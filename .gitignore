@@ -1,0 +1,41 @@
+# =========================
+# Python / uv environment
+# =========================
+.venv/
+
+# =========================
+# Python cache files
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# =========================
+# Jupyter / VS Code notebook checkpoints
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# Secrets and API keys
+# Week 10 Gemini demo uses .env for GOOGLE_API_KEY
+# =========================
+.env
+
+# =========================
+# Data files
+# Do not commit raw or local datasets
+# =========================
+data/
+
+# =========================
+# OS-specific files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# VS Code local settings
+# Optional: ignore if students have personal VS Code settings
+# =========================
+.vscode/
