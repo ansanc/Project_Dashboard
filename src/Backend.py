@@ -16,8 +16,10 @@
 #Import libraries
 import pandas as pd
 # import requests # for working with APIs
-import plotly.express as px
-import plotly.graph_objects as go
+#import plotly.express as px
+#import plotly.graph_objects as go
+from pathlib import Path
+#import openpyxl
 # %%
 # This block of code intends to import all the necessary data files for the dashboard.
 # In this case, we are importing the data files from the "data" folder located in the root directory of the project.
@@ -26,29 +28,30 @@ import plotly.graph_objects as go
 # Import base related to esg reports
 
 #PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DATA_DIR = PROJECT_ROOT / "data"
+#DATA_DIR = PROJECT_ROOT / "data"
+#DATA_DIR = Path(r"C:\Users\angye\Documents\Project_Dashboard\data\")
 #ESG base
-df_ESG = pd.read_excel(DATA_DIR / "ESGReports.xlsx")
+#df_ESG = pd.read_excel(DATA_DIR / "ESGReports.xlsx")
 # Real GDP Growth by Industry - Million dolars
-df1 = pd.read_csv(DATA_DIR / "RealGDPGrowthByIndustry.csv")
+df1 = pd.read_csv("RealGDPGrowthByIndustry.csv")
 # Gross Operating Surplus Growth by Industry - Million dolars
-df2 = pd.read_csv(DATA_DIR / "GrossOperatingSurplusGrowthByIndustry.csv")
+df2 = pd.read_csv("GrossOperatingSurplusGrowthByIndustry.csv")
 # Labour Productivity Value added per Worker
-df3 = pd.read_csv(DATA_DIR / "LabourProductivityValueAddedPerWorker.csv")
+df3 = pd.read_csv(r"C:\Users\angye\Documents\Project_Dashboard\data\LabourProductivityValueAddedPerWorker.csv")
 # Equity Ratio of Companies by Industry
-df4 = pd.read_csv(DATA_DIR / "EquityRatioOfCompaniesByIndustry.csv")
+df4 = pd.read_csv(r"C:\Users\angye\Documents\Project_Dashboard\data\EquityRatioOfCompaniesByIndustry.csv")
 # Wage Growth by Industry - Changes In Value Added Per Worker In Chained
-df5 = pd.read_csv(DATA_DIR / "WageGrowthByIndustry.csv")
+df5 = pd.read_csv(r"C:\Users\angye\Documents\Project_Dashboard\data\WageGrowthByIndustry.csv")
 # Bussiness expectations by Manufacturing Sector - Changes In Value Added Per Worker In Chained
-df6 = pd.read_csv(DATA_DIR / "BusinessExpectationsOfTheManufacturingSector.csv")
+df6 = pd.read_csv(r"C:\Users\angye\Documents\Project_Dashboard\data\BusinessExpectationsOfTheManufacturingSector.csv")
 # Bussiness expectations by Service Sector - Changes In Value Added Per Worker In Chained
-df7 = pd.read_csv(DATA_DIR / "BusinessExpectationsOfTheServiceSector.csv")
+df7 = pd.read_csv(r"C:\Users\angye\Documents\Project_Dashboard\data\BusinessExpectationsOfTheServiceSector.csv")
 
 # After importing the data files, some cleaning and reviews of the data to make sure we keep what we want for the score and dashboard
 # %%
 ## Cleaning of the datafiles
 # ereasing extra rows and columns, as we want to keep only the relevant data for the analysis and dashboard.
-
+df1.head(5)
 # Filtering the data just for the las 10 years, as we want to focus on the most recent data for the analysis and dashboard.
 
 # Filtering to the sectors we are interested in, as we want to focus on the sectors that are relevant for the analysis and dashboard.
