@@ -16,57 +16,46 @@
 #Import libraries
 import pandas as pd
 # import requests # for working with APIs
-#import plotly.express as px
-#import plotly.graph_objects as go
+import plotly.express as px
+import plotly.graph_objects as go
 from pathlib import Path
-#import openpyxl
+import openpyxl
 
-def main():
-    #PROJECT_ROOT = Path(__file__).resolve().parent.parent
-    #DATA_DIR = PROJECT_ROOT / "data"
-    #DATA_DIR = Path(r"C:\Users\angye\Documents\Project_Dashboard\data\")
-    #ESG base
-    df_ESG = pd.read_excel(DATA_DIR / "ESGReports.xlsx")
-    # Real GDP Growth by Industry - Million dolars
-    df_GDP_Growth = pd.read_csv(DATA_DIR / "RealGDPGrowthByIndustry.csv")
-    # Gross Operating Surplus Growth by Industry - Million dolars
-    df_GrossOperatingSurplusGrowth = pd.read_csv("GrossOperatingSurplusGrowthByIndustry.csv")
-    # Labour Productivity Value added per Worker
-    df_LabourProductivity = pd.read_csv(r"C:\Users\angye\Documents\Project_Dashboard\data\LabourProductivityValueAddedPerWorker.csv")
-    # Equity Ratio of Companies by Industry
-    df_EquityRatio = pd.read_csv(r"C:\Users\angye\Documents\Project_Dashboard\data\EquityRatioOfCompaniesByIndustry.csv")
-    # Wage Growth by Industry - Changes In Value Added Per Worker In Chained
-    df_WageGrowth = pd.read_csv(r"C:\Users\angye\Documents\Project_Dashboard\data\WageGrowthByIndustry.csv")
-    # Bussiness expectations by Manufacturing Sector - Changes In Value Added Per Worker In Chained
-    df_Manufacturing_Business_Expectations = pd.read_csv(r"C:\Users\angye\Documents\Project_Dashboard\data\BusinessExpectationsOfTheManufacturingSector.csv")
-    # Bussiness expectations by Service Sector - Changes In Value Added Per Worker In Chained
-    df_Service_Business_Expectations = pd.read_csv(r"C:\Users\angye\Documents\Project_Dashboard\data\BusinessExpectationsOfTheServiceSector.csv")
+from Project_Dashboard import main
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = PROJECT_ROOT / "data"
 
-
-#PROJECT_ROOT = Path(__file__).resolve().parent.parent
-#DATA_DIR = PROJECT_ROOT / "data"
-#DATA_DIR = Path(r"C:\Users\angye\Documents\Project_Dashboard\data\")
 #ESG base
 df_ESG = pd.read_excel(DATA_DIR / "ESGReports.xlsx")
 # Real GDP Growth by Industry - Million dolars
 df_GDP_Growth = pd.read_csv(DATA_DIR / "RealGDPGrowthByIndustry.csv")
 # Gross Operating Surplus Growth by Industry - Million dolars
-df_GrossOperatingSurplusGrowth = pd.read_csv("GrossOperatingSurplusGrowthByIndustry.csv")
+df_GrossOperatingSurplusGrowth = pd.read_csv(DATA_DIR / "GrossOperatingSurplusGrowthByIndustry.csv")
 # Labour Productivity Value added per Worker
-df_LabourProductivity = pd.read_csv(r"C:\Users\angye\Documents\Project_Dashboard\data\LabourProductivityValueAddedPerWorker.csv")
+df_LabourProductivity = pd.read_csv(DATA_DIR / "LabourProductivityValueAddedPerWorker.csv")
 # Equity Ratio of Companies by Industry
-df_EquityRatio = pd.read_csv(r"C:\Users\angye\Documents\Project_Dashboard\data\EquityRatioOfCompaniesByIndustry.csv")
+df_EquityRatio = pd.read_csv(DATA_DIR / "EquityRatioOfCompaniesByIndustry.csv")
 # Wage Growth by Industry - Changes In Value Added Per Worker In Chained
-df_WageGrowth = pd.read_csv(r"C:\Users\angye\Documents\Project_Dashboard\data\WageGrowthByIndustry.csv")
+df_WageGrowth = pd.read_csv(DATA_DIR / "WageGrowthByIndustry.csv")
 # Bussiness expectations by Manufacturing Sector - Changes In Value Added Per Worker In Chained
-df_Manufacturing_Business_Expectations = pd.read_csv(r"C:\Users\angye\Documents\Project_Dashboard\data\BusinessExpectationsOfTheManufacturingSector.csv")
+df_Manufacturing_Business_Expectations = pd.read_csv(DATA_DIR / "BusinessExpectationsOfTheManufacturingSector.csv")
 # Bussiness expectations by Service Sector - Changes In Value Added Per Worker In Chained
-df_Service_Business_Expectations = pd.read_csv(r"C:\Users\angye\Documents\Project_Dashboard\data\BusinessExpectationsOfTheServiceSector.csv")
+df_Service_Business_Expectations = pd.read_csv(DATA_DIR / "BusinessExpectationsOfTheServiceSector.csv")
 
 # After importing the data files, some cleaning and reviews of the data to make sure we keep what we want for the score and dashboard
 
 # %%
+df_ESG.head(5)
 # creating ranges for each dataframe, to be able to create the score and the traffic-light system based on the ranges of each indicator.
 # Red 3 Yellow 2 Green 1
 # 
+
+
+
+
+
+#if __name__ == "__main__":
+#    main()
+
+# %%
