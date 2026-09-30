@@ -16,7 +16,7 @@ import pandas as pd
 # Paths
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
-DB_PATH = DATA_DIR / "industry_monitor.db"
+DB_PATH = DATA_DIR / "Database_RiskDashboard.db"
 
 # Table name in the database  ->  file in the data folder
 SOURCE_FILES = {
