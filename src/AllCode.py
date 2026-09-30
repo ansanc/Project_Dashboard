@@ -12,37 +12,37 @@
 # Creation day: 2026-09-15
 # Moficiation day: 2026-09-28
 # Created by: @ansanc
-## %% 
-#Import libraries
-import numpy as np # Numeric
-import pandas as pd # Dataframes
-# import requests # for working with APIs
-import plotly.express as px #Graphs
-import plotly.graph_objects as go #Graphs
-from pathlib import Path # Rute for our files
-import openpyxl # Managing excel files
+# Note that this code uses the help of Copilot, own knowledge and what was learnt in class.
 
-# %% 
-# Ruta de los archivos de datos
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DATA_DIR = PROJECT_ROOT / "data"
+# %%
+# Import the libraries we will use
+import numpy as np # Managing of numbers
+import pandas as pd # Dataframes 
+import plotly.express as px #Plots
 
-# %% 
-# Importing the data files
+# Our own database file, this file will help us to read the db file.
+from database import load_table, list_tables
+
+# %%
+# Check which tables are in the database
+list_tables()
+
+# %%
+# Importing the data from the database
 #ESG base
-df_ESG = pd.read_excel(DATA_DIR / "ESGReports.xlsx")
+df_ESG = load_table("raw_esg")
 # Real GDP Growth by Industry - Million dolars
-df_GDP_Growth = pd.read_csv(DATA_DIR / "RealGDPGrowthByIndustry.csv")
+df_GDP_Growth = load_table("raw_gdp_growth")
 # Gross Operating Surplus Growth by Industry - Million dolars
-df_GrossOperatingSurplusGrowth = pd.read_csv(DATA_DIR / "GrossOperatingSurplusGrowthByIndustry.csv")
+df_GrossOperatingSurplusGrowth = load_table("raw_gross_operating_surplus")
 # Labour Productivity Value added per Worker
-df_LabourProductivity = pd.read_csv(DATA_DIR / "LabourProductivityValueAddedPerWorker.csv")
+df_LabourProductivity = load_table("raw_labour_productivity")
 # Equity Ratio of Companies by Industry
-df_EquityRatio = pd.read_csv(DATA_DIR / "EquityRatioOfCompaniesByIndustry.csv")
+df_EquityRatio = load_table("raw_equity_ratio")
 # Bussiness expectations by Manufacturing Sector - Changes In Value Added Per Worker In Chained
-df_Manufacturing_Business_Expectations = pd.read_csv(DATA_DIR / "BusinessExpectationsOfTheManufacturingSector.csv")
+df_Manufacturing_Business_Expectations = load_table("raw_business_exp_manufacturing")
 # Bussiness expectations by Service Sector - Changes In Value Added Per Worker In Chained
-df_Service_Business_Expectations = pd.read_csv(DATA_DIR / "BusinessExpectationsOfTheServiceSector.csv")
+df_Service_Business_Expectations = load_table("raw_business_exp_services")
 
 # The sectors we will focus on are the following:
 target_sectors = [
@@ -52,13 +52,102 @@ target_sectors = [
     'Information & Communications',
     'Utilities'
 ]
+
+### CLEANING THE DATA
 # After importing the data files, some cleaning and reviews of the data to make sure we keep what we want for the score and dashboard
 
 # %%
 # Checkig the first rows of the different dataframes to see the structure and the columns of each dataframe
+# We start with the ESG report file. 
+# This is a file that recolected from the top companies in Singapure from the sectors we are interested si they report ESG criteria or not
+# In this file we are interested in two things:
+# First, if a companies has a very complete ESG report, partially reporting, or does not report
+# Second, a calculated ratio of the tendancy of the sector based in this companies
+# There is one relevant decision done by the team that creates a big limitation: just 10 of the biggest companies of each sector were selected,
+#  and therefore the tendancy is created in this case with the probable most mature companies of the sector that in some cases could be the "exceptions"
+# But the idea would be that in a bank we would have the list of all clients and then the pool of information would be larger
 df_ESG.head(10)
+# df_ESG.info()
 
-df_ESG.info()
+# %%
+# ESG REPORTING COMPLIANCE BY SECTOR
+# New df based on df_ESG showing the ratio of compliance of each sector in terms of ESG reporting.
+# Each company has an "ESG reporting" answer: Yes, Partially or No.
+# Rule:
+#   - If 75% or more of the companies answer Yes  -> Low risk
+#   - If 60% or more of the companies answer No   -> High risk
+#   - All the rest                                -> Medium risk
+
+# Names of the columns in df_ESG -> CHANGE the sector one to the real name you see in df_ESG.info()
+esg_sector_col = "Sector"
+esg_reporting_col = "ESG reporting"
+
+# Check the different values in both columns before calculating
+print(df_ESG[esg_sector_col].unique())
+print(df_ESG[esg_reporting_col].value_counts(dropna=False))
+
+# %%
+# Clean the text: remove spaces and put it in phrase format,
+# so "yes", "YES " and "Yes" all become "Yes"
+df_ESG[esg_sector_col] = df_ESG[esg_sector_col].astype(str).str.strip().str.capitalize()
+df_ESG[esg_reporting_col] = df_ESG[esg_reporting_col].astype(str).str.strip().str.capitalize()
+
+# MISSING ANSWERS -> worst case
+# Any company whose answer is empty or not Yes/Partially/No (blank, NaN, typo...)
+# is treated as "No", so missing information pushes the sector towards High risk.
+valid_answers = ["Yes", "Partially", "No"]
+not_valid = ~df_ESG[esg_reporting_col].isin(valid_answers)
+print(f"Companies with missing/invalid answer set to 'No': {not_valid.sum()}")
+print(df_ESG.loc[not_valid, esg_reporting_col].value_counts(dropna=False))
+df_ESG.loc[not_valid, esg_reporting_col] = "No"
+
+# Percentage of Yes, Partially and No per sector
+# (value_counts with normalize=True gives the proportion of each answer inside each sector)
+esg_pct = (
+    df_ESG.groupby(esg_sector_col)[esg_reporting_col]
+    .value_counts(normalize=True)
+    .unstack(fill_value=0) * 100
+)
+# Make sure the 3 columns always exist.
+# The 0 here is NOT missing data: if no company in a sector answers "Yes", then 0% of them are Yes.
+esg_pct = esg_pct.reindex(columns=valid_answers, fill_value=0)
+esg_pct.head(10)
+
+# %%
+# Risk rule
+def esg_risk(row):
+    if row["Yes"] >= 75:
+        return "Low"
+    elif row["No"] >= 60:
+        return "High"
+    else:
+        return "Medium"
+
+# Final df with the 3 columns
+df_ESG_risk = pd.DataFrame({
+    "Sector": esg_pct.index,
+    "ESG reporting compliance": esg_pct["Yes"].round(2).values,   # % of companies that answer Yes
+    "risk_score": esg_pct.apply(esg_risk, axis=1).values,
+})
+
+# MISSING SECTORS 
+# If one of our target sectors has no companies in the ESG file,
+# we have no information about it, so we give it High risk.
+missing_sectors = [s for s in target_sectors if s not in df_ESG_risk["Sector"].values]
+print("Target sectors with no ESG data (set to High risk):", missing_sectors)
+
+df_missing = pd.DataFrame({
+    "Sector": missing_sectors,
+    "ESG reporting compliance": np.nan,   # no data -> empty, not 0
+    "risk_score": "High",
+})
+df_ESG_risk = pd.concat([df_ESG_risk, df_missing], ignore_index=True)
+
+
+
+# %% 
+# we check again the last df created
+df_ESG_risk.head()
 
 # %%
 #df_GDP_Growth.head(10)
@@ -67,7 +156,7 @@ df_ESG.info()
 # In here we name the coulmns with the values of the index 8 row
 df_GDP_Growth.columns = df_GDP_Growth.iloc[8]
 # %%
-# Then lets erease the rows above the 9 
+# Then lets erease the rows above the 9
 df_GDP_Growth = df_GDP_Growth.iloc[9:].reset_index(drop=True)
 # %%
 # The first column has a name of Data Series, I would prefer it to be called Sectors
@@ -75,7 +164,7 @@ df_GDP_Growth = df_GDP_Growth.iloc[9:].reset_index(drop=True)
 df_GDP_Growth.columns.values[0] = "Sectors"
 
 
-# %% 
+# %%
 # Lets check the general behavour of the df
 df_GDP_Growth.info()
 # As we saw in our last function all values seems to be register as a str
@@ -96,7 +185,7 @@ df_GDP_Growth.head(5)
 df_GDP_Growth_filtered = df_GDP_Growth[df_GDP_Growth['Sectors'].isin(target_sectors)].reset_index(drop=True)
 
 df_GDP_Growth_filtered.head(10)
-# %% 
+# %%
 # I consider something also would be to see the concentration of each sector
 # Extract the baseline row containing Total GDP to serve as the 100% denominator
 total_gdp_row = df_GDP_Growth[
@@ -129,12 +218,20 @@ df_GDP_Pct_filtered.head(5)
 
 
 # %%
+# GROSS OPERATING SURPLUS
 df_GrossOperatingSurplusGrowth.head(10)
 
-df_GrossOperatingSurplusGrowth.values[0] = "Sectors"
+# %%
+# FIXED: before it was ".values[0] = 'Sectors'", which overwrote the first data row.
+# Same structure as GDP: row 8 has the headers, data starts at row 9
+# (check in the head(10) above that row 8 is the "Data Series" row)
+df_GrossOperatingSurplusGrowth.columns = df_GrossOperatingSurplusGrowth.iloc[8]
+df_GrossOperatingSurplusGrowth = df_GrossOperatingSurplusGrowth.iloc[9:].reset_index(drop=True)
+# Lets rename the sectors column
+df_GrossOperatingSurplusGrowth.columns.values[0] = "Sectors"
 
 
-# %% 
+# %%
 # Lets check the general behavour of the df
 df_GrossOperatingSurplusGrowth.info()
 # As we saw in our last function all values seems to be register as a str
@@ -152,26 +249,132 @@ df_GrossOperatingSurplusGrowth.head(5)
 # %%
 # Lets filter the df to the sectors we are interested in
 # Filter original DataFrame
-df_GDP_Growth_filtered = df_GDP_Growth[df_GDP_Growth['Sectors'].isin(target_sectors)].reset_index(drop=True)
+df_GrossOperatingSurplusGrowth_filtered = df_GrossOperatingSurplusGrowth[df_GrossOperatingSurplusGrowth['Sectors'].isin(target_sectors)].reset_index(drop=True)
 
 # %%
-df_LabourProductivity.head(5)
-# %%
-df_EquityRatio.head(5)
-# %%
-df_Manufacturing_Business_Expectations.head(5)
-# %%
-df_Service_Business_Expectations.head(5)
+# LABOUR PRODUCTIVITY
+# Lets drop the first rows and set the correct name of columns
+df_LabourProductivity.columns = df_LabourProductivity.iloc[8]
+df_LabourProductivity = df_LabourProductivity.iloc[9:].reset_index(drop=True)
+# Lets rename the sectors column
+df_LabourProductivity.columns.values[0] = "Sectors"
 
 # %%
-####### PLOTS 
+# Check the general info of the df
+df_LabourProductivity.info()
+# Modifying the NaN or empty values to np format
+df_LabourProductivity = df_LabourProductivity.replace(['NaN', 'nan', '-', ' '], np.nan)
+# Modifying the values of the quarters to float format
+for col in df_LabourProductivity.columns[1:]:
+    df_LabourProductivity[col] = pd.to_numeric(df_LabourProductivity[col], errors='coerce').astype(float)
+
+# %%
+# Checking the min, max and other stats of the df
+df_LabourProductivity.describe()
+
+# %%
+# Cleaning the possible spaces on the Sectors column
+df_LabourProductivity['Sectors'] = df_LabourProductivity['Sectors'].astype(str).str.strip()
+# Filtering the df to sectors we are interested
+df_LabourProductivity_filtered = df_LabourProductivity[
+    df_LabourProductivity['Sectors'].isin(target_sectors)
+].reset_index(drop=True)
+
+
+# %%
+# EQUITY RATIO
+# Check the general info of the df
+df_EquityRatio.info()
+# Modifying the NaN or empty values to np format
+df_EquityRatio = df_EquityRatio.replace(['NaN', 'nan', '-', ' '], np.nan)
+# Modifying the values of the quarters to float format
+for col in df_EquityRatio.columns[1:]:
+    df_EquityRatio[col] = pd.to_numeric(df_EquityRatio[col], errors='coerce').astype(float)
+
+# %%
+# Checking the min, max and other stats of the df
+df_EquityRatio.describe()
+
+# %%
+# Cleaning the possible spaces on the Sectors column
+first_col_equity = df_EquityRatio.columns[0]
+df_EquityRatio[first_col_equity] = df_EquityRatio[first_col_equity].astype(str).str.strip()
+# Filtering the df to sectors we are interested
+df_EquityRatio_filtered = df_EquityRatio[
+    df_EquityRatio[first_col_equity].isin(target_sectors)
+].reset_index(drop=True)
+
+
+# %%
+# MANUFACTURING BUSINESS EXPECTATIONS
+# Lets drop the first rows and set the correct name of columns
+df_Manufacturing_Business_Expectations.columns = df_Manufacturing_Business_Expectations.iloc[8]
+df_Manufacturing_Business_Expectations = df_Manufacturing_Business_Expectations.iloc[9:].reset_index(drop=True)
+# Lets rename the sectors column
+df_Manufacturing_Business_Expectations.columns.values[0] = "Sectors"
+
+# %%
+# Check the general info of the df
+df_Manufacturing_Business_Expectations.info()
+# Modifying the NaN or empty values to np format
+df_Manufacturing_Business_Expectations = df_Manufacturing_Business_Expectations.replace(['NaN', 'nan', '-', ' '], np.nan)
+# Modifying the values of the quarters to float format
+for col in df_Manufacturing_Business_Expectations.columns[1:]:
+    df_Manufacturing_Business_Expectations[col] = pd.to_numeric(df_Manufacturing_Business_Expectations[col], errors='coerce').astype(float)
+
+# %%
+# Checking the min, max and other stats of the df
+df_Manufacturing_Business_Expectations.describe()
+
+# %%
+# Cleaning the possible spaces on the Sectors column
+df_Manufacturing_Business_Expectations['Sectors'] = df_Manufacturing_Business_Expectations['Sectors'].astype(str).str.strip()
+# Filtering the df to sectors we are interested
+df_Manufacturing_Business_Expectations_filtered = df_Manufacturing_Business_Expectations[
+    df_Manufacturing_Business_Expectations['Sectors'].isin(target_sectors)
+].reset_index(drop=True)
+
+
+# %%
+# SERVICE BUSINESS EXPECTATIONS
+# Lets drop the first rows and set the correct name of columns
+df_Service_Business_Expectations.columns = df_Service_Business_Expectations.iloc[8]
+df_Service_Business_Expectations = df_Service_Business_Expectations.iloc[9:].reset_index(drop=True)
+# Lets rename the sectors column
+df_Service_Business_Expectations.columns.values[0] = "Sectors"
+
+# %%
+# Check the general info of the df
+df_Service_Business_Expectations.info()
+# Modifying the NaN or empty values to np format
+df_Service_Business_Expectations = df_Service_Business_Expectations.replace(['NaN', 'nan', '-', ' '], np.nan)
+# Modifying the values of the quarters to float format
+for col in df_Service_Business_Expectations.columns[1:]:
+    df_Service_Business_Expectations[col] = pd.to_numeric(df_Service_Business_Expectations[col], errors='coerce').astype(float)
+
+# %%
+# Checking the min, max and other stats of the df
+df_Service_Business_Expectations.describe()
+
+# %%
+# Cleaning the possible spaces on the Sectors column
+df_Service_Business_Expectations['Sectors'] = df_Service_Business_Expectations['Sectors'].astype(str).str.strip()
+# Filtering the df to sectors we are interested
+df_Service_Business_Expectations_filtered = df_Service_Business_Expectations[
+    df_Service_Business_Expectations['Sectors'].isin(target_sectors)
+].reset_index(drop=True)
+# %%
+df_Service_Business_Expectations_filtered.head(5)
+
+# %%
+####### PLOTS
 # Now lets make some plots to
 
 # Lets Transform quarterly columns into a single categorical column ('Quarter')
 # and values into 'GDP_Value' for Plotly compatibility.
 df_melted_GDP_Growth = df_GDP_Growth_filtered.melt(
-    id_vars=['Sectors'], 
-    var_name='Quarter', 
+    id_vars=['Sectors'],
+    var_name='Quarter',
     value_name='GDP_Value'
 )
 # Convert values to float and replace invalid string entries with NaN
@@ -185,9 +388,9 @@ df_melted_GDP_Growth = df_melted_GDP_Growth.sort_values(by=['Quarter', 'Sectors'
 
 # Line Chart: Time Series Trends
 fig_line = px.line(
-    df_melted_GDP_Growth, 
-    x='Quarter', 
-    y='GDP_Value', 
+    df_melted_GDP_Growth,
+    x='Quarter',
+    y='GDP_Value',
     color='Sectors',
     markers=True,
     title="Quarterly GDP Growth Trend by Industry Sector (Chained 2015 Dollars)",
@@ -208,10 +411,10 @@ fig_line.update_layout(
 
 # Grouped Bar Chart: Sector Comparisons
 fig_bar = px.bar(
-    df_melted_GDP_Growth, 
-    x='Quarter', 
-    y='GDP_Value', 
-    color='Sectors', 
+    df_melted_GDP_Growth,
+    x='Quarter',
+    y='GDP_Value',
+    color='Sectors',
     barmode='group',
     title="Quarterly GDP Sector Breakdown & Size Comparison",
     labels={
@@ -260,8 +463,8 @@ pie_full_data = pd.concat([pie_full_data, other_row], ignore_index=True)
 
 # Generate Chart 1: Donut chart showing overall economic concentration
 fig_donut_full = px.pie(
-    pie_full_data, 
-    names='Sector', 
+    pie_full_data,
+    names='Sector',
     values='Percentage',
     title=f"Total GDP Concentration Share ({latest_quarter}) — Selected vs. Other Sectors",
     hole=0.4,
@@ -269,7 +472,7 @@ fig_donut_full = px.pie(
 )
 
 fig_donut_full.update_traces(
-    textposition='inside', 
+    textposition='inside',
     textinfo='percent+label',
     hovertemplate="<b>%{label}</b><br>Share of Total GDP: %{value:.2f}%<extra></extra>"
 )
@@ -294,8 +497,8 @@ pie_selected_data.columns = ['Sector', 'Percentage']
 
 # Generate Chart 2: Focused donut chart with cumulative share in title
 fig_donut_selected = px.pie(
-    pie_selected_data, 
-    names='Sector', 
+    pie_selected_data,
+    names='Sector',
     values='Percentage',
     title=f"Selected Sectors Breakdown ({latest_quarter}) — Representing {sum_selected_pct:.2f}% of Total GDP",
     hole=0.4,
@@ -303,7 +506,7 @@ fig_donut_selected = px.pie(
 )
 
 fig_donut_selected.update_traces(
-    textposition='inside', 
+    textposition='inside',
     textinfo='percent+label',
     hovertemplate="<b>%{label}</b><br>Share of Total GDP: %{value:.2f}%<extra></extra>"
 )
@@ -321,13 +524,48 @@ fig_donut_selected.show(renderer="browser")
 # %%
 # creating ranges for each dataframe, to be able to create the score and the traffic-light system based on the ranges of each indicator.
 # Red 3 Yellow 2 Green 1
-# 
+# Fist we are going to filter the data to the last five years
+# List of cleaned DataFrames to filter for the last 5 years
+dataframes = {
+    'df_GDP_Growth': df_GDP_Growth_filtered,
+    'df_GrossOperatingSurplusGrowth': df_GrossOperatingSurplusGrowth_filtered,
+    'df_LabourProductivity': df_LabourProductivity_filtered,
+    'df_EquityRatio': df_EquityRatio_filtered,
+    'df_Manufacturing_Business_Expectations': df_Manufacturing_Business_Expectations_filtered,
+    'df_Service_Business_Expectations': df_Service_Business_Expectations_filtered
+}
 
+# Dictionary to store the 5-year filtered DataFrames
+filtered_5yr_dfs = {}
 
+# Iterate over each DataFrame to apply the 5-year window filter
+for df_name, df in dataframes.items():
+    # Identify sector column (handles both 'Sectors' and original first column name)
+    sector_col = df.columns[0]
 
+    # Extract quarterly data columns excluding the sector label column
+    quarter_cols = [col for col in df.columns if col != sector_col]
 
+    # Extract numeric year values from quarterly column names
+    years = [int(col.split()[0]) for col in quarter_cols if col.split()[0].isdigit()]
 
-#if __name__ == "__main__":
-#    main()
+    # Calculate the 5-year cutoff threshold based on the maximum year present
+    max_year = max(years)
+    cutoff_year_5yr = max_year - 4  # Includes max_year and the previous 4 years (5 total)
 
-# %%
+    # Select quarterly columns falling within the last 5 years
+    selected_5yr_cols = [
+        col for col in quarter_cols
+        if int(col.split()[0]) >= cutoff_year_5yr
+    ]
+
+    # Filter DataFrame to keep sector column and the 5-year quarterly columns
+    filtered_5yr_dfs[f"{df_name}_5yr"] = df[[sector_col] + selected_5yr_cols].copy()
+
+# Assign filtered DataFrames to explicit variable names
+df_GDP_Growth_5yr = filtered_5yr_dfs['df_GDP_Growth_5yr']
+df_GrossOperatingSurplusGrowth_5yr = filtered_5yr_dfs['df_GrossOperatingSurplusGrowth_5yr']
+df_LabourProductivity_5yr = filtered_5yr_dfs['df_LabourProductivity_5yr']
+df_EquityRatio_5yr = filtered_5yr_dfs['df_EquityRatio_5yr']
+df_Manufacturing_Expectations_5yr = filtered_5yr_dfs['df_Manufacturing_Business_Expectations_5yr']
+df_Service_Expectations_5yr = filtered_5yr_dfs['df_Service_Business_Expectations_5yr']
