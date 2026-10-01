@@ -58,7 +58,7 @@ target_sectors = [
 
 # %%
 # Checkig the first rows of the different dataframes to see the structure and the columns of each dataframe
-# We start with the ESG report file. 
+# We start with the ESG report file. This file was created by the team, therefore the cleaning of it is minimum in comparison to the others sources.
 # This is a file that recolected from the top companies in Singapure from the sectors we are interested si they report ESG criteria or not
 # In this file we are interested in two things:
 # First, if a companies has a very complete ESG report, partially reporting, or does not report
@@ -82,9 +82,10 @@ df_ESG.head(10)
 esg_sector_col = "Sector"
 esg_reporting_col = "ESG reporting"
 
+# %%
 # Check the different values in both columns before calculating
-print(df_ESG[esg_sector_col].unique())
-print(df_ESG[esg_reporting_col].value_counts(dropna=False))
+df_ESG[esg_sector_col].unique()
+df_ESG[esg_reporting_col].value_counts(dropna=False)
 
 # %%
 # Clean the text: remove spaces and put it in phrase format,
@@ -98,8 +99,8 @@ df_ESG[esg_reporting_col] = df_ESG[esg_reporting_col].astype(str).str.strip().st
 valid_answers = ["Yes", "Partially", "No"]
 not_valid = ~df_ESG[esg_reporting_col].isin(valid_answers)
 print(f"Companies with missing/invalid answer set to 'No': {not_valid.sum()}")
-print(df_ESG.loc[not_valid, esg_reporting_col].value_counts(dropna=False))
-df_ESG.loc[not_valid, esg_reporting_col] = "No"
+print(df_ESG.loc[not_valid, esg_reporting_col].value_counts(dropna=False)
+df_ESG.loc[not_valid, esg_reporting_col] = "No")
 
 # Percentage of Yes, Partially and No per sector
 # (value_counts with normalize=True gives the proportion of each answer inside each sector)
@@ -149,8 +150,15 @@ df_ESG_risk = pd.concat([df_ESG_risk, df_missing], ignore_index=True)
 # we check again the last df created
 df_ESG_risk.head()
 
+
 # %%
+# GDP GROWTH BY SECTO
+
 #df_GDP_Growth.head(10)
+#df_GDP_Growth.sample()
+df_GDP_Growth.tail(10)
+
+# %%
 # This DataFrame needs to be modified to remove the first 7 rows
 # In turn, the 8th row should be used as the column headers
 # In here we name the coulmns with the values of the index 8 row
@@ -159,8 +167,7 @@ df_GDP_Growth.columns = df_GDP_Growth.iloc[8]
 # Then lets erease the rows above the 9
 df_GDP_Growth = df_GDP_Growth.iloc[9:].reset_index(drop=True)
 # %%
-# The first column has a name of Data Series, I would prefer it to be called Sectors
-# Therefore we rename the first column to Sectors
+# The first column has a name of Data Series, so we changed to Sectors to be align with all
 df_GDP_Growth.columns.values[0] = "Sectors"
 
 
