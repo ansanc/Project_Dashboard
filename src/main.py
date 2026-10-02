@@ -1,7 +1,7 @@
 
 ## MAIN 
 # ###
-#  Purpose of this file:
+#  Purpose of this project:
 # The system will consolidate multiple indicators into a centralized database
 # These indicators will then be processed into an overall industry assessment using a simple traffic-light rating system: Green, Amber, and Red.
 # This will allow users to quickly identify industries showing signs of strength, deterioration, or elevated risk.  
@@ -15,179 +15,162 @@
 # Moficiation day: 2026-09-28
 # Created by: @ansanc
 # Note that this code uses the help of Copilot, own knowledge and what was learnt in class.
+####
+# Porpuse of the file:
+# load -> clean -> merge -> filter -> ESG -> data checks -> score -> save -> charts
+#   How to use on terminal?
+#   uv run python src/main.py              -> Run to get the plots
+#   uv run python src/main.py --baseline   -> also save the results as the new baseline
+#   For running the tests: uv run pytest -v
+#
+# What happened in each run is written in log/pipeline.log
+# To explore the data step by step, use AllCode.py
+# =====================================================================
 
 
-#
-# PART 1 - DATA
-#   1. Load the tables from the database
-#   2. Clean each df (BEFORE filtering)
-#   3. Merge the files that measure the same thing
-#   4. Filter the target sectors
-#   5. GDP share of total
-#   6. ESG risk
-#   7. Data checks
-#   8. Charts
-#   9. Last 5 years
-# PART 2 - RISK SCORE
-#   10. Indicator results (value, light and points per sector / quarter / indicator)
-#   11. Pillar scores (W1, W2, W3) and overall score
-#   12. Tables (sectors x quarters) and report per sector
-#
-# The dfs are kept in dictionaries. Example with GDP:
-#   raw_data["gdp"]       -> the table as it comes from the database
-#   clean_data["gdp"]     -> after cleaning
-#   filtered_data["gdp"]  -> only the target sectors
-# Names: gdp, gos, labour_productivity, equity_ratio, business_expectations
-#
+from loguru import logger
 
-# %%
-from config import DATA_FILES, FILES_TO_MERGE, INDICATORS_TO_ANALYSE
-from database import list_database_tables, load_all_tables
+from config import (DATA_FILES, FILES_TO_MERGE, INDICATORS_TO_ANALYSE, LOG_FOLDER, LOG_FILE,
+                    OUTPUT_FOLDER, INDICATOR_RESULTS_FILE, PILLAR_RESULTS_FILE, OVERALL_RESULTS_FILE,
+                    BASELINE_OVERALL_RESULTS_FILE, BASELINE_INDICATOR_RESULTS_FILE)
+from database import load_all_tables
 from exploration import (clean_indicator_file, merge_indicator_files, keep_target_sectors,
-                         calculate_share_of_total, keep_last_years, build_esg_risk_table,
-                         summarize_tables, check_data_quality)
+                         build_esg_risk_table, check_data_quality)
 from plots import plot_all_charts_for_indicator
 from scoring import (build_indicator_results, build_pillar_results, build_overall_results,
-                     make_sector_by_quarter_table, make_indicator_tables,
-                     make_pillar_tables, print_score_report)
+                     make_sector_by_quarter_table)
 
 
-# =====================================================================
-# PART 1 - DATA
-# =====================================================================
-
-# %%
-# 1. LOAD THE TABLES FROM THE DATABASE
-list_database_tables()
-
-# %%
-raw_data = load_all_tables()
-summarize_tables(raw_data)
-
-# %%
-# Look at one table (change the name to see another one)
-raw_data["gdp"].head(10)
-
-# %%
-# 2. CLEAN EACH DF (header -> rename -> footnotes -> numbers -> sector names)
-#    The ESG file is different, it's cleaned in step 6
-clean_data = {}
-for data_name, file_settings in DATA_FILES.items():
-    if data_name == "esg":
-        continue
-    clean_data[data_name] = clean_indicator_file(raw_data[data_name], file_settings["header_row"])
-
-summarize_tables(clean_data)
-
-# %%
-# 3. MERGE THE FILES THAT MEASURE THE SAME THING
-#    business_expectations = manufacturing + services
-for merged_name, files_to_merge in FILES_TO_MERGE.items():
-    dfs_to_merge = []
-    for file_name in files_to_merge:
-        dfs_to_merge.append(clean_data[file_name])
-        del clean_data[file_name]          # the separate dfs are not needed anymore
-    clean_data[merged_name] = merge_indicator_files(dfs_to_merge)
-
-list(clean_data.keys())
-
-# %%
-# Check that each df ends at a real row (no footnotes)
-for data_name, df_clean in clean_data.items():
-    print(f"{data_name:25s} last row: {df_clean['Sectors'].iloc[-1]}")
-
-# %%
-# 4. FILTER THE SECTORS WE ARE INTERESTED IN
-filtered_data = {}
-for data_name, df_clean in clean_data.items():
-    filtered_data[data_name] = keep_target_sectors(df_clean)
-    print(f"{data_name:25s} {len(filtered_data[data_name])} sectors: "
-          f"{filtered_data[data_name]['Sectors'].tolist()}")
-
-# %%
-# 5. GDP: SHARE OF EACH SECTOR IN THE TOTAL GDP (%)
-df_gdp_share = calculate_share_of_total(clean_data["gdp"], INDICATORS_TO_ANALYSE["gdp"]["total_row"])
-df_gdp_share_filtered = keep_target_sectors(df_gdp_share).round(2)
-df_gdp_share_filtered.head()
-
-# %%
-# 6. ESG RISK
-df_esg_risk = build_esg_risk_table(raw_data["esg"])
-df_esg_risk
-
-# %%
-# 7. DATA CHECKS (summary per sector + unusual jumps)
-data_quality_checks = {}
-for indicator_name, indicator_settings in INDICATORS_TO_ANALYSE.items():
-    data_quality_checks[indicator_name] = check_data_quality(filtered_data[indicator_name], indicator_settings["title"])
-
-# %%
-# 8. CHARTS
-# All the indicators at once (set SHOW_CHARTS_IN_BROWSER = False in config.py
-# if you don't want ~20 browser tabs)
-for indicator_name, indicator_settings in INDICATORS_TO_ANALYSE.items():
-    plot_all_charts_for_indicator(clean_data[indicator_name], filtered_data[indicator_name], indicator_settings)
-
-# %%
-# ... or just one indicator
-plot_all_charts_for_indicator(clean_data["gdp"], filtered_data["gdp"], INDICATORS_TO_ANALYSE["gdp"])
-
-# %%
-# 9. LAST 5 YEARS
-filtered_data_5_years = {}
-for data_name, df_filtered in filtered_data.items():
-    filtered_data_5_years[data_name] = keep_last_years(df_filtered, n_years=5)
-
-filtered_data_5_years["gdp"].head()
+def setup_logging() -> None:
+    """Write the logs in log/pipeline.log (and keep showing them on screen)."""
+    LOG_FOLDER.mkdir(exist_ok=True)
+    logger.add(LOG_FILE, level="DEBUG", rotation="1 MB", encoding="utf-8")
 
 
-# =====================================================================
-# PART 2 - RISK SCORE
-# =====================================================================
+def run_pipeline() -> dict:
+    """Run all the steps and return the results in a dictionary."""
+    logger.info("Pipeline started")
 
-# %%
-# 10. INDICATOR RESULTS: one row per sector + quarter + indicator
-#     (value, traffic light, weight and points earned)
-df_indicator_results = build_indicator_results(filtered_data, df_esg_risk)
-df_indicator_results.head(10)
+    try:
+        # 1. LOAD the tables from the database
+        logger.info("Loading the tables from the database")
+        raw_data = load_all_tables()
+        for data_name, df_raw in raw_data.items():
+            logger.debug("{} raw shape: {}", data_name, df_raw.shape)
 
-# %%
-# 11a. PILLAR RESULTS: W1 economic, W2 financial, W3 workforce (traffic lights 1, 2, 3)
-df_pillar_results = build_pillar_results(df_indicator_results)
-df_pillar_results.head(10)
+        # 2. CLEAN each file (BEFORE filtering)
+        logger.info("Cleaning the indicator files")
+        clean_data = {}
+        for data_name, file_settings in DATA_FILES.items():
+            if data_name == "esg":
+                continue
+            clean_data[data_name] = clean_indicator_file(raw_data[data_name], file_settings["header_row"])
 
-# %%
-# 11b. OVERALL RESULTS: score with the override rules
-df_overall_results = build_overall_results(df_indicator_results)
-df_overall_results.head(10)
+        # 3. MERGE the files that measure the same thing
+        logger.info("Merging the files that measure the same thing")
+        for merged_name, files_to_merge in FILES_TO_MERGE.items():
+            dfs_to_merge = []
+            for file_name in files_to_merge:
+                dfs_to_merge.append(clean_data[file_name])
+                del clean_data[file_name]
+            clean_data[merged_name] = merge_indicator_files(dfs_to_merge)
 
-# %%
-# 12a. FINAL TABLES: sectors as rows, quarters of the last 5 years as columns
-df_overall_score_table = make_sector_by_quarter_table(df_overall_results, "Score")        # 0 - 100
-df_overall_light_table = make_sector_by_quarter_table(df_overall_results, "Final light")  # Green / Amber / Red
-df_overall_score_table
+        # 4. FILTER the target sectors
+        logger.info("Keeping the target sectors")
+        filtered_data = {}
+        for data_name, df_clean in clean_data.items():
+            filtered_data[data_name] = keep_target_sectors(df_clean)
+            if filtered_data[data_name].empty:
+                logger.warning("{}: no target sectors found -> check the sector names", data_name)
+            else:
+                logger.debug("{} filtered shape: {}", data_name, filtered_data[data_name].shape)
 
-# %%
-df_overall_light_table
+        # 5. ESG RISK
+        logger.info("Building the ESG risk table")
+        df_esg_risk = build_esg_risk_table(raw_data["esg"])
 
-# %%
-# One table per indicator (value, light or points)
-indicator_value_tables = make_indicator_tables(df_indicator_results, "Value")
-indicator_light_tables = make_indicator_tables(df_indicator_results, "Light")
-indicator_points_tables = make_indicator_tables(df_indicator_results, "Points")
-indicator_value_tables["gdp_growth"]
+        # 6. DATA CHECKS (only the warnings go to the log)
+        logger.info("Checking the data quality")
+        for indicator_name, indicator_settings in INDICATORS_TO_ANALYSE.items():
+            check_data_quality(filtered_data[indicator_name], indicator_settings["title"], show_tables=False)
 
-# %%
-# One table per pillar (score or light)
-pillar_score_tables = make_pillar_tables(df_pillar_results, "Score")
-pillar_light_tables = make_pillar_tables(df_pillar_results, "Light")
-pillar_score_tables["W1"]
+        # 7. RISK SCORE
+        logger.info("Calculating the risk score")
+        df_indicator_results = build_indicator_results(filtered_data, df_esg_risk)
+        df_pillar_results = build_pillar_results(df_indicator_results)
+        df_overall_results = build_overall_results(df_indicator_results)
 
-# %%
-# Sectors and quarters with a warning (override or a single Red)
-df_warnings = df_overall_results[df_overall_results["Warning"] != ""]
-df_warnings[["Sectors", "Quarter", "Score", "Final light", "Warning"]]
+        # Alerts: indicators without data and override rules
+        missing_values = df_indicator_results["Light"].isna().sum()
+        if missing_values > 0:
+            logger.warning("{} indicator values without data (the score was rescaled)", missing_values)
+        overrides = df_overall_results["Override applied"].sum()
+        if overrides > 0:
+            logger.warning("Green blocked by the override rule in {} sector-quarters", overrides)
 
-# %%
-# 12b. REPORT FOR ONE SECTOR (latest quarter; add quarter="2025 2Q" for another one)
-print_score_report(df_indicator_results, df_overall_results, "Manufacturing")
+    except Exception as error:
+        logger.error("Pipeline failed: {}", error)
+        raise
+
+    logger.success("Pipeline completed successfully")
+    return {
+        "clean_data": clean_data,
+        "filtered_data": filtered_data,
+        "df_esg_risk": df_esg_risk,
+        "df_indicator_results": df_indicator_results,
+        "df_pillar_results": df_pillar_results,
+        "df_overall_results": df_overall_results,
+    }
+
+
+def save_results(results: dict) -> None:
+    """8. SAVE the score results as CSV in the output folder."""
+    try:
+        OUTPUT_FOLDER.mkdir(exist_ok=True)
+        results["df_indicator_results"].to_csv(INDICATOR_RESULTS_FILE, index=False)
+        results["df_pillar_results"].to_csv(PILLAR_RESULTS_FILE, index=False)
+        results["df_overall_results"].to_csv(OVERALL_RESULTS_FILE, index=False)
+        logger.success("Results saved in {}", OUTPUT_FOLDER)
+    except Exception as error:
+        logger.error("Failed to save the results: {}", error)
+        raise
+
+
+def log_final_lights(results: dict) -> None:
+    """Write in the log the final traffic light of each sector in the latest quarter."""
+    df_light_table = make_sector_by_quarter_table(results["df_overall_results"], "Final light")
+    latest_quarter = df_light_table.columns[-1]
+    for sector in df_light_table.index:
+        logger.info("{} | {}: {}", latest_quarter, sector, df_light_table.loc[sector, latest_quarter])
+
+
+def make_charts(results: dict) -> None:
+    """9. CHARTS: saved as HTML in the output folder.
+    If a chart fails, the error is logged (the results are already saved)."""
+    logger.info("Making the charts")
+    try:
+        for indicator_name, indicator_settings in INDICATORS_TO_ANALYSE.items():
+            plot_all_charts_for_indicator(results["clean_data"][indicator_name],
+                                          results["filtered_data"][indicator_name],
+                                          indicator_settings)
+        logger.success("Charts saved in {}", OUTPUT_FOLDER)
+    except Exception as error:
+        logger.error("Failed to make the charts: {}", error)
+
+
+def save_baseline() -> None:
+    """Copy the saved results as the baseline the tests compare against.
+    Do it ONLY when you are sure the results are correct."""
+    shutil.copy(OVERALL_RESULTS_FILE, BASELINE_OVERALL_RESULTS_FILE)
+    shutil.copy(INDICATOR_RESULTS_FILE, BASELINE_INDICATOR_RESULTS_FILE)
+    logger.success("Baseline saved in {}", BASELINE_OVERALL_RESULTS_FILE.parent)
+
+
+if __name__ == "__main__":
+    setup_logging()
+    pipeline_results = run_pipeline()
+    save_results(pipeline_results)
+    log_final_lights(pipeline_results)
+    make_charts(pipeline_results)
+    if "--baseline" in sys.argv:
+        save_baseline()

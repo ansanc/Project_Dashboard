@@ -6,19 +6,36 @@
 # Moficiation day: 2026-10-01
 # Created by: @ansanc
 # ##
-# Import libraries
+# Import files
 from pathlib import Path
 
+# =====================================================================
 # 1. FOLDERS
 # Project_Dashboard/
-# ├── data/          <- CSVs, Excel and the database (.db)
-# ├── output/        <- HTML charts (created by plots.py)
+# ├── data/          <- CSVs, Excel, the database (.db) and the baselines
+# ├── output/        <- HTML charts and result CSVs
+# ├── log/           <- pipeline.log (what happened in each run)
+# ├── test/          <- pytest tests
 # └── src/           <- all the .py files (this file is here)
 # =====================================================================
 PROJECT_FOLDER = Path(__file__).resolve().parent.parent
 DATA_FOLDER = PROJECT_FOLDER / "data"
-PLOTS_FOLDER = PROJECT_FOLDER / "output"
+OUTPUT_FOLDER = PROJECT_FOLDER / "output"
+PLOTS_FOLDER = OUTPUT_FOLDER
 DATABASE_PATH = DATA_FOLDER / "Database_RiskDashboard.db"
+
+# Logs: every run writes what happened in log/pipeline.log
+LOG_FOLDER = PROJECT_FOLDER / "log"
+LOG_FILE = LOG_FOLDER / "pipeline.log"
+
+# Results saved by the pipeline (the "analysis-ready" outputs)
+INDICATOR_RESULTS_FILE = OUTPUT_FOLDER / "indicator_results.csv"
+PILLAR_RESULTS_FILE = OUTPUT_FOLDER / "pillar_results.csv"
+OVERALL_RESULTS_FILE = OUTPUT_FOLDER / "overall_results.csv"
+
+# Baseline: a copy of a result we trust. The tests compare every new run against it
+BASELINE_OVERALL_RESULTS_FILE = DATA_FOLDER / "reconciliation_baseline_overall_results.csv"
+BASELINE_INDICATOR_RESULTS_FILE = DATA_FOLDER / "reconciliation_baseline_indicator_results.csv"
 
 
 # =====================================================================
@@ -67,10 +84,7 @@ DATA_FILES = {
     },
 }
 
-# ###
-# COMBINED DF
-# One variable is divided in two csv and therefore they are merged later on for the score
-# The parts are replaced by the merged df.
+# Files that measure the SAME thing for different sectors -> merged into one df
 FILES_TO_MERGE = {
     "business_expectations": ["business_expectations_manufacturing",
                               "business_expectations_services"],
@@ -142,26 +156,12 @@ INDICATORS_TO_ANALYSE = {
 }
 
 
-# ###
+# =====================================================================
 # 5. ESG FILE
-# This file was created by the team, therefore the cleaning of it is minimum in comparison to the others sources.
-# This is a file that recolected from the top companies in Singapure from the sectors we are interested si they report ESG criteria or not
-# In this file we are interested in two things:
-# First, if a companies has a very complete ESG report, partially reporting, or does not report
-# Second, a calculated ratio of the tendancy of the sector based in this companies
-# There is one relevant decision done by the team that creates a big limitation: just 10 of the biggest companies of each sector were selected,
-# and therefore the tendancy is created in this case with the probable most mature companies of the sector that in some cases could be the "exceptions"
-# But the idea would be that in a bank we would have the list of all clients and then the pool of information would be larger
-
+# =====================================================================
 ESG_SECTOR_COLUMN = "Sector"            # CHECK: real name of the sector column
 ESG_REPORTING_COLUMN = "ESG reporting"
 ESG_VALID_ANSWERS = ["Yes", "Partially", "No"]
-
-# Each company has an "ESG reporting" answer: Yes, Partially or No.
-# Rule:
-#   - If 75% or more of the companies answer Yes  -> Low risk
-#   - If 60% or more of the companies answer No   -> High risk
-#   - All the rest     
 ESG_LOW_RISK_IF_YES_AT_LEAST = 75       # >= 75% Yes -> Low risk
 ESG_HIGH_RISK_IF_NO_AT_LEAST = 60       # >= 60% No  -> High risk
 

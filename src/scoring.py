@@ -8,8 +8,8 @@
 # Moficiation day: 2026-10-01
 # Created by: @ansanc
 # Note that this code uses the help of Copilot, own knowledge and what was learnt in class.
- 
-# PART 2: RISK SCORE and TRAFFIC LIGHTS by sector and quarter.
+
+# RISK SCORE and TRAFFIC LIGHTS by sector and quarter.
 #
 #   1. Preparing the values -> yearly growth, list of quarters, value of each quarter
 #   2. Traffic lights       -> Green / Amber / Red
@@ -17,11 +17,10 @@
 #   4. Scores               -> pillars (W1, W2, W3) and overall score + override rules
 #   5. Tables and report    -> sectors as rows, quarters as columns + report per sector
 #
-# All the settings (weights, limits, points) are in config.py
-
-
+# import libraries
 import numpy as np
 import pandas as pd
+from loguru import logger
 
 from config import (TARGET_SECTORS, SCORE_NUMBER_OF_YEARS, SCORE_QUARTERS_TAKEN_FROM,
                     MAX_YEARS_BACK_FOR_ANNUAL_DATA, PILLARS, SCORE_INDICATORS,
@@ -30,11 +29,10 @@ from config import (TARGET_SECTORS, SCORE_NUMBER_OF_YEARS, SCORE_QUARTERS_TAKEN_
 from exploration import keep_last_years, convert_period_to_date
 
 
-# %%%
-# ###
+# =====================================================================
 # 1. PREPARING THE VALUES
-
-def same_period_one_year_before(period):
+# =====================================================================
+def same_period_one_year_before(period: str) -> str:
     """'2025 2Q' -> '2024 2Q'  |  '2025' -> '2024'"""
     period_parts = period.split()
     year_before = int(period_parts[0]) - 1
@@ -42,7 +40,7 @@ def same_period_one_year_before(period):
     return " ".join(period_parts)
 
 
-def calculate_yearly_growth(df_indicator):
+def calculate_yearly_growth(df_indicator: pd.DataFrame) -> pd.DataFrame:
     """% change vs the same period one year before:
     (value / value one year before - 1) * 100
     Works for quarterly ('2025 2Q' vs '2024 2Q') and annual data ('2025' vs '2024')."""
@@ -54,7 +52,7 @@ def calculate_yearly_growth(df_indicator):
     return df_growth
 
 
-def get_score_quarters(df_quarters_source, n_years=SCORE_NUMBER_OF_YEARS):
+def get_score_quarters(df_quarters_source: pd.DataFrame, n_years: int = SCORE_NUMBER_OF_YEARS) -> list[str]:
     """List of quarters of the last `n_years` years that have data,
     from the oldest to the newest. These are the columns of the score tables."""
     df_last_years = keep_last_years(df_quarters_source, n_years)
@@ -68,7 +66,7 @@ def get_score_quarters(df_quarters_source, n_years=SCORE_NUMBER_OF_YEARS):
     return quarters
 
 
-def get_value_for_quarter(df_indicator_values, sector, quarter):
+def get_value_for_quarter(df_indicator_values: pd.DataFrame, sector: str, quarter: str) -> tuple[float, str | None]:
     """Value of one sector in one quarter, and the period it comes from.
     - Quarterly data: the value of that quarter.
     - Annual data   : the value of that year. If it's not published yet,
@@ -95,11 +93,10 @@ def get_value_for_quarter(df_indicator_values, sector, quarter):
     return np.nan, None
 
 
-# %%%
-# ###
+# =====================================================================
 # 2. TRAFFIC LIGHTS
-# 
-def get_indicator_light(value, indicator_settings):
+# =====================================================================
+def get_indicator_light(value: float, indicator_settings: dict) -> str | float:
     """Green / Amber / Red for one value, using the limits of the indicator."""
     if pd.isna(value):
         return np.nan
@@ -118,7 +115,7 @@ def get_indicator_light(value, indicator_settings):
         return "Red"
 
 
-def get_score_light(score):
+def get_score_light(score: float) -> str | float:
     """Score 0-100 -> traffic light. 70 - 74.99 falls into Amber."""
     if pd.isna(score):
         return np.nan
@@ -130,11 +127,11 @@ def get_score_light(score):
         return "Red"
 
 
-# %%%
-# ###
+# =====================================================================
 # 3. INDICATOR RESULTS: one row per sector + quarter + indicator
-# 
-def build_indicator_results(filtered_data, df_esg_risk, sectors=TARGET_SECTORS):
+# =====================================================================
+def build_indicator_results(filtered_data: dict[str, pd.DataFrame], df_esg_risk: pd.DataFrame,
+                            sectors: list[str] = TARGET_SECTORS) -> pd.DataFrame:
     """Value, traffic light, weight and points of every indicator,
     for every sector and every quarter of the score.
     filtered_data : dictionary with the filtered dfs (from main.py)
@@ -145,7 +142,7 @@ def build_indicator_results(filtered_data, df_esg_risk, sectors=TARGET_SECTORS):
     for indicator_settings in SCORE_INDICATORS.values():
         total_weight = total_weight + indicator_settings["weight"]
     if total_weight != 100:
-        print(f"WARNING: the weights add up to {total_weight}, not 100 (check config.py)")
+        logger.warning("The weights add up to {}, not 100 (check config.py)", total_weight)
 
     score_quarters = get_score_quarters(filtered_data[SCORE_QUARTERS_TAKEN_FROM])
 
@@ -192,11 +189,11 @@ def build_indicator_results(filtered_data, df_esg_risk, sectors=TARGET_SECTORS):
     df_indicator_results = pd.DataFrame(indicator_result_rows)
     return df_indicator_results
 
-# %%%
-# ###
+
+# =====================================================================
 # 4. SCORES
-# 
-def calculate_score(indicator_rows):
+# =====================================================================
+def calculate_score(indicator_rows: pd.DataFrame) -> tuple[float, float]:
     """Score 0-100 of a group of indicators (one sector, one quarter).
     If an indicator has no data, the score is calculated only with the indicators
     that have data, and 'coverage' says how much of the weight had data."""
@@ -214,7 +211,7 @@ def calculate_score(indicator_rows):
     return round(score, 2), round(coverage, 1)
 
 
-def build_pillar_results(df_indicator_results):
+def build_pillar_results(df_indicator_results: pd.DataFrame) -> pd.DataFrame:
     """One row per sector + quarter + pillar (W1, W2, W3): score 0-100 and traffic light."""
     pillar_rows = []
     for sector in df_indicator_results["Sectors"].unique():
@@ -237,7 +234,7 @@ def build_pillar_results(df_indicator_results):
     return pd.DataFrame(pillar_rows)
 
 
-def build_overall_results(df_indicator_results):
+def build_overall_results(df_indicator_results: pd.DataFrame) -> pd.DataFrame:
     """One row per sector + quarter: overall score, traffic light and override rules.
     - Score >= 75 Green | 40 - 74.99 Amber | < 40 Red
     - 2 or more Red indicators -> it can't be Green (maximum Amber)
@@ -282,7 +279,7 @@ def build_overall_results(df_indicator_results):
 # =====================================================================
 # 5. TABLES (sectors as rows, quarters as columns) AND REPORT
 # =====================================================================
-def make_sector_by_quarter_table(df_one_row_per_quarter, column_to_show):
+def make_sector_by_quarter_table(df_one_row_per_quarter: pd.DataFrame, column_to_show: str) -> pd.DataFrame:
     """Long table -> sectors as rows, quarters as columns (oldest to newest).
     column_to_show: the column whose values fill the table (e.g. 'Score')"""
     quarters_in_order = df_one_row_per_quarter["Quarter"].unique()
@@ -294,7 +291,7 @@ def make_sector_by_quarter_table(df_one_row_per_quarter, column_to_show):
     return df_table
 
 
-def make_indicator_tables(df_indicator_results, column_to_show):
+def make_indicator_tables(df_indicator_results: pd.DataFrame, column_to_show: str) -> dict[str, pd.DataFrame]:
     """Dictionary with one table (sectors x quarters) per indicator.
     column_to_show: 'Value', 'Light' or 'Points'"""
     indicator_tables = {}
@@ -304,7 +301,7 @@ def make_indicator_tables(df_indicator_results, column_to_show):
     return indicator_tables
 
 
-def make_pillar_tables(df_pillar_results, column_to_show):
+def make_pillar_tables(df_pillar_results: pd.DataFrame, column_to_show: str) -> dict[str, pd.DataFrame]:
     """Dictionary with one table (sectors x quarters) per pillar.
     column_to_show: 'Score' or 'Light'"""
     pillar_tables = {}
@@ -314,7 +311,8 @@ def make_pillar_tables(df_pillar_results, column_to_show):
     return pillar_tables
 
 
-def print_score_report(df_indicator_results, df_overall_results, sector, quarter=None):
+def print_score_report(df_indicator_results: pd.DataFrame, df_overall_results: pd.DataFrame,
+                       sector: str, quarter: str | None = None) -> pd.DataFrame | None:
     """Report for one sector and one quarter (the latest one if quarter is None):
     1. Indicator breakdown  2. Calculation  3. Override check  4. Final result"""
     if quarter is None:
@@ -325,7 +323,7 @@ def print_score_report(df_indicator_results, df_overall_results, sector, quarter
     overall_rows = df_overall_results[(df_overall_results["Sectors"] == sector) &
                                       (df_overall_results["Quarter"] == quarter)]
     if indicator_rows.empty:
-        print(f"No data for {sector} in {quarter}")
+        logger.warning("No data for {} in {}", sector, quarter)
         return None
     overall_row = overall_rows.iloc[0]
 

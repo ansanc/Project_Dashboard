@@ -14,16 +14,18 @@
 #   2. plot_share_of_total_donuts    -> donuts (only for amounts that add up: GDP, GOS)
 #   3. plot_sectors_vs_total         -> bars vs the total (ratios, per worker, expectations)
 #   4. plot_all_charts_for_indicator -> picks the right charts for one indicator
-# =====================================================================
 
+
+# import libraries
 import pandas as pd
 import plotly.express as px
+from loguru import logger
 
 from config import PLOTS_FOLDER, SECTOR_COLORS, SHOW_CHARTS_IN_BROWSER
 from exploration import make_one_row_per_sector_and_period, find_latest_period_with_data
 
 
-def save_and_show_chart(figure, file_name):
+def save_and_show_chart(figure, file_name: str) -> None:
     """Save the chart as HTML in the plots folder and (optionally) open it in the browser."""
     PLOTS_FOLDER.mkdir(exist_ok=True)
     figure.write_html(PLOTS_FOLDER / file_name, include_plotlyjs="cdn")
@@ -31,7 +33,7 @@ def save_and_show_chart(figure, file_name):
         figure.show(renderer="browser")
 
 
-def make_chart_file_name(title):
+def make_chart_file_name(title: str) -> str:
     """'Gross Operating Surplus' -> 'gross_operating_surplus' (for the file names)"""
     return title.lower().replace("&", "and").replace(" ", "_")
 
@@ -39,11 +41,12 @@ def make_chart_file_name(title):
 # =====================================================================
 # 1. LINE TREND AND GROUPED BARS
 # =====================================================================
-def plot_trend_charts(df_filtered, title, unit, number_of_bar_periods=20):
+def plot_trend_charts(df_filtered: pd.DataFrame, title: str, unit: str,
+                      number_of_bar_periods: int = 20) -> None:
     """Line chart with the full history of each sector, and grouped bars
     comparing the sectors in the last `number_of_bar_periods` periods."""
     if df_filtered.empty:
-        print(f"{title}: the filtered DataFrame is EMPTY -> check the sector names in this file")
+        logger.warning("{}: the filtered DataFrame is EMPTY -> check the sector names in this file", title)
         return
 
     df_one_row_per_period = make_one_row_per_sector_and_period(df_filtered)
@@ -81,18 +84,19 @@ def plot_trend_charts(df_filtered, title, unit, number_of_bar_periods=20):
 # =====================================================================
 # 2. DONUTS (only for amounts that add up to a total)
 # =====================================================================
-def plot_share_of_total_donuts(df_clean, df_filtered, total_row_name, title):
+def plot_share_of_total_donuts(df_clean: pd.DataFrame, df_filtered: pd.DataFrame,
+                               total_row_name: str | None, title: str) -> None:
     """Donut 1: selected sectors vs 'Other Sectors' (share of the total).
     Donut 2: zoom in on the selected sectors only.
     df_clean = cleaned df with ALL the rows (it needs the total row)"""
     if total_row_name is None:
-        print(f"{title}: no total row defined, donuts skipped")
+        logger.info("{}: no total row defined, donuts skipped", title)
         return
 
     total_row = df_clean[df_clean["Sectors"] == total_row_name]
     if total_row.empty:
-        print(f"{title}: total row '{total_row_name}' not found. Row names in this df are:")
-        print(df_clean["Sectors"].tolist())
+        logger.warning("{}: total row '{}' not found. Row names in this df are: {}",
+                       title, total_row_name, df_clean["Sectors"].tolist())
         return
 
     # Latest period where the total has a value
@@ -136,11 +140,12 @@ def plot_share_of_total_donuts(df_clean, df_filtered, total_row_name, title):
 # 3. BARS VS TOTAL (ratios, per worker, expectations)
 # A donut makes no sense here: a ratio doesn't add up to a total.
 # =====================================================================
-def plot_sectors_vs_total(df_clean, df_filtered, total_row_name, title, unit):
+def plot_sectors_vs_total(df_clean: pd.DataFrame, df_filtered: pd.DataFrame,
+                          total_row_name: str | None, title: str, unit: str) -> None:
     """Horizontal bars with the latest value of each selected sector,
     plus a dashed line with the value of the whole economy (if there is a total row)."""
     if df_filtered.empty:
-        print(f"{title}: the filtered DataFrame is EMPTY -> check the sector names in this file")
+        logger.warning("{}: the filtered DataFrame is EMPTY -> check the sector names in this file", title)
         return
 
     df_one_row_per_period = make_one_row_per_sector_and_period(df_filtered)
@@ -158,8 +163,8 @@ def plot_sectors_vs_total(df_clean, df_filtered, total_row_name, title, unit):
     if total_row_name is not None:
         total_row = df_clean[df_clean["Sectors"] == total_row_name]
         if total_row.empty:
-            print(f"{title}: total row '{total_row_name}' not found, plotting without the total line. Row names:")
-            print(df_clean["Sectors"].tolist())
+            logger.warning("{}: total row '{}' not found, plotting without the total line. Row names: {}",
+                           title, total_row_name, df_clean["Sectors"].tolist())
         else:
             total_value = total_row[newest_period].values[0]
             bar_chart.add_vline(x=total_value, line_dash="dash", line_color="#555555",
@@ -173,7 +178,8 @@ def plot_sectors_vs_total(df_clean, df_filtered, total_row_name, title, unit):
 # =====================================================================
 # 4. ALL THE CHARTS OF ONE INDICATOR
 # =====================================================================
-def plot_all_charts_for_indicator(df_clean, df_filtered, indicator_settings):
+def plot_all_charts_for_indicator(df_clean: pd.DataFrame, df_filtered: pd.DataFrame,
+                                  indicator_settings: dict) -> None:
     """indicator_settings = one entry of INDICATORS_TO_ANALYSE in config.py"""
     title = indicator_settings["title"]
     unit = indicator_settings["unit"]
