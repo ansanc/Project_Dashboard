@@ -9,11 +9,12 @@
 # Note that this code uses the help of Copilot, own knowledge and what was learnt in class.
 
 # All the CHARTS (Plotly). Each one is saved as HTML in main_folder/plots
+
 #   1. plot_trend_charts             -> line trend + grouped bars by sector
 #   2. plot_share_of_total_donuts    -> donuts (only for amounts that add up: GDP, GOS)
 #   3. plot_sectors_vs_total         -> bars vs the total (ratios, per worker, expectations)
 #   4. plot_all_charts_for_indicator -> picks the right charts for one indicator
-# 
+# =====================================================================
 
 import pandas as pd
 import plotly.express as px
