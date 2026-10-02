@@ -99,9 +99,11 @@ df_ESG[esg_reporting_col] = df_ESG[esg_reporting_col].astype(str).str.strip().st
 valid_answers = ["Yes", "Partially", "No"]
 not_valid = ~df_ESG[esg_reporting_col].isin(valid_answers)
 print(f"Companies with missing/invalid answer set to 'No': {not_valid.sum()}")
-print(df_ESG.loc[not_valid, esg_reporting_col].value_counts(dropna=False)
-df_ESG.loc[not_valid, esg_reporting_col] = "No")
-
+# %%
+df_ESG.loc[not_valid, esg_reporting_col].value_counts(dropna=False)
+# %%
+df_ESG.loc[not_valid, esg_reporting_col] = "No"
+# %%
 # Percentage of Yes, Partially and No per sector
 # (value_counts with normalize=True gives the proportion of each answer inside each sector)
 esg_pct = (
@@ -152,14 +154,14 @@ df_ESG_risk.head()
 
 
 # %%
-# GDP GROWTH BY SECTO
+# GDP GROWTH BY SECTOR
 
 #df_GDP_Growth.head(10)
 #df_GDP_Growth.sample()
-df_GDP_Growth.tail(10)
+df_GDP_Growth.tail(40)
 
 # %%
-# This DataFrame needs to be modified to remove the first 7 rows
+# This DataFrame needs to be modified to remove the first 7 rows and the rows after de 38 line
 # In turn, the 8th row should be used as the column headers
 # In here we name the coulmns with the values of the index 8 row
 df_GDP_Growth.columns = df_GDP_Growth.iloc[8]
@@ -227,6 +229,9 @@ df_GDP_Pct_filtered.head(5)
 # %%
 # GROSS OPERATING SURPLUS
 df_GrossOperatingSurplusGrowth.head(10)
+# df_GrossOperatingSurplusGrowth.describe()
+# df_GrossOperatingSurplusGrowth.info()
+#df_GrossOperatingSurplusGrowth.tail(30)
 
 # %%
 # FIXED: before it was ".values[0] = 'Sectors'", which overwrote the first data row.
@@ -290,17 +295,18 @@ df_LabourProductivity_filtered = df_LabourProductivity[
 
 # %%
 # EQUITY RATIO
+
 # Check the general info of the df
-df_EquityRatio.info()
+#df_EquityRatio.info()
+# df_EquityRatio.head(15)
+df_EquityRatio.describe()
+ # %%
 # Modifying the NaN or empty values to np format
 df_EquityRatio = df_EquityRatio.replace(['NaN', 'nan', '-', ' '], np.nan)
 # Modifying the values of the quarters to float format
 for col in df_EquityRatio.columns[1:]:
     df_EquityRatio[col] = pd.to_numeric(df_EquityRatio[col], errors='coerce').astype(float)
 
-# %%
-# Checking the min, max and other stats of the df
-df_EquityRatio.describe()
 
 # %%
 # Cleaning the possible spaces on the Sectors column
@@ -314,6 +320,13 @@ df_EquityRatio_filtered = df_EquityRatio[
 
 # %%
 # MANUFACTURING BUSINESS EXPECTATIONS
+#df_Manufacturing_Business_Expectations.head(5)
+
+#df_Manufacturing_Business_Expectations.tail(35)
+df_Manufacturing_Business_Expectations.info()
+
+#df_Manufacturing_Business_Expectations.describe()   
+# %%
 # Lets drop the first rows and set the correct name of columns
 df_Manufacturing_Business_Expectations.columns = df_Manufacturing_Business_Expectations.iloc[8]
 df_Manufacturing_Business_Expectations = df_Manufacturing_Business_Expectations.iloc[9:].reset_index(drop=True)
@@ -321,8 +334,6 @@ df_Manufacturing_Business_Expectations = df_Manufacturing_Business_Expectations.
 df_Manufacturing_Business_Expectations.columns.values[0] = "Sectors"
 
 # %%
-# Check the general info of the df
-df_Manufacturing_Business_Expectations.info()
 # Modifying the NaN or empty values to np format
 df_Manufacturing_Business_Expectations = df_Manufacturing_Business_Expectations.replace(['NaN', 'nan', '-', ' '], np.nan)
 # Modifying the values of the quarters to float format
@@ -344,6 +355,10 @@ df_Manufacturing_Business_Expectations_filtered = df_Manufacturing_Business_Expe
 
 # %%
 # SERVICE BUSINESS EXPECTATIONS
+# df_Service_Business_Expectations.head(10)
+# df_Service_Business_Expectations.tail(10)
+df_Service_Business_Expectations.info()
+# %%
 # Lets drop the first rows and set the correct name of columns
 df_Service_Business_Expectations.columns = df_Service_Business_Expectations.iloc[8]
 df_Service_Business_Expectations = df_Service_Business_Expectations.iloc[9:].reset_index(drop=True)
@@ -351,8 +366,6 @@ df_Service_Business_Expectations = df_Service_Business_Expectations.iloc[9:].res
 df_Service_Business_Expectations.columns.values[0] = "Sectors"
 
 # %%
-# Check the general info of the df
-df_Service_Business_Expectations.info()
 # Modifying the NaN or empty values to np format
 df_Service_Business_Expectations = df_Service_Business_Expectations.replace(['NaN', 'nan', '-', ' '], np.nan)
 # Modifying the values of the quarters to float format
