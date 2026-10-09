@@ -300,12 +300,12 @@ if not chart_snapshot.empty:
         yaxis={"categoryorder": "total ascending"},
         margin=dict(l=10, r=40, t=55, b=10),
     )
-    st.plotly_chart(snapshot_fig, use_container_width=True)
+    st.plotly_chart(snapshot_fig, width="stretch")
 
 st.dataframe(
     snapshot[["Industry", "Score", "Status display", "Red indicators", "Coverage %"]],
     hide_index=True,
-    use_container_width=True,
+    width="stretch",
 )
 
 # %%
@@ -348,7 +348,7 @@ history_fig.update_layout(
     showlegend=False,
     margin=dict(l=10, r=10, t=20, b=10),
 )
-st.plotly_chart(history_fig, use_container_width=True)
+st.plotly_chart(history_fig, width="stretch")
 
 # %%
 # -----------------------------------------------------------------------------
@@ -381,7 +381,7 @@ indicator_table = selected_indicator_rows[
 st.dataframe(
     indicator_table,
     hide_index=True,
-    use_container_width=True,
+    width="stretch",
     column_config={
         "Weight %": st.column_config.NumberColumn(format="%.0f"),
         "Points earned": st.column_config.NumberColumn(format="%.1f"),
@@ -413,7 +413,7 @@ pillar_fig = px.bar(
 )
 pillar_fig.update_traces(texttemplate="%{text:.1f}", textposition="outside")
 pillar_fig.update_layout(template="plotly_white", legend_title="Status")
-st.plotly_chart(pillar_fig, use_container_width=True)
+st.plotly_chart(pillar_fig, width="stretch")
 
 pillar_table = selected_pillars[
     ["Pillar name", "Score", "Status display", "Data coverage %"]
@@ -424,7 +424,7 @@ pillar_table = selected_pillars[
         "Data coverage %": "Coverage %",
     }
 )
-st.dataframe(pillar_table, hide_index=True, use_container_width=True)
+st.dataframe(pillar_table, hide_index=True, width="stretch")
 
 # %%
 # -----------------------------------------------------------------------------
@@ -480,7 +480,7 @@ with trend_col2:
             legend_title="Industry",
             margin=dict(l=10, r=10, t=50, b=10),
         )
-        st.plotly_chart(trend_fig, use_container_width=True)
+        st.plotly_chart(trend_fig, width="stretch")
 
 # %%
 # -----------------------------------------------------------------------------
@@ -527,7 +527,7 @@ with st.expander("Scoring methodology and thresholds", expanded=False):
         methodology_rows.append(row)
 
     methodology_df = pd.DataFrame(methodology_rows)
-    st.dataframe(methodology_df, hide_index=True, use_container_width=True)
+    st.dataframe(methodology_df, hide_index=True, width="stretch")
 
     st.caption(
         "Important: when some indicator data is missing, the current scoring code "
@@ -541,10 +541,10 @@ with st.expander("Scoring methodology and thresholds", expanded=False):
 # -----------------------------------------------------------------------------
 with st.expander("Technical data view", expanded=False):
     st.write("Overall result rows")
-    st.dataframe(overall, use_container_width=True)
+    st.dataframe(overall, width="stretch")
 
     st.write("Indicator result rows")
-    st.dataframe(indicators, use_container_width=True)
+    st.dataframe(indicators, width="stretch")
 
     st.write("Pillar result rows")
-    st.dataframe(pillars, use_container_width=True)
+    st.dataframe(pillars, width="stretch")
