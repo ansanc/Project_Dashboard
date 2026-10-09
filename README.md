@@ -6,8 +6,7 @@ This repository covers:
 
 - **Part 1 – Data:** loading, cleaning, exploration and charts.
 - **Part 2 – Risk score:** indicator traffic lights, pillar scores and the overall score.
-
-The interactive dashboard (Plotly Dash) is the next phase and is not included yet.
+- **Part 3 - Dashboard:** Dashboard based on the risk scoring
 
 ---
 
@@ -28,7 +27,7 @@ Initial phase, kept small so the system can be built and tested properly. The fr
 ## Project structure
 
 ```
-main_folder/
+Project_Dashboard/
 ├── data/                         <- source files + the SQLite database
 │   ├── RealGDPGrowthByIndustry.csv
 │   ├── GrossOperatingSurplusGrowthByIndustry.csv
@@ -37,49 +36,71 @@ main_folder/
 │   ├── BusinessExpectationsOfTheManufacturingSector.csv
 │   ├── BusinessExpectationsOfTheServiceSector.csv
 │   ├── ESGReports.xlsx
-│   └── Database_RiskDashboard.db  <- created by database.py
-├── plots/                        <- HTML charts (created automatically)
-└── code_folder/
-    ├── config.py                 <- all the settings
-    ├── database.py               <- creates and reads the database
-    ├── exploration.py            <- cleaning, merging, ESG, data checks
-    ├── plots.py                  <- charts
-    ├── scoring.py                <- risk score and traffic lights
-    └── main.py                   <- runs everything, cell by cell
+│   ├── Database_RiskDashboard.db  <- created by database.py
+│   └── reconciliation_baseline_*.csv  <- trusted results the tests compare against
+├── output/                       <- HTML charts + result CSVs
+├── log/
+│   └── pipeline.log              <- what happened in each run
+├── src/                          <- all the code
+│   ├── config.py                 <- all the settings
+│   ├── database.py               <- creates and reads the database
+│   ├── exploration.py            <- cleaning, merging, ESG, data checks and charts
+│   ├── scoring.py                <- risk score and traffic lights
+│   ├── main.py                   <- RUNS the whole project with one command (logs, results, charts)
+│   └── AllCode.py                <- to EXPLORE: the whole project in one file, without functions, cell by cell
+├── test/
+│   └── test_pipeline.py          <- 4 simple pytest tests
+├── check_setup.py                <- checks that the environment is ready
+├── pyproject.toml                <- project and dependencies (uv)
+├── uv.lock                       <- exact versions of the dependencies (uv)
+├── .python-version
+├── .gitignore
+└── README.md
 ```
 
 | File | What it does |
 |---|---|
 | `config.py` | Folders, data files, sectors, colors, indicators, ESG rules, score weights and limits. **Everything you may want to change is here.** |
 | `database.py` | Reads every source file and saves it as a table in `Database_RiskDashboard.db`. Also loads the tables back into pandas. |
-| `exploration.py` | Cleans the SingStat files, merges files that measure the same thing, calculates the share of total GDP, builds the ESG risk and runs the data checks. |
-| `plots.py` | Line trends, grouped bars, donuts (share of total) and bars vs. total. Saves everything as HTML in `plots/`. |
+| `exploration.py` | Cleans the SingStat files, merges files that measure the same thing, calculates the share of total GDP, builds the ESG risk, runs the data checks and makes the charts (line trends, grouped bars, donuts and bars vs. total, saved as HTML in `output/`). |
 | `scoring.py` | Yearly growth, traffic lights, pillar scores (W1, W2, W3), overall score, override rules and the report per sector. |
-| `main.py` | Runs the whole process in order. Use it cell by cell (`# %%`) in VS Code. |
+| `main.py` | **Runs** the whole project with one command: load, clean, merge, filter, ESG, data checks, score, save the results in `output/` (which the tests read), charts and, when asked, the baseline. Everything is written in `log/pipeline.log`. |
+| `AllCode.py` | **Explores** the data: the whole project in one file, without functions, cell by cell (`# %%`), reviewing each df (head, tail, info, describe) before changing it. |
 
 ---
 
 ## How to run
 
-**Requirements:** Python 3.10+, `pandas`, `numpy`, `plotly`, `openpyxl` (to read the Excel file).
+The project uses [uv](https://docs.astral.sh/uv/) to manage Python and the dependencies (`pandas`, `numpy`, `plotly`, `openpyxl`, `loguru`, and `pytest` for the tests). All the commands are run from the `Project_Dashboard/` folder.
 
-```bash
-pip install pandas numpy plotly openpyxl
-```
-
+0. **Install the environment** (first time only):
+   ```bash
+   uv sync
+   uv add pandas numpy plotly openpyxl loguru   # if they are not in pyproject.toml yet
+   uv add --dev pytest
+   ```
 1. **Create the database.** Run this only the first time, or when you get new or updated files.
    ```bash
-   cd code_folder
-   python database.py
+   uv run python src/database.py
    ```
-2. **Run the analysis.** Open `main.py` in VS Code and run it cell by cell, or run the whole file:
+2. **Run the project.** Results, charts and log:
    ```bash
-   python main.py
+   uv run python src/main.py
    ```
+3. **Create the baseline.** Do this only once, when you are sure the results are correct:
+   put `SAVE_BASELINE = True` in `config.py`, run `uv run python src/main.py` once, and put it back to `False`.
+4. **Run the tests** (after running `main.py`, because they read `output/overall_results.csv`):
+   ```bash
+   uv run pytest -v
+   ```
+
+> The `.py` files import each other (`from config import ...`), so Python must look for them in `src/`. From the terminal the commands above already do it. In the VS Code interactive window, if you get `ModuleNotFoundError: No module named 'config'`, add `"jupyter.notebookFileRoot": "${fileDirname}"` to `.vscode/settings.json`.
+
+> To explore the data step by step, open `src/AllCode.py` in VS Code and run it cell by cell.
 
 > Tip: if you edit another `.py` file while working in the VS Code interactive window, run `%load_ext autoreload` and `%autoreload 2` once. Your changes will then be picked up without restarting.
 
-> Set `SHOW_CHARTS_IN_BROWSER = False` in `config.py` if you don't want the charts to open in the browser. They are always saved in `plots/`.
+> The charts are always saved in `output/`. Set `SHOW_CHARTS_IN_BROWSER = True` in `config.py` if you also want them to open in the browser.
 
 ---
 
@@ -98,14 +119,15 @@ pip install pandas numpy plotly openpyxl
 
 All the SingStat files go through the same steps, **before** filtering by sector (`clean_indicator_file()` in `exploration.py`):
 
-1. **Header:** row 8 has the column names, and the data starts in row 9.
-2. **Rename:** the first column becomes `Sectors`.
-3. **Footnotes:** everything from the `Definitions and Footnotes` row down is removed, together with empty rows.
-4. **Numbers:** values become numbers, and texts like `na` or `-` become empty (NaN).
-5. **Sector names:** extra spaces are removed so they match the target sectors.
-6. **Filter:** only the target sectors are kept.
+1. **Header:** the row with the column names is found automatically (the one that says `Data Series`). Each file can have it in a different row; if it is already the header, nothing changes.
+2. **Rename:** the first column becomes `Sectors`, and all the quarters are written the same way (`19801Q` -> `1980 1Q`).
+3. **Bad columns:** columns without a name that are completely empty are removed, and repeated column names keep only the first one.
+4. **Footnotes:** everything from the `Definitions and Footnotes` row down is removed, together with completely empty rows.
+5. **Numbers:** values become numbers, and texts like `na` or `-` become empty (NaN).
+6. **Sector names:** extra spaces are removed so they match the target sectors.
+7. **Filter:** only the target sectors are kept.
 
-The Equity Ratio file already has the right header, so step 1 is skipped. The two Business Expectations files measure the same thing for different sectors, so after cleaning they are **merged into one df** (`business_expectations`).
+The two Business Expectations files measure the same thing for different sectors, so after cleaning they are **merged into one df** (`business_expectations`).
 
 ### ESG file
 
@@ -136,22 +158,27 @@ It was collected from the top companies in Singapore in the sectors we are inter
 
 ## Part 1 – Outputs
 
-| Variable in `main.py` | Content |
+**Results of `main.py`:** `run_pipeline()` returns a dictionary with:
+
+| Key | Content |
 |---|---|
-| `raw_data[name]` | Tables as they come from the database |
 | `clean_data[name]` | Cleaned dfs, with all the rows (including totals) |
 | `filtered_data[name]` | Only the target sectors |
-| `df_gdp_share_filtered` | % of total GDP per sector and quarter |
 | `df_esg_risk` | Sector, ESG reporting compliance, risk_score |
-| `data_quality_checks[name]` | Summary per sector (missing values, min, max, latest…) and unusual jumps |
-| `filtered_data_5_years[name]` | Last 5 years only |
 
-**Charts** (saved in `plots/`):
+The data checks (missing values, repeated sectors, unusual jumps) are written as warnings in `log/pipeline.log`.
 
-1. Line trend by sector (full history).
-2. Grouped bars by sector (last 20 periods).
-3. Donut charts: selected sectors vs. "Other Sectors", and a zoom on the selected sectors. These are only for amounts that add up to a total (GDP, GOS).
-4. Bars vs. total for ratios and per-worker values (a donut would make no sense for them).
+**In `AllCode.py`** (to explore step by step) you also have: each df reviewed before and after cleaning, `df_GDP_Share_filtered` (% of total GDP), `data_check_summaries` and `data_check_jumps` (the data check tables) and `filtered_data_5_years`.
+
+**Charts** (saved as HTML in `output/`), made by `make_charts()` in `main.py` with the functions of section 7 of `exploration.py`:
+
+| Function | Chart | For which indicators |
+|---|---|---|
+| `plot_trend_charts` | Line trend by sector (full history) + grouped bars (last 20 periods) | All |
+| `plot_share_of_total_donuts` | 2 donuts: selected sectors vs. "Other Sectors", and a zoom on the selected sectors | Only amounts that add up to a total: GDP, GOS (`adds_up_to_total = True`) |
+| `plot_sectors_vs_total` | Bars with the latest value of each sector and a dashed line with the total | Ratios, per worker and expectations (`adds_up_to_total = False`), where a donut would make no sense |
+
+In total: 4 charts for GDP and GOS, 3 for each of the other indicators (17 charts).
 
 ---
 
@@ -161,7 +188,7 @@ It was collected from the top companies in Singapore in the sectors we are inter
 
 The overall score is the weighted sum of three pillars. Each pillar is also a traffic light of its own.
 
-| Pillar | Weight | Indicator | Weight | 🟢 Green | 🟠 Amber | 🔴 Red |
+| Pillar | Weight | Indicator | Weight | Green | Amber | Red |
 |---|---|---|---|---|---|---|
 | **W1** Economic performance | 40 | Real GDP growth (YoY) | 20 | > 3% | 0% to 3% | < 0% |
 | | | GOS growth (YoY) | 20 | > 5% | 0% to 5% | < 0% |
@@ -175,9 +202,9 @@ The overall score is the weighted sum of three pillars. Each pillar is also a tr
 
 | Score | Rating |
 |---|---|
-| 75.00 – 100 | 🟢 Green |
-| 40.00 – 74.99 | 🟠 Amber (70.00 – 74.99 is provisionally Amber) |
-| 0 – 39.99 | 🔴 Red |
+| 75.00 – 100 | Green |
+| 40.00 – 74.99 | Amber (70.00 – 74.99 is provisionally Amber) |
+| 0 – 39.99 | Red |
 
 ### Override rules
 
@@ -194,16 +221,67 @@ The overall score is the weighted sum of three pillars. Each pillar is also a tr
 
 ### Outputs
 
-| Variable in `main.py` | Content |
+**Files saved by `main.py` in `output/`** (the tests and the dashboard read them):
+
+| File | Content |
 |---|---|
-| `df_overall_score_table` | **Final table:** sectors as rows, quarters (last 5 years) as columns, score 0–100 |
+| `indicator_results.csv` | One row per sector + quarter + indicator: value, light, weight, points |
+| `pillar_results.csv` | One row per sector + quarter + pillar: score and light |
+| `overall_results.csv` | One row per sector + quarter: score, light by score, number of Reds, override, final light, warning |
+
+The log also shows the final light of each sector in the latest quarter.
+
+**In `AllCode.py`** you also have the tables with sectors as rows and quarters as columns:
+
+| Variable | Content |
+|---|---|
+| `df_overall_score_table` | **Final table:** score 0–100, quarters of the last 5 years as columns |
 | `df_overall_light_table` | Same shape, final traffic light after the override rules |
-| `df_indicator_results` | One row per sector + quarter + indicator: value, light, weight, points (long format, for the dashboard) |
-| `df_pillar_results` | One row per sector + quarter + pillar: score and light |
-| `df_overall_results` | One row per sector + quarter: score, light by score, number of Reds, override, final light, warning |
-| `indicator_value_tables`, `indicator_light_tables`, `indicator_points_tables` | One table (sectors × quarters) per indicator, e.g. `indicator_value_tables["gdp_growth"]` |
-| `pillar_score_tables`, `pillar_light_tables` | One table (sectors × quarters) per pillar, e.g. `pillar_score_tables["W1"]` |
-| `print_score_report(...)` | Printed report for one sector and quarter: indicator breakdown, calculation, override check, final result |
+| `indicator_value_tables`, `indicator_light_tables`, `indicator_points_tables` | One table per indicator, e.g. `indicator_value_tables["gdp_growth"]` |
+| `pillar_score_tables`, `pillar_light_tables` | One table per pillar, e.g. `pillar_score_tables["W1"]` |
+| Section 10.7 | Report for one sector and quarter: indicator breakdown, calculation, override check, final result |
+
+The same tables can be made from the CSVs with `make_sector_by_quarter_table()` in `scoring.py`.
+
+---
+
+## Tests
+
+`test/test_pipeline.py` has 4 simple tests on the results saved in `output/overall_results.csv`:
+
+| Test | What it checks |
+|---|---|
+| `test_output_matches_baseline` | The result is exactly the same as the baseline in `data/` (same columns, same data). |
+| `test_weights_add_up_to_100` | The weights of the score add up to 100. |
+| `test_scores_between_0_and_100` | All the scores are between 0 and 100. |
+| `test_lights_are_only_green_amber_red` | The final light is only Green, Amber or Red. |
+
+**How to run them:**
+
+```bash
+uv run python src/main.py          # 1. creates the results in output/
+uv run pytest -v                   # 2. runs the tests
+```
+
+**The baseline** is a copy of results you have checked and trust. It is created once by putting `SAVE_BASELINE = True` in `config.py` and running `main.py` (then put it back to `False`). The baseline test doesn't prove the results are correct, only that they **haven't changed** since then.
+
+**Break it on purpose:** a test that has never failed hasn't proven anything. For example, change the equity ratio weight from 40 to 30 in `config.py`, run the pipeline and the tests: they must **FAIL**. Then undo the change.
+
+> When you change the logic **on purpose** (new weights, a new indicator…), check the new results and then create the baseline again with `SAVE_BASELINE = True`.
+
+---
+
+## Logs
+
+Every run of `main.py` writes what happened in `log/pipeline.log` (with [loguru](https://github.com/Delgan/loguru)):
+
+| Level | Used for |
+|---|---|
+| `info` | Each step that starts (loading, cleaning, merging, scoring…). |
+| `debug` | Shapes of the tables. |
+| `warning` | **Alerts:** a filtered df is empty, a total row is not found, a sector appears twice, unusual jumps in the data, invalid ESG answers, sectors without ESG data, indicators without data (score rescaled), Green blocked by the override rule, weights that don't add up to 100. |
+| `success` | Pipeline completed, results saved, baseline saved. |
+| `error` | A step failed (`try/except`): the error is written in the log before stopping. |
 
 ---
 
@@ -224,7 +302,3 @@ The overall score is the weighted sum of three pillars. Each pillar is also a tr
 - **New data file:** add it to `DATA_FILES`, run `python database.py`, and add it to `INDICATORS_TO_ANALYSE`.
 - **New score indicator:** add it to `SCORE_INDICATORS` with its pillar, weight, calculation and limits. The weights must add up to 100 (the code warns if they don't).
 
-## Next steps
-
-- Interactive dashboard in Plotly Dash, with filters by sector, indicator and time period.
-- Add wage and workplace injury data to complete pillar W3.

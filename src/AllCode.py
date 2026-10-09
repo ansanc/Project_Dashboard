@@ -12,11 +12,8 @@
 # Creation day: 2026-09-15
 # Moficiation day: 2026-09-30
 # Created by: @ansanc
-# Note that this code uses the help of Copilot, own knowledge and what was learnt in class.
+# Note that this code uses the help of Copilot/Claude, own knowledge and what was learnt in class.
 
-#%%
-## Purpose of this file: 
-# The project in one file to run cell by cell for trying the code and experiment with it
 #
 #   PART 0  - Libraries and settings
 #   PART 1  - Create the database from the files
@@ -30,14 +27,11 @@
 #   PART 8  - Charts
 #   PART 9  - Last 5 years
 #   PART 10 - Risk score (traffic lights, pillars, overall score)
-
-
-# =====================================================================
-
+######################################################################
 # %%
-# =====================================================================
+######################################################################
 # PART 0 - LIBRARIES AND SETTINGS
-# =====================================================================
+######################################################################
 from pathlib import Path
 import sqlite3
 import numpy as np
@@ -100,11 +94,11 @@ ESG_HIGH_RISK_IF_NO_AT_LEAST = 60       # >= 60% No  -> High risk
 SHOW_CHARTS_IN_BROWSER = True
 
 # %%
-# =====================================================================
+######################################################################
 # PART 1 - CREATE THE DATABASE FROM THE FILES
 # (only needed the first time or when the files change)
 # Each file is saved as one table, exactly as it comes (no cleaning)
-# =====================================================================
+######################################################################
 connection = sqlite3.connect(DATABASE_PATH)
 
 # %%
@@ -144,9 +138,9 @@ connection.commit()
 pd.read_sql("SELECT name FROM sqlite_master WHERE type = 'table'", connection)
 
 # %%
-# =====================================================================
+######################################################################
 # PART 2 - LOAD THE TABLES FROM THE DATABASE
-# =====================================================================
+######################################################################
 # Real GDP by Industry - Million dollars (chained 2015)
 df_GDP_Growth = pd.read_sql("SELECT * FROM raw_gdp_growth", connection)
 
@@ -179,16 +173,15 @@ df_ESG = pd.read_sql("SELECT * FROM raw_esg", connection)
 connection.close()
 
 # %%
-# =====================================================================
+######################################################################
 # PART 3 - REVIEW AND CLEAN EACH DF
 # Same steps for every SingStat file:
-#   header -> rename -> footnotes -> numbers -> sector names -> filter
-# =====================================================================
-
+#   find header -> rename -> bad columns -> footnotes -> numbers -> sector names -> filter
+######################################################################
 # %%
-# =====================================================================
+######################################################################
 # 3.1 REAL GDP
-# =====================================================================
+######################################################################
 # REVIEW BEFORE ANY CHANGE: first rows
 df_GDP_Growth.head(10)
 
@@ -205,18 +198,36 @@ df_GDP_Growth.info()
 df_GDP_Growth.describe()
 
 # %%
-# Row 8 has the real column names -> use it as the header
-df_GDP_Growth.columns = df_GDP_Growth.iloc[8]
+# Find the row that has the real column names: the one whose first cell says "Data Series"
+# (each file can have it in a different row; if it is already the header, nothing changes)
+gdp_first_column_name = str(df_GDP_Growth.columns[0]).replace(" ", "").lower()
+gdp_first_column_text = df_GDP_Growth.iloc[:, 0].astype(str).str.replace(" ", "").str.lower()
+gdp_header_rows = df_GDP_Growth.index[gdp_first_column_text == "dataseries"]
+
+if gdp_first_column_name == "dataseries" or len(gdp_header_rows) == 0:
+    gdp_header_row = None
+else:
+    gdp_header_row = int(gdp_header_rows[0])
+gdp_header_row
 
 # %%
-# Remove the rows above the data (rows 0 to 8)
-df_GDP_Growth = df_GDP_Growth.iloc[9:].reset_index(drop=True)
+# Use that row as the header and remove the rows above it
+if gdp_header_row is not None:
+    df_GDP_Growth.columns = df_GDP_Growth.iloc[gdp_header_row]
+    df_GDP_Growth = df_GDP_Growth.iloc[gdp_header_row + 1:].reset_index(drop=True)
 
 # %%
-# Column names as text, without spaces before/after
+df_GDP_Growth.head(5)
+
+# %%
+# Column names as text, without spaces before/after, and quarters written the same way
 gdp_column_names = []
 for column in df_GDP_Growth.columns:
-    gdp_column_names.append(str(column).strip())
+    column_name = str(column).strip()
+    # Quarter without space, e.g. "20252Q" -> "2025 2Q"
+    if len(column_name) == 6 and column_name[:5].isdigit() and column_name[5].upper() == "Q":
+        column_name = column_name[:4] + " " + column_name[4] + "Q"
+    gdp_column_names.append(column_name)
 
 # %%
 # First column -> "Sectors"
@@ -224,6 +235,28 @@ gdp_column_names[0] = "Sectors"
 
 # %%
 df_GDP_Growth.columns = gdp_column_names
+
+# %%
+# Columns WITHOUT a name (empty cells in the header row): check them
+df_GDP_Growth.columns[df_GDP_Growth.columns.isin(["", "nan", "None", "NaN"])]
+
+# %%
+# Remove the columns without a name that are completely empty
+gdp_columns_to_keep = []
+for position in range(df_GDP_Growth.shape[1]):
+    column_name = df_GDP_Growth.columns[position]
+    column_is_empty = df_GDP_Growth.iloc[:, position].isna().all()
+    if position > 0 and column_name in ["", "nan", "None", "NaN"] and column_is_empty:
+        continue
+    gdp_columns_to_keep.append(position)
+df_GDP_Growth = df_GDP_Growth.iloc[:, gdp_columns_to_keep]
+
+# %%
+# Repeated column names (should be empty). If there are, only the first one is kept
+df_GDP_Growth.columns[df_GDP_Growth.columns.duplicated()]
+
+# %%
+df_GDP_Growth = df_GDP_Growth.loc[:, ~df_GDP_Growth.columns.duplicated()]
 
 # %%
 df_GDP_Growth.head(5)
@@ -275,9 +308,9 @@ df_GDP_Growth_filtered = df_GDP_Growth[df_GDP_Growth["Sectors"].isin(TARGET_SECT
 df_GDP_Growth_filtered
 
 # %%
-# =====================================================================
+######################################################################
 # 3.2 GROSS OPERATING SURPLUS
-# =====================================================================
+######################################################################
 # REVIEW BEFORE ANY CHANGE: first rows
 df_GrossOperatingSurplusGrowth.head(10)
 
@@ -294,18 +327,36 @@ df_GrossOperatingSurplusGrowth.info()
 df_GrossOperatingSurplusGrowth.describe()
 
 # %%
-# Row 8 has the real column names -> use it as the header
-df_GrossOperatingSurplusGrowth.columns = df_GrossOperatingSurplusGrowth.iloc[8]
+# Find the row that has the real column names: the one whose first cell says "Data Series"
+# (each file can have it in a different row; if it is already the header, nothing changes)
+gos_first_column_name = str(df_GrossOperatingSurplusGrowth.columns[0]).replace(" ", "").lower()
+gos_first_column_text = df_GrossOperatingSurplusGrowth.iloc[:, 0].astype(str).str.replace(" ", "").str.lower()
+gos_header_rows = df_GrossOperatingSurplusGrowth.index[gos_first_column_text == "dataseries"]
+
+if gos_first_column_name == "dataseries" or len(gos_header_rows) == 0:
+    gos_header_row = None
+else:
+    gos_header_row = int(gos_header_rows[0])
+gos_header_row
 
 # %%
-# Remove the rows above the data (rows 0 to 8)
-df_GrossOperatingSurplusGrowth = df_GrossOperatingSurplusGrowth.iloc[9:].reset_index(drop=True)
+# Use that row as the header and remove the rows above it
+if gos_header_row is not None:
+    df_GrossOperatingSurplusGrowth.columns = df_GrossOperatingSurplusGrowth.iloc[gos_header_row]
+    df_GrossOperatingSurplusGrowth = df_GrossOperatingSurplusGrowth.iloc[gos_header_row + 1:].reset_index(drop=True)
 
 # %%
-# Column names as text, without spaces before/after
+df_GrossOperatingSurplusGrowth.head(5)
+
+# %%
+# Column names as text, without spaces before/after, and quarters written the same way
 gos_column_names = []
 for column in df_GrossOperatingSurplusGrowth.columns:
-    gos_column_names.append(str(column).strip())
+    column_name = str(column).strip()
+    # Quarter without space, e.g. "20252Q" -> "2025 2Q"
+    if len(column_name) == 6 and column_name[:5].isdigit() and column_name[5].upper() == "Q":
+        column_name = column_name[:4] + " " + column_name[4] + "Q"
+    gos_column_names.append(column_name)
 
 # %%
 # First column -> "Sectors"
@@ -313,6 +364,28 @@ gos_column_names[0] = "Sectors"
 
 # %%
 df_GrossOperatingSurplusGrowth.columns = gos_column_names
+
+# %%
+# Columns WITHOUT a name (empty cells in the header row): check them
+df_GrossOperatingSurplusGrowth.columns[df_GrossOperatingSurplusGrowth.columns.isin(["", "nan", "None", "NaN"])]
+
+# %%
+# Remove the columns without a name that are completely empty
+gos_columns_to_keep = []
+for position in range(df_GrossOperatingSurplusGrowth.shape[1]):
+    column_name = df_GrossOperatingSurplusGrowth.columns[position]
+    column_is_empty = df_GrossOperatingSurplusGrowth.iloc[:, position].isna().all()
+    if position > 0 and column_name in ["", "nan", "None", "NaN"] and column_is_empty:
+        continue
+    gos_columns_to_keep.append(position)
+df_GrossOperatingSurplusGrowth = df_GrossOperatingSurplusGrowth.iloc[:, gos_columns_to_keep]
+
+# %%
+# Repeated column names (should be empty). If there are, only the first one is kept
+df_GrossOperatingSurplusGrowth.columns[df_GrossOperatingSurplusGrowth.columns.duplicated()]
+
+# %%
+df_GrossOperatingSurplusGrowth = df_GrossOperatingSurplusGrowth.loc[:, ~df_GrossOperatingSurplusGrowth.columns.duplicated()]
 
 # %%
 df_GrossOperatingSurplusGrowth.head(5)
@@ -364,9 +437,9 @@ df_GrossOperatingSurplusGrowth_filtered = df_GrossOperatingSurplusGrowth[df_Gros
 df_GrossOperatingSurplusGrowth_filtered
 
 # %%
-# =====================================================================
+######################################################################
 # 3.3 LABOUR PRODUCTIVITY
-# =====================================================================
+######################################################################
 # REVIEW BEFORE ANY CHANGE: first rows
 df_LabourProductivity.head(10)
 
@@ -383,18 +456,36 @@ df_LabourProductivity.info()
 df_LabourProductivity.describe()
 
 # %%
-# Row 8 has the real column names -> use it as the header
-df_LabourProductivity.columns = df_LabourProductivity.iloc[8]
+# Find the row that has the real column names: the one whose first cell says "Data Series"
+# (each file can have it in a different row; if it is already the header, nothing changes)
+labour_productivity_first_column_name = str(df_LabourProductivity.columns[0]).replace(" ", "").lower()
+labour_productivity_first_column_text = df_LabourProductivity.iloc[:, 0].astype(str).str.replace(" ", "").str.lower()
+labour_productivity_header_rows = df_LabourProductivity.index[labour_productivity_first_column_text == "dataseries"]
+
+if labour_productivity_first_column_name == "dataseries" or len(labour_productivity_header_rows) == 0:
+    labour_productivity_header_row = None
+else:
+    labour_productivity_header_row = int(labour_productivity_header_rows[0])
+labour_productivity_header_row
 
 # %%
-# Remove the rows above the data (rows 0 to 8)
-df_LabourProductivity = df_LabourProductivity.iloc[9:].reset_index(drop=True)
+# Use that row as the header and remove the rows above it
+if labour_productivity_header_row is not None:
+    df_LabourProductivity.columns = df_LabourProductivity.iloc[labour_productivity_header_row]
+    df_LabourProductivity = df_LabourProductivity.iloc[labour_productivity_header_row + 1:].reset_index(drop=True)
 
 # %%
-# Column names as text, without spaces before/after
+df_LabourProductivity.head(5)
+
+# %%
+# Column names as text, without spaces before/after, and quarters written the same way
 labour_productivity_column_names = []
 for column in df_LabourProductivity.columns:
-    labour_productivity_column_names.append(str(column).strip())
+    column_name = str(column).strip()
+    # Quarter without space, e.g. "20252Q" -> "2025 2Q"
+    if len(column_name) == 6 and column_name[:5].isdigit() and column_name[5].upper() == "Q":
+        column_name = column_name[:4] + " " + column_name[4] + "Q"
+    labour_productivity_column_names.append(column_name)
 
 # %%
 # First column -> "Sectors"
@@ -402,6 +493,28 @@ labour_productivity_column_names[0] = "Sectors"
 
 # %%
 df_LabourProductivity.columns = labour_productivity_column_names
+
+# %%
+# Columns WITHOUT a name (empty cells in the header row): check them
+df_LabourProductivity.columns[df_LabourProductivity.columns.isin(["", "nan", "None", "NaN"])]
+
+# %%
+# Remove the columns without a name that are completely empty
+labour_productivity_columns_to_keep = []
+for position in range(df_LabourProductivity.shape[1]):
+    column_name = df_LabourProductivity.columns[position]
+    column_is_empty = df_LabourProductivity.iloc[:, position].isna().all()
+    if position > 0 and column_name in ["", "nan", "None", "NaN"] and column_is_empty:
+        continue
+    labour_productivity_columns_to_keep.append(position)
+df_LabourProductivity = df_LabourProductivity.iloc[:, labour_productivity_columns_to_keep]
+
+# %%
+# Repeated column names (should be empty). If there are, only the first one is kept
+df_LabourProductivity.columns[df_LabourProductivity.columns.duplicated()]
+
+# %%
+df_LabourProductivity = df_LabourProductivity.loc[:, ~df_LabourProductivity.columns.duplicated()]
 
 # %%
 df_LabourProductivity.head(5)
@@ -453,9 +566,9 @@ df_LabourProductivity_filtered = df_LabourProductivity[df_LabourProductivity["Se
 df_LabourProductivity_filtered
 
 # %%
-# =====================================================================
-# 3.4 EQUITY RATIO (THIS FILE ALREADY HAS THE RIGHT HEADER)
-# =====================================================================
+######################################################################
+# 3.4 EQUITY RATIO
+######################################################################
 # REVIEW BEFORE ANY CHANGE: first rows
 df_EquityRatio.head(10)
 
@@ -472,10 +585,36 @@ df_EquityRatio.info()
 df_EquityRatio.describe()
 
 # %%
-# Column names as text, without spaces before/after
+# Find the row that has the real column names: the one whose first cell says "Data Series"
+# (each file can have it in a different row; if it is already the header, nothing changes)
+equity_ratio_first_column_name = str(df_EquityRatio.columns[0]).replace(" ", "").lower()
+equity_ratio_first_column_text = df_EquityRatio.iloc[:, 0].astype(str).str.replace(" ", "").str.lower()
+equity_ratio_header_rows = df_EquityRatio.index[equity_ratio_first_column_text == "dataseries"]
+
+if equity_ratio_first_column_name == "dataseries" or len(equity_ratio_header_rows) == 0:
+    equity_ratio_header_row = None
+else:
+    equity_ratio_header_row = int(equity_ratio_header_rows[0])
+equity_ratio_header_row
+
+# %%
+# Use that row as the header and remove the rows above it
+if equity_ratio_header_row is not None:
+    df_EquityRatio.columns = df_EquityRatio.iloc[equity_ratio_header_row]
+    df_EquityRatio = df_EquityRatio.iloc[equity_ratio_header_row + 1:].reset_index(drop=True)
+
+# %%
+df_EquityRatio.head(5)
+
+# %%
+# Column names as text, without spaces before/after, and quarters written the same way
 equity_ratio_column_names = []
 for column in df_EquityRatio.columns:
-    equity_ratio_column_names.append(str(column).strip())
+    column_name = str(column).strip()
+    # Quarter without space, e.g. "20252Q" -> "2025 2Q"
+    if len(column_name) == 6 and column_name[:5].isdigit() and column_name[5].upper() == "Q":
+        column_name = column_name[:4] + " " + column_name[4] + "Q"
+    equity_ratio_column_names.append(column_name)
 
 # %%
 # First column -> "Sectors"
@@ -483,6 +622,28 @@ equity_ratio_column_names[0] = "Sectors"
 
 # %%
 df_EquityRatio.columns = equity_ratio_column_names
+
+# %%
+# Columns WITHOUT a name (empty cells in the header row): check them
+df_EquityRatio.columns[df_EquityRatio.columns.isin(["", "nan", "None", "NaN"])]
+
+# %%
+# Remove the columns without a name that are completely empty
+equity_ratio_columns_to_keep = []
+for position in range(df_EquityRatio.shape[1]):
+    column_name = df_EquityRatio.columns[position]
+    column_is_empty = df_EquityRatio.iloc[:, position].isna().all()
+    if position > 0 and column_name in ["", "nan", "None", "NaN"] and column_is_empty:
+        continue
+    equity_ratio_columns_to_keep.append(position)
+df_EquityRatio = df_EquityRatio.iloc[:, equity_ratio_columns_to_keep]
+
+# %%
+# Repeated column names (should be empty). If there are, only the first one is kept
+df_EquityRatio.columns[df_EquityRatio.columns.duplicated()]
+
+# %%
+df_EquityRatio = df_EquityRatio.loc[:, ~df_EquityRatio.columns.duplicated()]
 
 # %%
 df_EquityRatio.head(5)
@@ -534,9 +695,9 @@ df_EquityRatio_filtered = df_EquityRatio[df_EquityRatio["Sectors"].isin(TARGET_S
 df_EquityRatio_filtered
 
 # %%
-# =====================================================================
+######################################################################
 # 3.5 BUSINESS EXPECTATIONS - MANUFACTURING
-# =====================================================================
+######################################################################
 # REVIEW BEFORE ANY CHANGE: first rows
 df_Manufacturing_Business_Expectations.head(10)
 
@@ -553,18 +714,36 @@ df_Manufacturing_Business_Expectations.info()
 df_Manufacturing_Business_Expectations.describe()
 
 # %%
-# Row 8 has the real column names -> use it as the header
-df_Manufacturing_Business_Expectations.columns = df_Manufacturing_Business_Expectations.iloc[8]
+# Find the row that has the real column names: the one whose first cell says "Data Series"
+# (each file can have it in a different row; if it is already the header, nothing changes)
+manufacturing_expectations_first_column_name = str(df_Manufacturing_Business_Expectations.columns[0]).replace(" ", "").lower()
+manufacturing_expectations_first_column_text = df_Manufacturing_Business_Expectations.iloc[:, 0].astype(str).str.replace(" ", "").str.lower()
+manufacturing_expectations_header_rows = df_Manufacturing_Business_Expectations.index[manufacturing_expectations_first_column_text == "dataseries"]
+
+if manufacturing_expectations_first_column_name == "dataseries" or len(manufacturing_expectations_header_rows) == 0:
+    manufacturing_expectations_header_row = None
+else:
+    manufacturing_expectations_header_row = int(manufacturing_expectations_header_rows[0])
+manufacturing_expectations_header_row
 
 # %%
-# Remove the rows above the data (rows 0 to 8)
-df_Manufacturing_Business_Expectations = df_Manufacturing_Business_Expectations.iloc[9:].reset_index(drop=True)
+# Use that row as the header and remove the rows above it
+if manufacturing_expectations_header_row is not None:
+    df_Manufacturing_Business_Expectations.columns = df_Manufacturing_Business_Expectations.iloc[manufacturing_expectations_header_row]
+    df_Manufacturing_Business_Expectations = df_Manufacturing_Business_Expectations.iloc[manufacturing_expectations_header_row + 1:].reset_index(drop=True)
 
 # %%
-# Column names as text, without spaces before/after
+df_Manufacturing_Business_Expectations.head(5)
+
+# %%
+# Column names as text, without spaces before/after, and quarters written the same way
 manufacturing_expectations_column_names = []
 for column in df_Manufacturing_Business_Expectations.columns:
-    manufacturing_expectations_column_names.append(str(column).strip())
+    column_name = str(column).strip()
+    # Quarter without space, e.g. "20252Q" -> "2025 2Q"
+    if len(column_name) == 6 and column_name[:5].isdigit() and column_name[5].upper() == "Q":
+        column_name = column_name[:4] + " " + column_name[4] + "Q"
+    manufacturing_expectations_column_names.append(column_name)
 
 # %%
 # First column -> "Sectors"
@@ -572,6 +751,28 @@ manufacturing_expectations_column_names[0] = "Sectors"
 
 # %%
 df_Manufacturing_Business_Expectations.columns = manufacturing_expectations_column_names
+
+# %%
+# Columns WITHOUT a name (empty cells in the header row): check them
+df_Manufacturing_Business_Expectations.columns[df_Manufacturing_Business_Expectations.columns.isin(["", "nan", "None", "NaN"])]
+
+# %%
+# Remove the columns without a name that are completely empty
+manufacturing_expectations_columns_to_keep = []
+for position in range(df_Manufacturing_Business_Expectations.shape[1]):
+    column_name = df_Manufacturing_Business_Expectations.columns[position]
+    column_is_empty = df_Manufacturing_Business_Expectations.iloc[:, position].isna().all()
+    if position > 0 and column_name in ["", "nan", "None", "NaN"] and column_is_empty:
+        continue
+    manufacturing_expectations_columns_to_keep.append(position)
+df_Manufacturing_Business_Expectations = df_Manufacturing_Business_Expectations.iloc[:, manufacturing_expectations_columns_to_keep]
+
+# %%
+# Repeated column names (should be empty). If there are, only the first one is kept
+df_Manufacturing_Business_Expectations.columns[df_Manufacturing_Business_Expectations.columns.duplicated()]
+
+# %%
+df_Manufacturing_Business_Expectations = df_Manufacturing_Business_Expectations.loc[:, ~df_Manufacturing_Business_Expectations.columns.duplicated()]
 
 # %%
 df_Manufacturing_Business_Expectations.head(5)
@@ -616,9 +817,9 @@ df_Manufacturing_Business_Expectations.describe()
 df_Manufacturing_Business_Expectations.head(5)
 
 # %%
-# =====================================================================
+######################################################################
 # 3.6 BUSINESS EXPECTATIONS - SERVICES
-# =====================================================================
+######################################################################
 # REVIEW BEFORE ANY CHANGE: first rows
 df_Service_Business_Expectations.head(10)
 
@@ -635,18 +836,36 @@ df_Service_Business_Expectations.info()
 df_Service_Business_Expectations.describe()
 
 # %%
-# Row 8 has the real column names -> use it as the header
-df_Service_Business_Expectations.columns = df_Service_Business_Expectations.iloc[8]
+# Find the row that has the real column names: the one whose first cell says "Data Series"
+# (each file can have it in a different row; if it is already the header, nothing changes)
+services_expectations_first_column_name = str(df_Service_Business_Expectations.columns[0]).replace(" ", "").lower()
+services_expectations_first_column_text = df_Service_Business_Expectations.iloc[:, 0].astype(str).str.replace(" ", "").str.lower()
+services_expectations_header_rows = df_Service_Business_Expectations.index[services_expectations_first_column_text == "dataseries"]
+
+if services_expectations_first_column_name == "dataseries" or len(services_expectations_header_rows) == 0:
+    services_expectations_header_row = None
+else:
+    services_expectations_header_row = int(services_expectations_header_rows[0])
+services_expectations_header_row
 
 # %%
-# Remove the rows above the data (rows 0 to 8)
-df_Service_Business_Expectations = df_Service_Business_Expectations.iloc[9:].reset_index(drop=True)
+# Use that row as the header and remove the rows above it
+if services_expectations_header_row is not None:
+    df_Service_Business_Expectations.columns = df_Service_Business_Expectations.iloc[services_expectations_header_row]
+    df_Service_Business_Expectations = df_Service_Business_Expectations.iloc[services_expectations_header_row + 1:].reset_index(drop=True)
 
 # %%
-# Column names as text, without spaces before/after
+df_Service_Business_Expectations.head(5)
+
+# %%
+# Column names as text, without spaces before/after, and quarters written the same way
 services_expectations_column_names = []
 for column in df_Service_Business_Expectations.columns:
-    services_expectations_column_names.append(str(column).strip())
+    column_name = str(column).strip()
+    # Quarter without space, e.g. "20252Q" -> "2025 2Q"
+    if len(column_name) == 6 and column_name[:5].isdigit() and column_name[5].upper() == "Q":
+        column_name = column_name[:4] + " " + column_name[4] + "Q"
+    services_expectations_column_names.append(column_name)
 
 # %%
 # First column -> "Sectors"
@@ -654,6 +873,28 @@ services_expectations_column_names[0] = "Sectors"
 
 # %%
 df_Service_Business_Expectations.columns = services_expectations_column_names
+
+# %%
+# Columns WITHOUT a name (empty cells in the header row): check them
+df_Service_Business_Expectations.columns[df_Service_Business_Expectations.columns.isin(["", "nan", "None", "NaN"])]
+
+# %%
+# Remove the columns without a name that are completely empty
+services_expectations_columns_to_keep = []
+for position in range(df_Service_Business_Expectations.shape[1]):
+    column_name = df_Service_Business_Expectations.columns[position]
+    column_is_empty = df_Service_Business_Expectations.iloc[:, position].isna().all()
+    if position > 0 and column_name in ["", "nan", "None", "NaN"] and column_is_empty:
+        continue
+    services_expectations_columns_to_keep.append(position)
+df_Service_Business_Expectations = df_Service_Business_Expectations.iloc[:, services_expectations_columns_to_keep]
+
+# %%
+# Repeated column names (should be empty). If there are, only the first one is kept
+df_Service_Business_Expectations.columns[df_Service_Business_Expectations.columns.duplicated()]
+
+# %%
+df_Service_Business_Expectations = df_Service_Business_Expectations.loc[:, ~df_Service_Business_Expectations.columns.duplicated()]
 
 # %%
 df_Service_Business_Expectations.head(5)
@@ -698,10 +939,10 @@ df_Service_Business_Expectations.describe()
 df_Service_Business_Expectations.head(5)
 
 # %%
-# =====================================================================
+######################################################################
 # PART 4 - MERGE THE TWO BUSINESS EXPECTATIONS FILES
 # They measure the same thing for different sectors -> one df
-# =====================================================================
+######################################################################
 df_Business_Expectations = pd.concat(
     [df_Manufacturing_Business_Expectations, df_Service_Business_Expectations],
     ignore_index=True,
@@ -736,10 +977,10 @@ df_Business_Expectations_filtered = df_Business_Expectations[
 df_Business_Expectations_filtered
 
 # %%
-# =====================================================================
+######################################################################
 # PART 5 - GDP: SHARE OF EACH SECTOR IN THE TOTAL GDP (%)
 # (sector value / total GDP value) * 100
-# =====================================================================
+######################################################################
 gdp_total_row = df_GDP_Growth[df_GDP_Growth["Sectors"] == GDP_TOTAL_ROW]
 gdp_total_row
 
@@ -761,7 +1002,7 @@ df_GDP_Share_filtered = df_GDP_Share_filtered.round(2)
 df_GDP_Share_filtered.head()
 
 # %%
-# =====================================================================
+######################################################################
 # PART 6 - ESG RISK
 # This file was created by the team, so its cleaning is minimum.
 # Rule:
@@ -769,7 +1010,7 @@ df_GDP_Share_filtered.head()
 #   - If 60% or more of the companies answer No   -> High risk
 #   - All the rest                                -> Medium risk
 #   - Missing answers count as "No", missing sectors get High risk
-# =====================================================================
+######################################################################
 # REVIEW BEFORE ANY CHANGE: first rows
 df_ESG.head(10)
 
@@ -870,11 +1111,11 @@ df_ESG_risk = pd.DataFrame(esg_rows)
 df_ESG_risk
 
 # %%
-# =====================================================================
+######################################################################
 # PART 7 - DATA CHECKS: tables to zoom in on data that may not make sense
 #   - summary per sector: periods, missing values, first/last period, min, max, mean
 #   - unusual jumps: change vs the previous period bigger than 3 standard deviations
-# =====================================================================
+######################################################################
 dfs_to_check = {
     "Real GDP": df_GDP_Growth_filtered,
     "Gross Operating Surplus": df_GrossOperatingSurplusGrowth_filtered,
@@ -960,13 +1201,13 @@ data_check_summaries["Business Expectations"]
 data_check_jumps["Business Expectations"]
 
 # %%
-# =====================================================================
+######################################################################
 # PART 8 - CHARTS (saved as HTML in output/)
 #   1. Line trend by sector (full history)
 #   2. Grouped bars by sector (last 20 periods)
 #   3. Donuts (only for amounts that add up to a total: GDP, GOS)
 #   4. Bars vs. total (ratios, per worker, expectations: a donut makes no sense)
-# =====================================================================
+######################################################################
 chart_settings = {
     "Real GDP": {
         "df_clean": df_GDP_Growth, "df_filtered": df_GDP_Growth_filtered,
@@ -1010,7 +1251,7 @@ for title, settings in chart_settings.items():
     df_one_row_per_period = df_one_row_per_period.sort_values(["Period", "Sectors"]).reset_index(drop=True)
     periods_in_time_order = sorted(df_one_row_per_period["Period"].unique())
 
-    # ---------- 1. Line trend ----------
+    ########## 1. Line trend ##########
     line_chart = px.line(
         df_one_row_per_period, x="Period", y="Value", color="Sectors",
         markers=True,
@@ -1024,7 +1265,7 @@ for title, settings in chart_settings.items():
     if SHOW_CHARTS_IN_BROWSER:
         line_chart.show(renderer="browser")
 
-    # ---------- 2. Grouped bars (last periods) ----------
+    ########## 2. Grouped bars (last periods) ##########
     last_periods = periods_in_time_order[-NUMBER_OF_BAR_PERIODS:]
     df_bar = df_one_row_per_period[df_one_row_per_period["Period"].isin(last_periods)]
     bar_chart = px.bar(
@@ -1049,7 +1290,7 @@ for title, settings in chart_settings.items():
             print(f"{title}: total row '{total_row_name}' not found. Row names:")
             print(df_clean["Sectors"].tolist())
 
-    # ---------- 3. Donuts (amounts that add up) ----------
+    ########## 3. Donuts (amounts that add up) ##########
     if settings["adds_up_to_total"] and not total_row.empty:
         # Latest period where the total has a value
         total_periods_with_value = []
@@ -1094,7 +1335,7 @@ for title, settings in chart_settings.items():
         if SHOW_CHARTS_IN_BROWSER:
             donut_selected.show(renderer="browser")
 
-    # ---------- 4. Bars vs. total (ratios, per worker, expectations) ----------
+    ########## 4. Bars vs. total (ratios, per worker, expectations) ##########
     if not settings["adds_up_to_total"]:
         newest_period = sorted(df_one_row_per_period.dropna(subset=["Value"])["Period"].unique())[-1]
         df_bar = df_one_row_per_period[df_one_row_per_period["Period"] == newest_period].sort_values("Value")
@@ -1115,10 +1356,10 @@ for title, settings in chart_settings.items():
             bar_chart.show(renderer="browser")
 
 # %%
-# =====================================================================
+######################################################################
 # PART 9 - LAST 5 YEARS
 # The most recent year of each df counts as year 1
-# =====================================================================
+######################################################################
 NUMBER_OF_YEARS = 5
 
 # %%
@@ -1150,7 +1391,7 @@ for data_name, df_filtered in filtered_data.items():
 filtered_data_5_years["gdp"].head()
 
 # %%
-# =====================================================================
+######################################################################
 # PART 10 - RISK SCORE
 #   W1 Economic performance (40): GDP growth 20 + GOS growth 20
 #   W2 Financial health     (40): Equity ratio 40
@@ -1158,7 +1399,7 @@ filtered_data_5_years["gdp"].head()
 #   Points: Green = 100% of the weight, Amber = 50%, Red = 0%
 #   Overall: >= 75 Green | 40 - 74.99 Amber | < 40 Red
 #   Override: 2+ Red indicators -> max Amber | 1 Red + Green -> warning
-# =====================================================================
+######################################################################
 PILLARS = {
     "W1": "Economic performance",
     "W2": "Financial health",
@@ -1224,10 +1465,10 @@ for indicator_settings in SCORE_INDICATORS.values():
 total_weight
 
 # %%
-# ---------------------------------------------------------------------
+###################################
 # 10.1 QUARTERS OF THE SCORE
 # Quarters of the last 5 years that have data in the GDP df (oldest -> newest)
-# ---------------------------------------------------------------------
+###################################
 score_quarters = []
 for column in filtered_data_5_years["gdp"].columns[1:]:
     if filtered_data_5_years["gdp"][column].notna().any():
@@ -1236,11 +1477,11 @@ score_quarters = sorted(score_quarters)
 score_quarters
 
 # %%
-# ---------------------------------------------------------------------
+###################################
 # 10.2 VALUES OF EACH INDICATOR
 # Growth = (value / value of the same period one year before - 1) * 100
 # "2025 2Q" is compared with "2024 2Q"
-# ---------------------------------------------------------------------
+###################################
 score_values = {}
 for indicator_name, indicator_settings in SCORE_INDICATORS.items():
 
@@ -1267,10 +1508,10 @@ for indicator_name, indicator_settings in SCORE_INDICATORS.items():
 score_values["gdp_growth"].head()
 
 # %%
-# ---------------------------------------------------------------------
+###################################
 # 10.3 INDICATOR RESULTS: one row per sector + quarter + indicator
 # (value, period used, traffic light, weight and points)
-# ---------------------------------------------------------------------
+###################################
 indicator_result_rows = []
 
 for indicator_name, indicator_settings in SCORE_INDICATORS.items():
@@ -1354,10 +1595,10 @@ df_indicator_results.head(10)
 df_indicator_results.info()
 
 # %%
-# ---------------------------------------------------------------------
+###################################
 # 10.4 PILLAR RESULTS: one row per sector + quarter + pillar
 # Score 0-100 = points earned / max points of the indicators WITH data * 100
-# ---------------------------------------------------------------------
+###################################
 pillar_result_rows = []
 
 for sector in TARGET_SECTORS:
@@ -1406,9 +1647,9 @@ df_pillar_results = pd.DataFrame(pillar_result_rows)
 df_pillar_results.head(10)
 
 # %%
-# ---------------------------------------------------------------------
+###################################
 # 10.5 OVERALL RESULTS: one row per sector + quarter, with the override rules
-# ---------------------------------------------------------------------
+###################################
 overall_result_rows = []
 
 for sector in TARGET_SECTORS:
@@ -1473,9 +1714,9 @@ df_overall_results = pd.DataFrame(overall_result_rows)
 df_overall_results.head(10)
 
 # %%
-# ---------------------------------------------------------------------
+###################################
 # 10.6 FINAL TABLES: sectors as rows, quarters of the last 5 years as columns
-# ---------------------------------------------------------------------
+###################################
 df_overall_score_table = df_overall_results.pivot(index="Sectors", columns="Quarter", values="Score")
 df_overall_score_table = df_overall_score_table.reindex(index=TARGET_SECTORS, columns=score_quarters)
 df_overall_score_table.columns.name = None
@@ -1536,9 +1777,9 @@ df_warnings = df_overall_results[df_overall_results["Warning"] != ""]
 df_warnings[["Sectors", "Quarter", "Score", "Final light", "Warning"]]
 
 # %%
-# ---------------------------------------------------------------------
+###################################
 # 10.7 REPORT FOR ONE SECTOR AND ONE QUARTER (change them here)
-# ---------------------------------------------------------------------
+###################################
 report_sector = "Manufacturing"
 report_quarter = score_quarters[-1]     # latest quarter
 

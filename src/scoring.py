@@ -7,17 +7,19 @@
 # Creation day: 2026-09-28
 # Moficiation day: 2026-10-01
 # Created by: @ansanc
-# Note that this code uses the help of Copilot, own knowledge and what was learnt in class.
+# Note that this code uses the help of Copilot/Claude, own knowledge and what was learnt in class.
 
-# RISK SCORE and TRAFFIC LIGHTS by sector and quarter.
+# PART 2: RISK SCORE and TRAFFIC LIGHTS by sector and quarter.
 #
 #   1. Preparing the values -> yearly growth, list of quarters, value of each quarter
 #   2. Traffic lights       -> Green / Amber / Red
 #   3. Indicator results    -> one row per sector + quarter + indicator
 #   4. Scores               -> pillars (W1, W2, W3) and overall score + override rules
-#   5. Tables and report    -> sectors as rows, quarters as columns + report per sector
+#   5. Table                -> sectors as rows, quarters as columns
 #
-# import libraries
+# All the settings (weights, limits, points) are in config.py
+######################################################################
+
 import numpy as np
 import pandas as pd
 from loguru import logger
@@ -29,9 +31,10 @@ from config import (TARGET_SECTORS, SCORE_NUMBER_OF_YEARS, SCORE_QUARTERS_TAKEN_
 from exploration import keep_last_years, convert_period_to_date
 
 
-# =====================================================================
+######################################################################
 # 1. PREPARING THE VALUES
-# =====================================================================
+
+
 def same_period_one_year_before(period: str) -> str:
     """'2025 2Q' -> '2024 2Q'  |  '2025' -> '2024'"""
     period_parts = period.split()
@@ -93,9 +96,10 @@ def get_value_for_quarter(df_indicator_values: pd.DataFrame, sector: str, quarte
     return np.nan, None
 
 
-# =====================================================================
+######################################################################
 # 2. TRAFFIC LIGHTS
-# =====================================================================
+#
+
 def get_indicator_light(value: float, indicator_settings: dict) -> str | float:
     """Green / Amber / Red for one value, using the limits of the indicator."""
     if pd.isna(value):
@@ -127,9 +131,10 @@ def get_score_light(score: float) -> str | float:
         return "Red"
 
 
-# =====================================================================
+######################################################################
 # 3. INDICATOR RESULTS: one row per sector + quarter + indicator
-# =====================================================================
+
+
 def build_indicator_results(filtered_data: dict[str, pd.DataFrame], df_esg_risk: pd.DataFrame,
                             sectors: list[str] = TARGET_SECTORS) -> pd.DataFrame:
     """Value, traffic light, weight and points of every indicator,
@@ -190,9 +195,10 @@ def build_indicator_results(filtered_data: dict[str, pd.DataFrame], df_esg_risk:
     return df_indicator_results
 
 
-# =====================================================================
+######################################################################
 # 4. SCORES
-# =====================================================================
+
+
 def calculate_score(indicator_rows: pd.DataFrame) -> tuple[float, float]:
     """Score 0-100 of a group of indicators (one sector, one quarter).
     If an indicator has no data, the score is calculated only with the indicators
@@ -276,9 +282,10 @@ def build_overall_results(df_indicator_results: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(overall_rows)
 
 
-# =====================================================================
-# 5. TABLES (sectors as rows, quarters as columns) AND REPORT
-# =====================================================================
+######################################################################
+# 5. TABLE: sectors as rows, quarters as columns
+######################################################################
+
 def make_sector_by_quarter_table(df_one_row_per_quarter: pd.DataFrame, column_to_show: str) -> pd.DataFrame:
     """Long table -> sectors as rows, quarters as columns (oldest to newest).
     column_to_show: the column whose values fill the table (e.g. 'Score')"""
@@ -289,77 +296,3 @@ def make_sector_by_quarter_table(df_one_row_per_quarter: pd.DataFrame, column_to
     df_table = df_table.reindex(index=sectors_in_order, columns=quarters_in_order)
     df_table.columns.name = None
     return df_table
-
-
-def make_indicator_tables(df_indicator_results: pd.DataFrame, column_to_show: str) -> dict[str, pd.DataFrame]:
-    """Dictionary with one table (sectors x quarters) per indicator.
-    column_to_show: 'Value', 'Light' or 'Points'"""
-    indicator_tables = {}
-    for indicator_name in SCORE_INDICATORS:
-        indicator_rows = df_indicator_results[df_indicator_results["Indicator"] == indicator_name]
-        indicator_tables[indicator_name] = make_sector_by_quarter_table(indicator_rows, column_to_show)
-    return indicator_tables
-
-
-def make_pillar_tables(df_pillar_results: pd.DataFrame, column_to_show: str) -> dict[str, pd.DataFrame]:
-    """Dictionary with one table (sectors x quarters) per pillar.
-    column_to_show: 'Score' or 'Light'"""
-    pillar_tables = {}
-    for pillar in PILLARS:
-        pillar_rows = df_pillar_results[df_pillar_results["Pillar"] == pillar]
-        pillar_tables[pillar] = make_sector_by_quarter_table(pillar_rows, column_to_show)
-    return pillar_tables
-
-
-def print_score_report(df_indicator_results: pd.DataFrame, df_overall_results: pd.DataFrame,
-                       sector: str, quarter: str | None = None) -> pd.DataFrame | None:
-    """Report for one sector and one quarter (the latest one if quarter is None):
-    1. Indicator breakdown  2. Calculation  3. Override check  4. Final result"""
-    if quarter is None:
-        quarter = df_overall_results["Quarter"].unique()[-1]
-
-    indicator_rows = df_indicator_results[(df_indicator_results["Sectors"] == sector) &
-                                          (df_indicator_results["Quarter"] == quarter)]
-    overall_rows = df_overall_results[(df_overall_results["Sectors"] == sector) &
-                                      (df_overall_results["Quarter"] == quarter)]
-    if indicator_rows.empty:
-        logger.warning("No data for {} in {}", sector, quarter)
-        return None
-    overall_row = overall_rows.iloc[0]
-
-    print(f"\n========== {sector} — {quarter} ==========")
-
-    # 1. Indicator breakdown
-    print("\n1. INDICATOR BREAKDOWN")
-    breakdown = indicator_rows[["Pillar", "Label", "Value", "Value period", "Light", "Weight", "Points"]].copy()
-    breakdown["Light"] = breakdown["Light"].fillna("No data")
-    print(breakdown.to_string(index=False))
-
-    # 2. Calculation
-    print("\n2. CALCULATION")
-    rows_with_data = indicator_rows[indicator_rows["Light"].notna()]
-    points_earned = rows_with_data["Points"].sum()
-    max_points_with_data = rows_with_data["Weight"].sum()
-    points_text = " + ".join(f"{points:.1f}" for points in rows_with_data["Points"])
-    print(f"Points: {points_text} = {points_earned:.2f} out of {max_points_with_data:.0f}")
-    if overall_row["Data coverage %"] < 100:
-        print(f"Some indicators have no data -> rescaled to 100: "
-              f"{points_earned:.2f} / {max_points_with_data:.0f} x 100 = {overall_row['Score']:.2f}")
-    print(f"Overall score: {overall_row['Score']:.2f} / 100  ->  {overall_row['Light by score']} by score")
-
-    # 3. Override rule check
-    print("\n3. OVERRIDE RULE CHECK")
-    print(f"Red indicators: {overall_row['Red indicators']}")
-    if overall_row["Override applied"]:
-        print(f"APPLIES: {overall_row['Warning']} -> maximum allowed is Amber")
-    elif overall_row["Warning"] != "":
-        print(f"Does not apply (only 1 Red). {overall_row['Warning']}")
-    else:
-        print("Does not apply")
-
-    # 4. Final result
-    print("\n4. FINAL RESULT")
-    final_light = overall_row["Final light"]
-    print(f"Numerical score : {overall_row['Score']:.2f}")
-    print(f"Final status    : {final_light}")
-    return breakdown

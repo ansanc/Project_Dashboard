@@ -1,6 +1,6 @@
 
 ## MAIN 
-# ###
+################################################################################################
 #  Purpose of this project:
 # The system will consolidate multiple indicators into a centralized database
 # These indicators will then be processed into an overall industry assessment using a simple traffic-light rating system: Green, Amber, and Red.
@@ -14,8 +14,8 @@
 # Creation day: 2026-09-15
 # Moficiation day: 2026-09-28
 # Created by: @ansanc
-# Note that this code uses the help of Copilot, own knowledge and what was learnt in class.
-####
+# Note that this code uses the help of Copilot/claude, own knowledge and what was learnt in class.
+################################################################################################
 # Porpuse of the file:
 # load -> clean -> merge -> filter -> ESG -> data checks -> score -> save -> charts
 #   How to use on terminal?
@@ -24,19 +24,19 @@
 #   For running the tests: uv run pytest -v
 #
 # What happened in each run is written in log/pipeline.log
-# To explore the data step by step, use AllCode.py
-# =====================================================================
 
 
+
+# import the libraries
 from loguru import logger
 
 from config import (DATA_FILES, FILES_TO_MERGE, INDICATORS_TO_ANALYSE, LOG_FOLDER, LOG_FILE,
                     OUTPUT_FOLDER, INDICATOR_RESULTS_FILE, PILLAR_RESULTS_FILE, OVERALL_RESULTS_FILE,
-                    BASELINE_OVERALL_RESULTS_FILE, BASELINE_INDICATOR_RESULTS_FILE)
+                    SAVE_BASELINE, BASELINE_OVERALL_RESULTS_FILE, BASELINE_INDICATOR_RESULTS_FILE)
 from database import load_all_tables
 from exploration import (clean_indicator_file, merge_indicator_files, keep_target_sectors,
-                         build_esg_risk_table, check_data_quality)
-from plots import plot_all_charts_for_indicator
+                         build_esg_risk_table, check_data_quality,
+                         plot_trend_charts, plot_share_of_total_donuts, plot_sectors_vs_total)
 from scoring import (build_indicator_results, build_pillar_results, build_overall_results,
                      make_sector_by_quarter_table)
 
@@ -61,10 +61,10 @@ def run_pipeline() -> dict:
         # 2. CLEAN each file (BEFORE filtering)
         logger.info("Cleaning the indicator files")
         clean_data = {}
-        for data_name, file_settings in DATA_FILES.items():
+        for data_name in DATA_FILES:
             if data_name == "esg":
                 continue
-            clean_data[data_name] = clean_indicator_file(raw_data[data_name], file_settings["header_row"])
+            clean_data[data_name] = clean_indicator_file(raw_data[data_name], data_name)
 
         # 3. MERGE the files that measure the same thing
         logger.info("Merging the files that measure the same thing")
@@ -150,27 +150,41 @@ def make_charts(results: dict) -> None:
     logger.info("Making the charts")
     try:
         for indicator_name, indicator_settings in INDICATORS_TO_ANALYSE.items():
-            plot_all_charts_for_indicator(results["clean_data"][indicator_name],
-                                          results["filtered_data"][indicator_name],
-                                          indicator_settings)
+            df_clean = results["clean_data"][indicator_name]
+            df_filtered = results["filtered_data"][indicator_name]
+            title = indicator_settings["title"]
+            unit = indicator_settings["unit"]
+            total_row_name = indicator_settings["total_row"]
+
+            # Every indicator: line trend + grouped bars
+            plot_trend_charts(df_filtered, title, unit)
+
+            # Amounts that add up (GDP, GOS) -> donuts | the rest -> bars vs total
+            if indicator_settings["adds_up_to_total"]:
+                plot_share_of_total_donuts(df_clean, df_filtered, total_row_name, title)
+            else:
+                plot_sectors_vs_total(df_clean, df_filtered, total_row_name, title, unit)
+
         logger.success("Charts saved in {}", OUTPUT_FOLDER)
     except Exception as error:
         logger.error("Failed to make the charts: {}", error)
 
 
-def save_baseline() -> None:
-    """Copy the saved results as the baseline the tests compare against.
+def save_baseline(results: dict) -> None:
+    """Save the results as the baseline the tests compare against.
     Do it ONLY when you are sure the results are correct."""
-    shutil.copy(OVERALL_RESULTS_FILE, BASELINE_OVERALL_RESULTS_FILE)
-    shutil.copy(INDICATOR_RESULTS_FILE, BASELINE_INDICATOR_RESULTS_FILE)
+    results["df_overall_results"].to_csv(BASELINE_OVERALL_RESULTS_FILE, index=False)
+    results["df_indicator_results"].to_csv(BASELINE_INDICATOR_RESULTS_FILE, index=False)
     logger.success("Baseline saved in {}", BASELINE_OVERALL_RESULTS_FILE.parent)
+    logger.warning("Remember to put SAVE_BASELINE = False again in config.py")
 
 
+# Runs ONLY with "python main.py", not when another file imports it
 if __name__ == "__main__":
     setup_logging()
     pipeline_results = run_pipeline()
     save_results(pipeline_results)
     log_final_lights(pipeline_results)
     make_charts(pipeline_results)
-    if "--baseline" in sys.argv:
-        save_baseline()
+    if SAVE_BASELINE:
+        save_baseline(pipeline_results)

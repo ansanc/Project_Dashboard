@@ -5,11 +5,13 @@
 # Creation day: 2026-09-28
 # Moficiation day: 2026-10-01
 # Created by: @ansanc
-# ##
-# Import files
-from pathlib import Path
+# Note that this code uses the help of Copilot or Claude IA, own knowledge and what was learnt in class.
 
-# =====================================================================
+
+
+
+
+######################################################################
 # 1. FOLDERS
 # Project_Dashboard/
 # ├── data/          <- CSVs, Excel, the database (.db) and the baselines
@@ -17,7 +19,10 @@ from pathlib import Path
 # ├── log/           <- pipeline.log (what happened in each run)
 # ├── test/          <- pytest tests
 # └── src/           <- all the .py files (this file is here)
-# =====================================================================
+######################################################################
+# import libraries
+from pathlib import Path
+# routes/ path of files to read or deliver
 PROJECT_FOLDER = Path(__file__).resolve().parent.parent
 DATA_FOLDER = PROJECT_FOLDER / "data"
 OUTPUT_FOLDER = PROJECT_FOLDER / "output"
@@ -34,53 +39,49 @@ PILLAR_RESULTS_FILE = OUTPUT_FOLDER / "pillar_results.csv"
 OVERALL_RESULTS_FILE = OUTPUT_FOLDER / "overall_results.csv"
 
 # Baseline: a copy of a result we trust. The tests compare every new run against it
+# Put True ONLY for one run, when you are sure the results are correct,
+# and then put it back to False (if not, every run overwrites the baseline)
+SAVE_BASELINE = False
 BASELINE_OVERALL_RESULTS_FILE = DATA_FOLDER / "reconciliation_baseline_overall_results.csv"
 BASELINE_INDICATOR_RESULTS_FILE = DATA_FOLDER / "reconciliation_baseline_indicator_results.csv"
 
 
-# =====================================================================
+######################################################################
 # 2. DATA FILES
 # For each file:
 #   file_name  : name of the file inside the data folder
 #   table_name : name of the table inside the database
-#   header_row : row that has the column names (SingStat files = row 8)
-#                None = the file already has the right column names
-# =====================================================================
+#   (the row with the column names is found automatically: the one that says "Data Series")
+######################################################################
+
 DATA_FILES = {
     "gdp": {
         "file_name": "RealGDPGrowthByIndustry.csv",
         "table_name": "raw_gdp_growth",
-        "header_row": 8,
     },
     "gos": {
         "file_name": "GrossOperatingSurplusGrowthByIndustry.csv",
         "table_name": "raw_gross_operating_surplus",
-        "header_row": 8,
     },
     "labour_productivity": {
         "file_name": "LabourProductivityValueAddedPerWorker.csv",
         "table_name": "raw_labour_productivity",
-        "header_row": 8,
     },
     "equity_ratio": {
         "file_name": "EquityRatioOfCompaniesByIndustry.csv",
         "table_name": "raw_equity_ratio",
-        "header_row": None,
     },
     "business_expectations_manufacturing": {
         "file_name": "BusinessExpectationsOfTheManufacturingSector.csv",
         "table_name": "raw_business_exp_manufacturing",
-        "header_row": 8,
     },
     "business_expectations_services": {
         "file_name": "BusinessExpectationsOfTheServiceSector.csv",
         "table_name": "raw_business_exp_services",
-        "header_row": 8,
     },
     "esg": {
         "file_name": "ESGReports.xlsx",
         "table_name": "raw_esg",
-        "header_row": None,
     },
 }
 
@@ -91,9 +92,10 @@ FILES_TO_MERGE = {
 }
 
 
-# =====================================================================
+######################################################################
 # 3. SECTORS
-# =====================================================================
+######################################################################
+
 TARGET_SECTORS = [
     'Manufacturing',
     'Real Estate',
@@ -113,7 +115,7 @@ SECTOR_COLORS = {
 }
 
 
-# =====================================================================
+######################################################################
 # 4. INDICATORS TO ANALYSE: data checks and charts (after merging the files)
 #   title            : name shown in charts and tables
 #   unit             : unit shown in the axis
@@ -121,7 +123,8 @@ SECTOR_COLORS = {
 #                      None = there is no total row
 #   adds_up_to_total : True  -> amounts that add up (donut charts)
 #                      False -> ratios / per worker / expectations (bars vs total)
-# =====================================================================
+######################################################################
+
 INDICATORS_TO_ANALYSE = {
     "gdp": {
         "title": "Real GDP",
@@ -156,9 +159,10 @@ INDICATORS_TO_ANALYSE = {
 }
 
 
-# =====================================================================
+######################################################################
 # 5. ESG FILE
-# =====================================================================
+######################################################################
+
 ESG_SECTOR_COLUMN = "Sector"            # CHECK: real name of the sector column
 ESG_REPORTING_COLUMN = "ESG reporting"
 ESG_VALID_ANSWERS = ["Yes", "Partially", "No"]
@@ -166,19 +170,24 @@ ESG_LOW_RISK_IF_YES_AT_LEAST = 75       # >= 75% Yes -> Low risk
 ESG_HIGH_RISK_IF_NO_AT_LEAST = 60       # >= 60% No  -> High risk
 
 
-# =====================================================================
+######################################################################
 # 6. OTHER SETTINGS
-# =====================================================================
+######################################################################
 # Text values that mean "no data" in the files
 MISSING_VALUE_TEXTS = ['NaN', 'nan', 'na', '-', ' ', '']
 
-# Open the charts in the browser? False = only save the HTML files
-SHOW_CHARTS_IN_BROWSER = True
+# Open the charts in the browser? False = only save the HTML files in output/
+SHOW_CHARTS_IN_BROWSER = False
 
 
-# =====================================================================
+######################################################################
 # 7. RISK SCORE (PART 2)
-# =====================================================================
+# There are traffic lights (Green / Amber / Red) at 3 levels:
+#   1. Each INDICATOR (5 lights)  -> its own limits in SCORE_INDICATORS
+#                                    (ESG included, it is one more indicator of W3)
+#   2. Each PILLAR    (3 lights)  -> W1, W2, W3, from the score of its indicators
+#   3. The OVERALL score (1 light) -> from the weighted sum of all the indicators
+######################################################################
 # How many years of quarters the score tables show
 SCORE_NUMBER_OF_YEARS = 5
 
@@ -189,14 +198,23 @@ SCORE_QUARTERS_TAKEN_FROM = "gdp"
 # value of the year before (up to this many years back)
 MAX_YEARS_BACK_FOR_ANNUAL_DATA = 1
 
-# The 3 pillars (each one is also a traffic light)
+# The 3 pillars (each one has its own traffic light, level 2)
 PILLARS = {
-    "W1": "Economic performance",
-    "W2": "Financial health",
-    "W3": "Workforce / operational risk",
+    "W1": "Economic performance",          # 40 points (GDP growth + GOS growth)
+    "W2": "Financial health",              # 40 points (Equity ratio)
+    "W3": "Workforce / operational risk",  # 20 points (Labour productivity growth + ESG reporting)
 }
+# What each pillar contains and how its score is calculated:
+#   W1 (40) = GDP growth (20) + GOS growth (20)
+#   W2 (40) = Equity ratio (40)
+#   W3 (20) = Labour productivity growth (10) + ESG reporting (10)
+#
+#   Points of each indicator = weight x points of its light (Green 1 | Amber 0.5 | Red 0)
+#   Pillar score  = points of its indicators / maximum points of the pillar x 100
+#   Overall score = W1 points + W2 points + W3 points   (out of 100)
+#   Example: GDP Green (20) + GOS Red (0) -> W1 = 20 / 40 x 100 = 50 -> Amber
 
-# Indicators of the score
+# Indicators of the score (each one has its own traffic light, level 1)
 #   label         : name shown in the tables
 #   data_name     : which df the values come from (or "esg")
 #   pillar        : W1 / W2 / W3
@@ -208,6 +226,8 @@ PILLARS = {
 #       Green  if value >  green_from   (>= if green_includes_limit is True)
 #       Amber  if value >= amber_from
 #       Red    in any other case
+#   ESG is the only one without these limits: its light comes from its risk
+#   (Low / Medium / High, rule in section 5) -> see ESG_RISK_TO_LIGHT below
 SCORE_INDICATORS = {
     "gdp_growth": {
         "label": "Real GDP growth (YoY %)",
@@ -247,16 +267,20 @@ SCORE_INDICATORS = {
         "pillar": "W3",
         "weight": 10,
         "calculation": "esg",
+        # Light: >= 75% Yes -> Green | >= 60% No -> Red | rest -> Amber
+        # (limits in section 5: ESG_LOW_RISK_IF_YES_AT_LEAST, ESG_HIGH_RISK_IF_NO_AT_LEAST)
     },
 }
 
-# ESG risk -> traffic light
+# ESG risk -> traffic light of the ESG indicator
+# (ESG gives a risk word instead of a number, so it only needs to be translated)
 ESG_RISK_TO_LIGHT = {"Low": "Green", "Medium": "Amber", "High": "Red"}
 
 # Part of the indicator's weight earned by each light (1 = all the points)
 POINTS_PER_LIGHT = {"Green": 1.0, "Amber": 0.5, "Red": 0.0}
 
-# Overall score -> traffic light (70 - 74.99 falls into Amber)
+# Pillar score and overall score -> traffic light (levels 2 and 3)
+# >= 75 Green | 40 - 74.99 Amber (70 - 74.99 falls into Amber) | < 40 Red
 GREEN_IF_SCORE_AT_LEAST = 75
 AMBER_IF_SCORE_AT_LEAST = 40
 
