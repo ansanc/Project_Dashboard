@@ -340,3 +340,9 @@ else:
         st.dataframe(table_data, use_container_width=True, hide_index=True)
         st.download_button("Download selected table", table_data.to_csv(index=False).encode("utf-8"),
                            file_name=table_name.lower().replace(" ", "_") + ".csv", mime="text/csv")
+
+
+
+
+
+
