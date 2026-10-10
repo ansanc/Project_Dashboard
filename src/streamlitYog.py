@@ -1,3 +1,4 @@
+
 """
 Industry Monitoring Dashboard
 =============================
@@ -12,14 +13,20 @@ It imports the final tables produced there and focuses on presentation,
 filtering, comparison and drill-down analysis.
 """
 
+import os
 from pathlib import Path
 import importlib.util
 
+from dotenv import load_dotenv
+from openai import OpenAI
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
 import streamlit as st
+
+# Load environment variables from .env file
+load_dotenv()
 
 # -----------------------------------------------------------------------------
 # PAGE SETUP
@@ -44,6 +51,65 @@ STATUS_COLOR = {
     "Amber": "#E69F00",
     "Red": "#D64545",
 }
+
+# -----------------------------------------------------------------------------
+# OPENROUTER AI CLIENT SETUP & HELPER FUNCTION
+# -----------------------------------------------------------------------------
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+
+@st.cache_data(show_spinner=False)
+def generate_ai_sector_commentary(sector_name, quarter, score, status, red_count, warning_text, indicator_data_dict):
+    """
+    Call OpenRouter API to generate an executive risk analyst commentary for a specific sector.
+    Cached per sector, quarter, and score state to minimize unnecessary API calls.
+    """
+    if not OPENROUTER_API_KEY:
+        return "⚠️ OpenRouter API Key not found. Please set `OPENROUTER_API_KEY` in your `.env` file to enable AI Commentary."
+
+    try:
+        client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=OPENROUTER_API_KEY,
+        )
+
+        indicators_summary = "\n".join([f"- {k}: {v}" for k, v in indicator_data_dict.items()])
+
+        prompt = f"""
+You are an expert actuarial and financial risk analyst evaluating industry sector health in Singapore.
+Provide a concise executive commentary for the following industry assessment:
+
+- Sector: {sector_name}
+- Assessment Quarter: {quarter}
+- Overall Risk Score: {score:.1f} / 100
+- Traffic-Light Status: {status}
+- Number of Red Indicators: {red_count}
+- Safety Warnings/Overrides: {warning_text if warning_text else 'None'}
+
+Key Indicator Results:
+{indicators_summary}
+
+Please provide a professional 3-paragraph assessment:
+1. Key Strengths & Vulnerabilities: Briefly analyze what driven this score and status.
+2. Outlook & Risk Commentary: Highlight key macro or financial risks based on the indicator traffic lights.
+3. Recommended Action Items: Concise, actionable recommendations for industry stakeholders/risk managers.
+
+Keep the tone concise, professional, and directly actionable.
+"""
+
+        response = client.chat.completions.create(
+            model="nvidia/nemotron-3-ultra-550b-a55b:free", # You can also use openai/gpt-4o-mini or meta-llama/llama-3.1-80b-instruct
+            messages=[
+                {"role": "system", "content": "You are a senior financial risk analyst producing executive reports."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.5,
+            max_tokens=5000,
+        )
+
+        return response.choices[0].message.content
+
+    except Exception as e:
+        return f"⚠️ Unable to generate AI commentary: {str(e)}"
 
 # -----------------------------------------------------------------------------
 # LOAD THE EXISTING ANALYSIS ENGINE
@@ -337,7 +403,6 @@ if st.session_state.active_sector_detail:
                         p_row = p_data.iloc[0]
                         st.metric("Pillar Score", f"{p_row['Score']:.1f} / 100", status_text(p_row['Light']))
                         
-                        # Individual Pillar Gauge / Bar
                         fig_p = px.bar(
                             p_data,
                             x="Pillar name",
@@ -354,23 +419,30 @@ if st.session_state.active_sector_detail:
         st.divider()
 
         # ---------------------------------------------------------------------
-        # SECTION 5: ONE GRAPH OF EACH INDICATOR (5 INDICATORS)
+        # SECTION 5: INDIVIDUAL INDICATOR PERFORMANCE GRAPHS
         # ---------------------------------------------------------------------
         st.markdown("### 5️⃣ Individual Indicator Performance Graphs")
-        st.caption("Historical performance trajectory for each of the core scoring indicators for this sector.")
+        st.caption("Historical performance trajectory for each core scoring indicator.")
 
         sector_indicators = indicators[indicators["Sectors"] == selected_sector].copy()
         sector_indicators["Quarter"] = sector_indicators["Quarter"].astype(str)
         sector_indicators = sector_indicators.sort_values("Quarter", key=lambda s: s.map(period_sort_key))
 
         ind_grid_col1, ind_grid_col2 = st.columns(2)
-
         unique_ind_keys = list(SCORE_INDICATORS.keys())
+
+        # Construct dictionary of indicators for OpenRouter Prompt
+        current_indicator_dict = {}
 
         for ind_idx, ind_key in enumerate(unique_ind_keys):
             ind_info = SCORE_INDICATORS[ind_key]
             ind_label = ind_info["label"]
             ind_history = sector_indicators[sector_indicators["Indicator"] == ind_key].dropna(subset=["Value"])
+
+            if not ind_history.empty:
+                latest_val = ind_history.iloc[-1]["Value"]
+                latest_light = ind_history.iloc[-1]["Light"]
+                current_indicator_dict[ind_label] = f"{latest_val:.2f} ({latest_light})"
 
             target_col = ind_grid_col1 if ind_idx % 2 == 0 else ind_grid_col2
 
@@ -397,6 +469,35 @@ if st.session_state.active_sector_detail:
                             height=250,
                         )
                         st.plotly_chart(fig_ind, width="stretch", key=f"ind_graph_{ind_key}_{selected_sector}")
+
+        st.divider()
+
+        # ---------------------------------------------------------------------
+        # NEW SECTION 6: AI RISK ANALYST COMMENTARY (OPENROUTER INTEGRATION)
+        # ---------------------------------------------------------------------
+        st.markdown("### 🤖 AI Risk Analyst Commentary")
+        st.caption("Automated executive analysis generated via OpenRouter LLM.")
+
+        with st.container(border=True):
+            if st.button("✨ Generate / Refresh AI Commentary", key=f"btn_ai_{selected_sector}"):
+                with st.spinner("Analyzing sector data via OpenRouter AI..."):
+                    commentary = generate_ai_sector_commentary(
+                        sector_name=selected_sector,
+                        quarter=selected_quarter,
+                        score=selected_score,
+                        status=selected_light,
+                        red_count=selected_reds,
+                        warning_text=selected_warning,
+                        indicator_data_dict=current_indicator_dict
+                    )
+                    st.session_state[f"ai_commentary_{selected_sector}_{selected_quarter}"] = commentary
+
+            # Display generated commentary if present in session state
+            commentary_key = f"ai_commentary_{selected_sector}_{selected_quarter}"
+            if commentary_key in st.session_state:
+                st.markdown(st.session_state[commentary_key])
+            else:
+                st.info("Click the **✨ Generate / Refresh AI Commentary** button above to generate a tailored executive summary for this sector.")
 
     st.divider()
     if st.button("⬅️ Return to Overall Market Summary", type="primary", key="btn_back_bottom"):
@@ -501,7 +602,6 @@ else:
         pivot_scores = pivot_scores.reindex(index=TARGET_SECTORS, columns=ordered_quarters)
         pivot_lights = pivot_lights.reindex(index=TARGET_SECTORS, columns=ordered_quarters)
 
-        # Convert status strings to numerical color codes for Discrete Heatmap
         light_map = {"Green": 1, "Amber": 0.5, "Red": 0}
         numeric_lights = pivot_lights.replace(light_map)
 
@@ -514,7 +614,6 @@ else:
             text_auto=False,
         )
 
-        # Overlay Numerical Score Labels inside heatmap cells
         for i, sector in enumerate(TARGET_SECTORS):
             for j, qtr in enumerate(ordered_quarters):
                 score_val = pivot_scores.loc[sector, qtr]
