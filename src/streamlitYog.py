@@ -570,3 +570,5 @@ with st.expander("🛠️ Technical Data View", expanded=False):
 
     st.write("Pillar Results Table")
     st.dataframe(pillars, width="stretch")
+
+    #nothing 
