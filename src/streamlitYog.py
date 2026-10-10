@@ -130,7 +130,7 @@ def get_trend_dataframe(metric_name):
     """Return one long-format dataframe for the selected raw monitoring metric."""
     metric_sources = {
         "Real GDP": engine.df_GDP_Growth_filtered,
-        "GDP share of total": engine.df_GDP_Share_filtered,
+        "GDP Share": engine.df_GDP_Share_filtered,
         "Gross Operating Surplus": engine.df_GrossOperatingSurplusGrowth_filtered,
         "Labour Productivity": engine.df_LabourProductivity_filtered,
         "Equity Ratio": engine.df_EquityRatio_filtered,
@@ -150,210 +150,68 @@ def get_trend_dataframe(metric_name):
     return long_df.sort_values(["Period", "Sectors"])
 
 # -----------------------------------------------------------------------------
-# TITLE AND SHORT USER GUIDE
-# -----------------------------------------------------------------------------
-st.title("📊 Industry Monitoring System")
-st.caption(
-    "A simple traffic-light dashboard for monitoring industry strength, "
-    "deterioration and elevated risk."
-)
-
-with st.expander("How to read this dashboard", expanded=False):
-    st.markdown(
-        """
-        - **🟢 Green** = relatively healthy based on the project's scoring rules.
-        - **🟠 Amber** = watch closely; some indicators are weaker or mixed.
-        - **🔴 Red** = elevated risk based on the project's thresholds.
-        - The **overall score** combines the indicators using their assigned weights.
-        - Use the **left sidebar** to filter global assessment quarters and indicator drill-downs.
-        - Use the **top tabs** to switch between Market Overview and Industry Drill-Downs.
-        """
-    )
-
-# -----------------------------------------------------------------------------
-# SIDEBAR FILTERS (GLOBAL CONTROLS WITH WORKING RESET BUTTON)
+# SIDEBAR FILTERS
 # -----------------------------------------------------------------------------
 quarter_options = sorted(overall["Quarter"].dropna().astype(str).unique(), key=period_sort_key)
 latest_quarter = quarter_options[-1]
 
-# Initialize Session State key directly bound to widget
 if "quarter_selector_key" not in st.session_state:
     st.session_state.quarter_selector_key = latest_quarter
 
 def reset_quarter_callback():
     st.session_state.quarter_selector_key = latest_quarter
 
-st.sidebar.header("⚙️ Global Assessment Filters")
+st.sidebar.header("⚙️ Dashboard Controls")
 
-selected_quarter = st.sidebar.selectbox(
-    "Assessment Quarter",
-    quarter_options,
-    key="quarter_selector_key",
-    help="Select the quarter to evaluate risk across all industries."
-)
+with st.sidebar.expander("📅 Assessment Quarter Filter", expanded=True):
+    selected_quarter = st.sidebar.selectbox(
+        "Assessment Quarter",
+        quarter_options,
+        key="quarter_selector_key",
+        help="Select the quarter to evaluate risk across all industries."
+    )
 
-# Reset Quarter Button using callback
-st.sidebar.button(
-    "🔄 Reset to Latest Quarter", 
-    on_click=reset_quarter_callback,
-    help="Reset the Assessment Quarter back to the most recent period."
-)
+    st.sidebar.button(
+        "🔄 Reset to Latest Quarter", 
+        on_click=reset_quarter_callback,
+        help="Reset the Assessment Quarter back to the most recent period."
+    )
 
-st.sidebar.divider()
-st.sidebar.header("🔍 Indicator Drill-Down Filters")
-
-selected_metric = st.sidebar.selectbox(
-    "Monitoring Indicator",
-    [
-        "Real GDP",
-        "GDP share of total",
-        "Gross Operating Surplus",
-        "Labour Productivity",
-        "Equity Ratio",
-        "Business Expectations",
-    ],
-    help="Select an indicator to view across all industry drill-down tabs."
-)
-
-compared_sectors = st.sidebar.multiselect(
-    "Industries to Compare",
-    TARGET_SECTORS,
-    default=TARGET_SECTORS,
-    help="Select which industries to plot in the historical trend chart."
-)
-
-st.sidebar.divider()
 st.sidebar.caption(
-    "Tip: Adjust filters in the sidebar to update cross-industry calculations "
-    "and indicator trend charts globally."
+    "Tip: Select an Assessment Quarter to update market risk scores and indicators."
 )
 
-# -----------------------------------------------------------------------------
-# TOP NAVIGATION TABS (ALL SECTORS + INDIVIDUAL INDUSTRIES)
-# -----------------------------------------------------------------------------
-tab_titles = ["🌐 Overall Market Summary"] + [f"🏢 {sector}" for sector in TARGET_SECTORS]
-tabs = st.tabs(tab_titles)
+# Initialize Session State for Active View Page
+if "active_sector_detail" not in st.session_state:
+    st.session_state.active_sector_detail = None
 
 # =============================================================================
-# TAB 1: OVERALL MARKET SUMMARY
+# VIEW 1: FULL-PAGE SECTOR DETAIL PAGE (SHOWS WHEN A SECTOR BUTTON IS CLICKED)
 # =============================================================================
-with tabs[0]:
-    st.subheader(f"🌐 Overall Market Risk Summary — {selected_quarter}")
+if st.session_state.active_sector_detail:
+    selected_sector = st.session_state.active_sector_detail
 
-    quarter_overall = overall[overall["Quarter"].astype(str) == selected_quarter].copy()
-
-    # KPI Summary Row
-    green_count = (quarter_overall["Final light"] == "Green").sum()
-    amber_count = (quarter_overall["Final light"] == "Amber").sum()
-    red_count = (quarter_overall["Final light"] == "Red").sum()
-    avg_score = quarter_overall["Score"].mean()
-
-    kpi_cols = st.columns(4)
-    kpi_cols[0].metric("Low Risk Industries (Green)", f"{green_count} / {len(TARGET_SECTORS)}")
-    kpi_cols[1].metric("Moderate Risk (Amber)", f"{amber_count} / {len(TARGET_SECTORS)}")
-    kpi_cols[2].metric("High Risk (Red)", f"{red_count} / {len(TARGET_SECTORS)}")
-    kpi_cols[3].metric("Average Market Score", f"{avg_score:.1f} / 100" if pd.notna(avg_score) else "No data")
+    # Header and Navigation Bar
+    col_nav_title, col_nav_btn = st.columns([4, 1])
+    with col_nav_title:
+        st.title(f"🏢 Sector Analysis: {selected_sector}")
+        st.caption(f"Comprehensive risk drill-down and indicator performance evaluation for {selected_quarter}.")
+    with col_nav_btn:
+        st.write("") # Padding
+        if st.button("⬅️ Back to Market Overview", type="primary", key="btn_back_main"):
+            st.session_state.active_sector_detail = None
+            st.rerun()
 
     st.divider()
 
-    # Main Visualizations Row
-    col_chart1, col_chart2 = st.columns([1, 1])
+    selected_overall = overall[
+        (overall["Sectors"] == selected_sector)
+        & (overall["Quarter"].astype(str) == selected_quarter)
+    ]
 
-    with col_chart1:
-        st.markdown("#### 📊 Industry Risk Score Ranking")
-        snapshot_df = quarter_overall.sort_values("Score", ascending=True)
-
-        fig_scores = px.bar(
-            snapshot_df,
-            x="Score",
-            y="Sectors",
-            orientation="h",
-            color="Final light",
-            color_discrete_map=STATUS_COLOR,
-            range_x=[0, 100],
-            text="Score",
-            labels={"Sectors": "Industry", "Score": "Overall Score", "Final light": "Status"},
-        )
-        fig_scores.update_traces(texttemplate="%{text:.1f}", textposition="outside")
-        fig_scores.update_layout(
-            template="plotly_white",
-            legend_title="Status",
-            margin=dict(l=10, r=30, t=20, b=10),
-        )
-        st.plotly_chart(fig_scores, width="stretch", key="overall_scores_bar")
-
-    with col_chart2:
-        st.markdown("#### 📈 Multi-Sector Historical Score Trajectory")
-        all_history = overall.copy()
-        all_history["Quarter"] = all_history["Quarter"].astype(str)
-        all_history = all_history.sort_values("Quarter", key=lambda s: s.map(period_sort_key))
-
-        fig_history = px.line(
-            all_history,
-            x="Quarter",
-            y="Score",
-            color="Sectors",
-            markers=True,
-            color_discrete_map=engine.SECTOR_COLORS,
-            labels={"Sectors": "Industry", "Score": "Score (0–100)"},
-        )
-        fig_history.add_hrect(y0=75, y1=100, opacity=0.06, line_width=0, fillcolor="green")
-        fig_history.add_hrect(y0=40, y1=75, opacity=0.04, line_width=0, fillcolor="orange")
-        fig_history.add_hrect(y0=0, y1=40, opacity=0.03, line_width=0, fillcolor="red")
-        fig_history.update_layout(
-            template="plotly_white",
-            hovermode="x unified",
-            yaxis_range=[0, 100],
-            margin=dict(l=10, r=10, t=20, b=10),
-        )
-        st.plotly_chart(fig_history, width="stretch", key="overall_history_line")
-
-    st.divider()
-
-    # Detailed Table & Alerts
-    st.markdown("#### 📋 Cross-Industry Status Matrix")
-
-    summary_table = quarter_overall[
-        ["Sectors", "Score", "Final light", "Red indicators", "Warning", "Data coverage %"]
-    ].copy()
-
-    summary_table["Status"] = summary_table["Final light"].apply(status_text)
-    summary_table = summary_table.rename(
-        columns={
-            "Sectors": "Industry",
-            "Score": "Overall Score",
-            "Red indicators": "Red Indicators",
-            "Warning": "Active Warnings / Overrides",
-            "Data coverage %": "Coverage %",
-        }
-    )
-
-    summary_table = summary_table.sort_values("Overall Score", ascending=False)
-
-    st.dataframe(
-        summary_table[["Industry", "Overall Score", "Status", "Red Indicators", "Active Warnings / Overrides", "Coverage %"]],
-        hide_index=True,
-        width="stretch",
-        column_config={
-            "Overall Score": st.column_config.NumberColumn(format="%.1f"),
-            "Coverage %": st.column_config.NumberColumn(format="%.0f%%"),
-        },
-    )
-
-# =============================================================================
-# TABS 2+: INDIVIDUAL SECTOR DRILL-DOWNS
-# =============================================================================
-for tab, selected_sector in zip(tabs[1:], TARGET_SECTORS):
-    with tab:
-        selected_overall = overall[
-            (overall["Sectors"] == selected_sector)
-            & (overall["Quarter"].astype(str) == selected_quarter)
-        ]
-
-        if selected_overall.empty:
-            st.warning(f"No overall assessment is available for {selected_sector} in {selected_quarter}.")
-            continue
-
+    if selected_overall.empty:
+        st.warning(f"No overall assessment data available for {selected_sector} in {selected_quarter}.")
+    else:
         selected_overall_row = selected_overall.iloc[0]
         selected_light = selected_overall_row["Final light"]
         selected_score = selected_overall_row["Score"]
@@ -361,98 +219,26 @@ for tab, selected_sector in zip(tabs[1:], TARGET_SECTORS):
         selected_reds = int(selected_overall_row["Red indicators"])
         selected_warning = selected_overall_row["Warning"]
 
-        st.subheader(f"{selected_sector} — {selected_quarter} Assessment")
-
-        kpi_cols = st.columns(4)
-        kpi_cols[0].metric("Overall Status", status_text(selected_light))
-        kpi_cols[1].metric(
-            "Industry Score",
-            "No data" if pd.isna(selected_score) else f"{selected_score:.1f} / 100",
-        )
-        kpi_cols[2].metric("Red Indicators", f"{selected_reds}")
-        kpi_cols[3].metric("Data Coverage", f"{selected_coverage:.0f}%")
+        # ---------------------------------------------------------------------
+        # SECTION 1: OVERALL STATUS, INDUSTRY SCORE, RED INDICATOR, DATA COVERAGE
+        # ---------------------------------------------------------------------
+        st.markdown("### 1️⃣ Sector KPI Summary")
+        sec_kpi = st.columns(4)
+        sec_kpi[0].metric("Overall Status", status_text(selected_light))
+        sec_kpi[1].metric("Industry Score", f"{selected_score:.1f} / 100" if pd.notna(selected_score) else "No data")
+        sec_kpi[2].metric("Red Indicators", f"{selected_reds}")
+        sec_kpi[3].metric("Data Coverage", f"{selected_coverage:.0f}%")
 
         if isinstance(selected_warning, str) and selected_warning.strip():
             st.warning(selected_warning)
-        elif selected_light == "Red":
-            st.error(f"{selected_sector} is currently classified as RED (Elevated Risk).")
-        elif selected_light == "Amber":
-            st.info(f"{selected_sector} is currently AMBER and requires monitoring.")
-        else:
-            st.success(f"{selected_sector} is currently GREEN under scoring rules.")
 
         st.divider()
 
-        # SCORE HISTORY & PILLAR BREAKDOWN
-        col_left, col_right = st.columns([1, 1])
-
-        with col_left:
-            st.markdown("#### 📈 Score History")
-            st.caption("Historical performance trajectory over time.")
-
-            history = overall[overall["Sectors"] == selected_sector].copy()
-            history["Quarter"] = history["Quarter"].astype(str)
-            history = history.sort_values("Quarter", key=lambda s: s.map(period_sort_key))
-
-            history_fig = go.Figure()
-            history_fig.add_trace(
-                go.Scatter(
-                    x=history["Quarter"],
-                    y=history["Score"],
-                    mode="lines+markers",
-                    name="Overall score",
-                    line=dict(width=3, color=STATUS_COLOR.get(selected_light, "#2a78d6")),
-                    marker=dict(size=8),
-                    customdata=history[["Final light", "Data coverage %"]],
-                    hovertemplate=(
-                        "<b>%{x}</b><br>Score: %{y:.1f}<br>"
-                        "Status: %{customdata[0]}<br>Coverage: %{customdata[1]:.0f}%<extra></extra>"
-                    ),
-                )
-            )
-            history_fig.add_hrect(y0=75, y1=100, opacity=0.08, line_width=0, fillcolor="green")
-            history_fig.add_hrect(y0=40, y1=75, opacity=0.05, line_width=0, fillcolor="orange")
-            history_fig.add_hrect(y0=0, y1=40, opacity=0.04, line_width=0, fillcolor="red")
-            history_fig.add_hline(y=75, line_dash="dash", annotation_text="Green (75+)")
-            history_fig.add_hline(y=40, line_dash="dash", annotation_text="Amber (40+)")
-            history_fig.update_layout(
-                template="plotly_white",
-                yaxis_title="Score (0–100)",
-                xaxis_title="Quarter",
-                yaxis_range=[0, 100],
-                showlegend=False,
-                margin=dict(l=10, r=10, t=20, b=10),
-            )
-            st.plotly_chart(history_fig, width="stretch", key=f"score_history_{selected_sector}")
-
-        with col_right:
-            st.markdown("#### 🛡️ Risk Pillars Breakdown")
-            st.caption("Pillar performance breakdown for this industry.")
-
-            selected_pillars = pillars[
-                (pillars["Sectors"] == selected_sector)
-                & (pillars["Quarter"].astype(str) == selected_quarter)
-            ].copy()
-
-            pillar_fig = px.bar(
-                selected_pillars,
-                x="Pillar name",
-                y="Score",
-                color="Light",
-                color_discrete_map=STATUS_COLOR,
-                range_y=[0, 100],
-                text="Score",
-                labels={"Pillar name": "Risk Pillar", "Score": "Score", "Light": "Status"},
-            )
-            pillar_fig.update_traces(texttemplate="%{text:.1f}", textposition="outside")
-            pillar_fig.update_layout(template="plotly_white", legend_title="Status", margin=dict(l=10, r=10, t=20, b=10))
-            st.plotly_chart(pillar_fig, width="stretch", key=f"pillar_breakdown_{selected_sector}")
-
-        st.divider()
-
-        # INDICATOR SCORECARD TABLE
-        st.markdown("### 📋 Indicator Scorecard")
-        st.caption("Detailed view of raw values, traffic lights, and assigned weights.")
+        # ---------------------------------------------------------------------
+        # SECTION 2: INDICATOR SCORECARD
+        # ---------------------------------------------------------------------
+        st.markdown("### 2️⃣ Indicator Scorecard")
+        st.caption("Detailed breakdown of raw values, traffic lights, assigned weights, and points earned.")
 
         selected_indicator_rows = indicators[
             (indicators["Sectors"] == selected_sector)
@@ -487,33 +273,382 @@ for tab, selected_sector in zip(tabs[1:], TARGET_SECTORS):
 
         st.divider()
 
-        # FULL-WIDTH HISTORICAL INDICATOR DRILL-DOWN (SIDEBAR CONTROLLED)
-        st.markdown(f"### 🔍 Historical Indicator Drill-Down: {selected_metric}")
-        st.caption("Controlled globally from the left-hand sidebar.")
+        # ---------------------------------------------------------------------
+        # SECTION 3: SCORE HISTORY / SCORE TRAJECTORY
+        # ---------------------------------------------------------------------
+        st.markdown("### 3️⃣ Score History & Trajectory")
+        st.caption("Overall historical risk score trajectory over time.")
 
-        if not compared_sectors:
-            st.info("Select at least one industry in the sidebar to display the trend.")
-        else:
-            trend_df = get_trend_dataframe(selected_metric)
-            trend_df = trend_df[trend_df["Sectors"].isin(compared_sectors)]
+        history = overall[overall["Sectors"] == selected_sector].copy()
+        history["Quarter"] = history["Quarter"].astype(str)
+        history = history.sort_values("Quarter", key=lambda s: s.map(period_sort_key))
 
-            trend_fig = px.line(
-                trend_df,
-                x="Period",
-                y="Value",
-                color="Sectors",
-                markers=True,
-                color_discrete_map=engine.SECTOR_COLORS,
-                title=f"{selected_metric} Historical Trend",
-                labels={"Sectors": "Industry", "Value": selected_metric},
+        history_fig = go.Figure()
+        history_fig.add_trace(
+            go.Scatter(
+                x=history["Quarter"],
+                y=history["Score"],
+                mode="lines+markers",
+                name="Overall Score",
+                line=dict(width=3, color=STATUS_COLOR.get(selected_light, "#2a78d6")),
+                marker=dict(size=8),
+                customdata=history[["Final light", "Data coverage %"]],
+                hovertemplate=(
+                    "<b>%{x}</b><br>Score: %{y:.1f}<br>"
+                    "Status: %{customdata[0]}<br>Coverage: %{customdata[1]:.0f}%<extra></extra>"
+                ),
             )
-            trend_fig.update_layout(
-                template="plotly_white",
-                hovermode="x unified",
-                legend_title="Industry",
-                margin=dict(l=10, r=10, t=40, b=10),
-            )
-            st.plotly_chart(trend_fig, width="stretch", key=f"indicator_trend_{selected_sector}")
+        )
+        history_fig.add_hrect(y0=75, y1=100, opacity=0.08, line_width=0, fillcolor="green", annotation_text="Green Band (≥75)")
+        history_fig.add_hrect(y0=40, y1=75, opacity=0.05, line_width=0, fillcolor="orange", annotation_text="Amber Band (40-74)")
+        history_fig.add_hrect(y0=0, y1=40, opacity=0.04, line_width=0, fillcolor="red", annotation_text="Red Band (<40)")
+        history_fig.update_layout(
+            template="plotly_white",
+            yaxis_title="Overall Score (0–100)",
+            xaxis_title="Quarter",
+            yaxis_range=[0, 100],
+            showlegend=False,
+            margin=dict(l=10, r=10, t=20, b=10),
+        )
+        st.plotly_chart(history_fig, width="stretch", key=f"full_page_history_{selected_sector}")
+
+        st.divider()
+
+        # ---------------------------------------------------------------------
+        # SECTION 4: RISK PILLAR PERFORMANCE
+        # ---------------------------------------------------------------------
+        st.markdown("### 4️⃣ Risk Pillar Performance")
+        st.caption("Pillar breakdown across Economic Performance (W1), Financial Health (W2), and Workforce/Operational Risk (W3).")
+
+        selected_pillars = pillars[
+            (pillars["Sectors"] == selected_sector)
+            & (pillars["Quarter"].astype(str) == selected_quarter)
+        ].copy()
+
+        p_cols = st.columns(3)
+        for p_idx, (p_id, p_name) in enumerate(PILLARS.items()):
+            p_data = selected_pillars[selected_pillars["Pillar"] == p_id]
+            with p_cols[p_idx]:
+                with st.container(border=True):
+                    st.markdown(f"#### {p_id}: {p_name}")
+                    if p_data.empty or pd.isna(p_data.iloc[0]["Score"]):
+                        st.write("No pillar data available.")
+                    else:
+                        p_row = p_data.iloc[0]
+                        st.metric("Pillar Score", f"{p_row['Score']:.1f} / 100", status_text(p_row['Light']))
+                        
+                        # Individual Pillar Gauge / Bar
+                        fig_p = px.bar(
+                            p_data,
+                            x="Pillar name",
+                            y="Score",
+                            color="Light",
+                            color_discrete_map=STATUS_COLOR,
+                            range_y=[0, 100],
+                            text="Score"
+                        )
+                        fig_p.update_traces(texttemplate="%{text:.1f}", textposition="outside")
+                        fig_p.update_layout(template="plotly_white", showlegend=False, margin=dict(l=5, r=5, t=10, b=5), height=200)
+                        st.plotly_chart(fig_p, width="stretch", key=f"pillar_chart_{p_id}_{selected_sector}")
+
+        st.divider()
+
+        # ---------------------------------------------------------------------
+        # SECTION 5: ONE GRAPH OF EACH INDICATOR (5 INDICATORS)
+        # ---------------------------------------------------------------------
+        st.markdown("### 5️⃣ Individual Indicator Performance Graphs")
+        st.caption("Historical performance trajectory for each of the core scoring indicators for this sector.")
+
+        sector_indicators = indicators[indicators["Sectors"] == selected_sector].copy()
+        sector_indicators["Quarter"] = sector_indicators["Quarter"].astype(str)
+        sector_indicators = sector_indicators.sort_values("Quarter", key=lambda s: s.map(period_sort_key))
+
+        ind_grid_col1, ind_grid_col2 = st.columns(2)
+
+        unique_ind_keys = list(SCORE_INDICATORS.keys())
+
+        for ind_idx, ind_key in enumerate(unique_ind_keys):
+            ind_info = SCORE_INDICATORS[ind_key]
+            ind_label = ind_info["label"]
+            ind_history = sector_indicators[sector_indicators["Indicator"] == ind_key].dropna(subset=["Value"])
+
+            target_col = ind_grid_col1 if ind_idx % 2 == 0 else ind_grid_col2
+
+            with target_col:
+                with st.container(border=True):
+                    st.markdown(f"##### 📊 {ind_label}")
+                    st.caption(f"Pillar: {PILLARS[ind_info['pillar']]} | Weight: {ind_info['weight']}%")
+
+                    if ind_history.empty:
+                        st.info("No historical raw data available for this indicator.")
+                    else:
+                        fig_ind = px.line(
+                            ind_history,
+                            x="Quarter",
+                            y="Value",
+                            markers=True,
+                            title=f"{ind_label} Trend",
+                            labels={"Value": "Indicator Value", "Quarter": "Quarter"},
+                        )
+                        fig_ind.update_traces(line_color=engine.SECTOR_COLORS.get(selected_sector, "#2a78d6"), line_width=2, marker_size=6)
+                        fig_ind.update_layout(
+                            template="plotly_white",
+                            margin=dict(l=10, r=10, t=30, b=10),
+                            height=250,
+                        )
+                        st.plotly_chart(fig_ind, width="stretch", key=f"ind_graph_{ind_key}_{selected_sector}")
+
+    st.divider()
+    if st.button("⬅️ Return to Overall Market Summary", type="primary", key="btn_back_bottom"):
+        st.session_state.active_sector_detail = None
+        st.rerun()
+
+# =============================================================================
+# VIEW 2: MAIN OVERALL MARKET SUMMARY PAGE
+# =============================================================================
+else:
+    st.title("📊 Industry Monitoring System")
+    st.caption("A simple traffic-light dashboard for monitoring industry strength, deterioration and elevated risk.")
+
+    with st.expander("How to read this dashboard", expanded=False):
+        st.markdown(
+            """
+            - **🟢 Green** = relatively healthy based on the project's scoring rules.
+            - **🟠 Amber** = watch closely; some indicators are weaker or mixed.
+            - **🔴 Red** = elevated risk based on the project's thresholds.
+            - The **overall score** combines the indicators using their assigned weights.
+            - Click any **Sector Deep-Dive Button** to switch to that industry's full detail page.
+            - Use the **left sidebar** to adjust the assessment quarter.
+            """
+        )
+
+    st.subheader(f"🌐 Overall Market Risk Summary — {selected_quarter}")
+
+    quarter_overall = overall[overall["Quarter"].astype(str) == selected_quarter].copy()
+
+    # KPI Summary Row
+    green_count = (quarter_overall["Final light"] == "Green").sum()
+    amber_count = (quarter_overall["Final light"] == "Amber").sum()
+    red_count = (quarter_overall["Final light"] == "Red").sum()
+    avg_score = quarter_overall["Score"].mean()
+
+    kpi_cols = st.columns(4)
+    kpi_cols[0].metric("Low Risk Industries (Green)", f"{green_count} / {len(TARGET_SECTORS)}")
+    kpi_cols[1].metric("Moderate Risk (Amber)", f"{amber_count} / {len(TARGET_SECTORS)}")
+    kpi_cols[2].metric("High Risk (Red)", f"{red_count} / {len(TARGET_SECTORS)}")
+    kpi_cols[3].metric("Average Market Score", f"{avg_score:.1f} / 100" if pd.notna(avg_score) else "No data")
+
+    st.divider()
+
+    # -------------------------------------------------------------------------
+    # 1. SECTOR DEEP-DIVE BUTTONS (SWITCHES TO FULL SECTOR PAGE)
+    # -------------------------------------------------------------------------
+    st.markdown("### 🏢 Sector Deep-Dive Actions")
+    st.caption("Click a sector button below to switch to that sector's full analysis page.")
+
+    btn_cols = st.columns(len(TARGET_SECTORS))
+
+    for idx, sector in enumerate(TARGET_SECTORS):
+        sector_overall = quarter_overall[quarter_overall["Sectors"] == sector]
+        status_icon = "⚪"
+        if not sector_overall.empty:
+            status_light = sector_overall.iloc[0]["Final light"]
+            status_icon = STATUS_ICON.get(status_light, "⚪")
+        
+        if btn_cols[idx].button(f"{status_icon} {sector}", key=f"btn_sector_{sector}", use_container_width=True):
+            st.session_state.active_sector_detail = sector
+            st.rerun()
+
+    st.divider()
+
+    # -------------------------------------------------------------------------
+    # 2. INDUSTRY RISK SCORING HORIZONTAL BAR CHART & 3. TRAFFIC-LIGHT HEATMAP
+    # -------------------------------------------------------------------------
+    col_bar, col_heatmap = st.columns([1, 1])
+
+    with col_bar:
+        st.markdown("### 📊 Industry Risk Score Ranking")
+        st.caption(f"Overall sector score ranking for {selected_quarter}.")
+        snapshot_df = quarter_overall.sort_values("Score", ascending=True)
+
+        fig_scores = px.bar(
+            snapshot_df,
+            x="Score",
+            y="Sectors",
+            orientation="h",
+            color="Final light",
+            color_discrete_map=STATUS_COLOR,
+            range_x=[0, 100],
+            text="Score",
+            labels={"Sectors": "Industry", "Score": "Overall Score", "Final light": "Status"},
+        )
+        fig_scores.update_traces(texttemplate="%{text:.1f}", textposition="outside")
+        fig_scores.update_layout(
+            template="plotly_white",
+            legend_title="Status",
+            margin=dict(l=10, r=30, t=20, b=10),
+        )
+        st.plotly_chart(fig_scores, width="stretch", key="overall_scores_bar")
+
+    with col_heatmap:
+        st.markdown("### 🚦 Historical Traffic-Light Heatmap")
+        st.caption("Historical sector scores color-coded by final traffic-light status.")
+
+        pivot_scores = overall.pivot(index="Sectors", columns="Quarter", values="Score")
+        pivot_lights = overall.pivot(index="Sectors", columns="Quarter", values="Final light")
+
+        ordered_quarters = sorted([str(q) for q in pivot_scores.columns], key=period_sort_key)
+        pivot_scores = pivot_scores.reindex(index=TARGET_SECTORS, columns=ordered_quarters)
+        pivot_lights = pivot_lights.reindex(index=TARGET_SECTORS, columns=ordered_quarters)
+
+        # Convert status strings to numerical color codes for Discrete Heatmap
+        light_map = {"Green": 1, "Amber": 0.5, "Red": 0}
+        numeric_lights = pivot_lights.replace(light_map)
+
+        fig_heatmap = px.imshow(
+            numeric_lights,
+            labels=dict(x="Quarter", y="Industry", color="Traffic Light"),
+            x=ordered_quarters,
+            y=TARGET_SECTORS,
+            color_continuous_scale=[[0, "#D64545"], [0.5, "#E69F00"], [1, "#2E8B57"]],
+            text_auto=False,
+        )
+
+        # Overlay Numerical Score Labels inside heatmap cells
+        for i, sector in enumerate(TARGET_SECTORS):
+            for j, qtr in enumerate(ordered_quarters):
+                score_val = pivot_scores.loc[sector, qtr]
+                text_val = f"{score_val:.1f}" if pd.notna(score_val) else "-"
+                fig_heatmap.add_annotation(
+                    x=qtr, y=sector, text=text_val,
+                    showarrow=False, font=dict(color="white", size=11, family="sans-serif")
+                )
+
+        fig_heatmap.update_layout(
+            template="plotly_white",
+            coloraxis_showscale=False,
+            margin=dict(l=10, r=10, t=20, b=10),
+        )
+        st.plotly_chart(fig_heatmap, width="stretch", key="overall_traffic_light_heatmap")
+
+    st.divider()
+
+    # -------------------------------------------------------------------------
+    # 4. CROSS-INDUSTRY STATUS MATRIX
+    # -------------------------------------------------------------------------
+    st.markdown("### 📋 Cross-Industry Status Matrix")
+    st.caption(f"Full breakdown of scores, traffic light status, and active warnings ({selected_quarter}).")
+
+    summary_table = quarter_overall[
+        ["Sectors", "Score", "Final light", "Red indicators", "Warning", "Data coverage %"]
+    ].copy()
+
+    summary_table["Status"] = summary_table["Final light"].apply(status_text)
+    summary_table = summary_table.rename(
+        columns={
+            "Sectors": "Industry",
+            "Score": "Overall Score",
+            "Red indicators": "Red Indicators",
+            "Warning": "Active Warnings / Overrides",
+            "Data coverage %": "Coverage %",
+        }
+    )
+
+    summary_table = summary_table.sort_values("Overall Score", ascending=False)
+
+    st.dataframe(
+        summary_table[["Industry", "Overall Score", "Status", "Red Indicators", "Active Warnings / Overrides", "Coverage %"]],
+        hide_index=True,
+        width="stretch",
+        column_config={
+            "Overall Score": st.column_config.NumberColumn(format="%.1f"),
+            "Coverage %": st.column_config.NumberColumn(format="%.0f%%"),
+        },
+    )
+
+    st.divider()
+
+    # -------------------------------------------------------------------------
+    # 5. HISTORICAL INDICATOR DRILL-DOWN (INDICATOR TABS + COMPACT FILTERS)
+    # -------------------------------------------------------------------------
+    st.markdown("### 🔍 Historical Indicator Drill-Down")
+    st.caption("Compare underlying macro indicators across target industries over adjustable time horizons.")
+
+    indicator_names = [
+        "Real GDP",
+        "GDP Share",
+        "Gross Operating Surplus",
+        "Labour Productivity",
+        "Equity Ratio",
+        "Business Expectations",
+    ]
+
+    # Indicator Tabs
+    ind_tabs = st.tabs([f"📈 {name}" for name in indicator_names])
+
+    for ind_tab, selected_metric in zip(ind_tabs, indicator_names):
+        with ind_tab:
+            col_ctrl, col_graph = st.columns([1, 3])
+
+            with col_ctrl:
+                st.markdown("#### ⚙️ Filters")
+                
+                compared_sectors = st.multiselect(
+                    "Filter Industries",
+                    TARGET_SECTORS,
+                    default=TARGET_SECTORS,
+                    key=f"sectors_{selected_metric}",
+                    help="Select industries to include in the plot."
+                )
+
+                num_years = st.slider(
+                    "Years of History",
+                    min_value=1,
+                    max_value=10,
+                    value=5,
+                    step=1,
+                    key=f"years_slider_{selected_metric}",
+                    help="Adjust how many recent years of data to view."
+                )
+
+            with col_graph:
+                if not compared_sectors:
+                    st.info("Select at least one industry to display the historical line chart.")
+                else:
+                    trend_df = get_trend_dataframe(selected_metric)
+                    
+                    # Filter by Selected Sectors
+                    trend_df = trend_df[trend_df["Sectors"].isin(compared_sectors)].copy()
+
+                    # Filter by Selected Number of Years
+                    if not trend_df.empty:
+                        trend_df["Year"] = trend_df["Period"].astype(str).str.extract(r'(\d{4})').astype(float)
+                        max_year = trend_df["Year"].max()
+                        if pd.notna(max_year):
+                            min_year_cutoff = max_year - num_years + 1
+                            trend_df = trend_df[trend_df["Year"] >= min_year_cutoff]
+
+                    if trend_df.empty:
+                        st.warning("No data available for the selected time window and sectors.")
+                    else:
+                        trend_fig = px.line(
+                            trend_df,
+                            x="Period",
+                            y="Value",
+                            color="Sectors",
+                            markers=True,
+                            color_discrete_map=engine.SECTOR_COLORS,
+                            title=f"{selected_metric} Historical Trend (Last {num_years} Years)",
+                            labels={"Sectors": "Industry", "Value": selected_metric},
+                        )
+                        trend_fig.update_layout(
+                            template="plotly_white",
+                            hovermode="x unified",
+                            legend_title="Industry",
+                            margin=dict(l=10, r=10, t=40, b=10),
+                            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                        )
+                        st.plotly_chart(trend_fig, width="stretch", key=f"indicator_trend_tab_{selected_metric}")
 
 # -----------------------------------------------------------------------------
 # METHODOLOGY & TECHNICAL DATA EXPANDERS
@@ -570,5 +705,3 @@ with st.expander("🛠️ Technical Data View", expanded=False):
 
     st.write("Pillar Results Table")
     st.dataframe(pillars, width="stretch")
-
-    #nothing 
