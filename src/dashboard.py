@@ -7,8 +7,8 @@
 # to grow or slow the growth.
 #
 # It shows COLOURS (traffic lights), not scores, and explains each colour
-# with its 3 pillars. It goes from the general picture to the details (5 pages):
-#   1. Overview        -> all the sectors at once (click a sector in the table to zoom into it)
+# with its 3 pillars. It goes from the general picture to the details:
+#   1. Overview        -> all the sectors at once
 #   2. Sector zoom     -> one sector: why it has its colour + AI analysis
 #                         (the AI is a complementary commentary, it does not change the colours)
 #   3. Indicator data  -> the data behind the colours
@@ -20,7 +20,7 @@
 #
 # Before the first time: create the database with  uv run python src/database.py
 # Run it from the Project_Dashboard folder with:
-#     uv run streamlit run src/dashboard.py
+#     uv run streamlit run dashboard.py
 # To stop it: Ctrl + C in the terminal
 ######################################################################
 
@@ -357,32 +357,15 @@ if len(selected_sectors) == 0:
     st.info("Select at least one sector in the left sidebar.")
     st.stop()
 
-# The sector shown in "Sector zoom" (it must be one of the sectors of the filter)
-if st.session_state.get("zoom_sector") not in selected_sectors:
-    st.session_state["zoom_sector"] = selected_sectors[0]
-
-
-def open_clicked_sector() -> None:
-    """When a row of the committee table is clicked: open that sector in 'Sector zoom'.
-    (it runs BEFORE the page is drawn again, so it can change the page and the sector)"""
-    clicked_rows = st.session_state["committee_table"].selection.rows
-    if len(clicked_rows) > 0:
-        clicked_sector = st.session_state["committee_table_order"][clicked_rows[0]]
-        st.session_state["zoom_sector"] = clicked_sector
-        st.session_state["page"] = "Sector zoom"
-
-
-# Pages (like tabs, but they can be opened from the code when a sector is clicked)
-PAGES = ["Overview", "Sector zoom", "Indicator data", "ESG", "Methodology"]
-selected_page = st.radio("Page", PAGES, horizontal=True, key="page", label_visibility="collapsed")
-st.divider()
+overview_tab, sector_tab, indicator_tab, esg_tab, methodology_tab = st.tabs(
+    ["Overview", "Sector zoom", "Indicator data", "ESG", "Methodology"])
 
 
 ######################################################################
 # TAB 1. OVERVIEW: all the sectors at once
 ######################################################################
 
-if selected_page == "Overview":
+with overview_tab:
     df_quarter = df_overall_results[df_overall_results["Quarter"] == selected_quarter]
     df_quarter = df_quarter[df_quarter["Sectors"].isin(selected_sectors)]
     df_quarter_pillars = df_pillar_results[df_pillar_results["Quarter"] == selected_quarter]
@@ -413,6 +396,7 @@ if selected_page == "Overview":
         summary_row = {
             "Industry": sector,
             "Traffic light": light_text(final_light),
+            "Credit signal": CREDIT_SIGNAL.get(final_light, "No data"),
             "vs previous quarter": change,
         }
         for pillar, pillar_name in PILLARS.items():
@@ -421,14 +405,13 @@ if selected_page == "Overview":
             pillar_light = df_quarter_pillars[is_this_sector & is_this_pillar]["Light"].iloc[0]
             summary_row[f"{pillar} {pillar_name}"] = light_text(pillar_light)
         summary_row["Red indicators"] = int(sector_row["Red indicators"])
+        summary_row["Data coverage"] = f"{sector_row['Data coverage %']:.0f}%"
+        summary_row["Note"] = sector_row["Warning"]
         summary_row["Order"] = LIGHT_NUMBER.get(final_light, -1)      # only to sort the table
         summary_rows.append(summary_row)
 
     df_summary = pd.DataFrame(summary_rows).sort_values("Order").drop(columns="Order")
-    st.caption("👆 Click a row to zoom into that sector.")
-    st.session_state["committee_table_order"] = list(df_summary["Industry"])   # order of the rows
-    st.dataframe(df_summary, hide_index=True, width="stretch", key="committee_table",
-                 on_select=open_clicked_sector, selection_mode="single-row")
+    st.dataframe(df_summary, hide_index=True, width="stretch")
     download_csv_button(df_summary, f"committee_summary_{selected_quarter}.csv")
 
     # 1.3 Colour of every sector in every quarter + colour of each pillar this quarter
@@ -446,15 +429,15 @@ if selected_page == "Overview":
                                        x_title="Pillar"),
                         width="stretch")
 
-    st.caption("Click a sector in the table, or go to **Sector zoom**, to see why it has its colour.")
+    st.caption("Go to **Sector zoom** to see why a sector has its colour.")
 
 
 ######################################################################
 # TAB 2. SECTOR ZOOM: one sector, why it has its colour
 ######################################################################
 
-if selected_page == "Sector zoom":
-    selected_sector = st.selectbox("Industry sector", selected_sectors, key="zoom_sector")
+with sector_tab:
+    selected_sector = st.selectbox("Industry sector", selected_sectors)
 
     df_sector_overall = df_overall_results[df_overall_results["Sectors"] == selected_sector]
     df_sector_pillars = df_pillar_results[df_pillar_results["Sectors"] == selected_sector]
@@ -605,7 +588,7 @@ if selected_page == "Sector zoom":
 # TAB 3. INDICATOR DATA: the data behind the colours
 ######################################################################
 
-if selected_page == "Indicator data":
+with indicator_tab:
     st.caption("The underlying data. Business Expectations is shown for context, it does not "
                "change the colours. ESG reporting has no history: only the latest report.")
 
@@ -693,7 +676,7 @@ if selected_page == "Indicator data":
 # TAB 4. ESG: reporting of each sector + the ESG risks of the sector
 ######################################################################
 
-if selected_page == "ESG":
+with esg_tab:
     st.subheader("ESG reporting — latest report")
     st.caption("The ESG file has no history: it is one picture of today of the top companies "
                "of each sector. The same ESG colour is used in every quarter.")
@@ -780,7 +763,7 @@ if selected_page == "ESG":
 # TAB 5. METHODOLOGY (taken from config.py)
 ######################################################################
 
-if selected_page == "Methodology":
+with methodology_tab:
     st.markdown(
         f"""
         **How the colours work**
