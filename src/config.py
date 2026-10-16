@@ -28,6 +28,7 @@ DATA_FOLDER = PROJECT_FOLDER / "data"
 OUTPUT_FOLDER = PROJECT_FOLDER / "output"
 PLOTS_FOLDER = OUTPUT_FOLDER
 DATABASE_PATH = DATA_FOLDER / "Database_RiskDashboard.db"
+LOGO_FILE = DATA_FOLDER / "IndustryPulse_logo.png"           # logo shown in the dashboard
 
 # Logs: every run writes what happened in log/pipeline.log
 LOG_FOLDER = PROJECT_FOLDER / "log"
@@ -146,7 +147,7 @@ INDICATORS_TO_ANALYSE = {
     },
     "equity_ratio": {
         "title": "Equity Ratio",
-        "unit": "Equity ratio (%)",
+        "unit": "Ratio (not %)",
         "total_row": "All Industries",                   # CHECK
         "adds_up_to_total": False,
     },
@@ -219,6 +220,7 @@ PILLARS = {
 #   data_name     : which df the values come from (or "esg")
 #   pillar        : W1 / W2 / W3
 #   weight        : points out of 100  (W1 = 40, W2 = 40, W3 = 20)
+#   unit          : "%" (growth rates) or "ratio" (equity ratio: 0.40 is a ratio, NOT 40%)
 #   calculation   : "yearly_growth" -> % change vs the same quarter one year before
 #                   "value"         -> the value as it is
 #                   "esg"           -> uses the ESG risk (Low / Medium / High)
@@ -234,6 +236,7 @@ SCORE_INDICATORS = {
         "data_name": "gdp",
         "pillar": "W1",
         "weight": 20,
+        "unit": "%",
         "calculation": "yearly_growth",
         "green_from": 3, "green_includes_limit": False, "amber_from": 0,    # >3 | 0-3 | <0
     },
@@ -242,22 +245,26 @@ SCORE_INDICATORS = {
         "data_name": "gos",
         "pillar": "W1",
         "weight": 20,
+        "unit": "%",
         "calculation": "yearly_growth",
         "green_from": 5, "green_includes_limit": False, "amber_from": 0,    # >5 | 0-5 | <0
     },
     "equity_ratio": {
-        "label": "Equity ratio (%)",
+        "label": "Equity ratio",
         "data_name": "equity_ratio",
         "pillar": "W2",
         "weight": 40,
+        "unit": "ratio",
         "calculation": "value",
-        "green_from": 40, "green_includes_limit": True, "amber_from": 20,   # >=40 | 20-<40 | <20
+        # The file gives a ratio (e.g. 0.51), so the limits are ratios too
+        "green_from": 0.40, "green_includes_limit": True, "amber_from": 0.20,   # >=0.40 | 0.20-<0.40 | <0.20
     },
     "labour_productivity": {
         "label": "Labour productivity growth (YoY %)",
         "data_name": "labour_productivity",
         "pillar": "W3",
         "weight": 10,
+        "unit": "%",
         "calculation": "yearly_growth",
         "green_from": 0, "green_includes_limit": True, "amber_from": -3,    # >=0 | -3-<0 | <-3
     },
@@ -266,6 +273,7 @@ SCORE_INDICATORS = {
         "data_name": "esg",
         "pillar": "W3",
         "weight": 10,
+        "unit": "% of companies",
         "calculation": "esg",
         # Light: >= 75% Yes -> Green | >= 60% No -> Red | rest -> Amber
         # (limits in section 5: ESG_LOW_RISK_IF_YES_AT_LEAST, ESG_HIGH_RISK_IF_NO_AT_LEAST)
