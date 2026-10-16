@@ -284,7 +284,7 @@ def find_latest_period_with_data(df_one_row_per_period: pd.DataFrame) -> str:
     return rows_with_value.loc[newest_row, "Period"]
 
 #%% 
-This function is used to keep only the sector column + the periods of the last `n_years` years.
+# This function is used to keep only the sector column + the periods of the last `n_years` years.
 def keep_last_years(df_indicator: pd.DataFrame, n_years: int = 5) -> pd.DataFrame:
     """Keep the sector column + the periods of the last `n_years` years
     (the most recent year in the df counts as year 1)."""
@@ -598,4 +598,41 @@ def plot_share_of_total_donuts(df_clean: pd.DataFrame, df_filtered: pd.DataFrame
     donut_selected.update_layout(template="plotly_white", legend_title="Selected Sectors")
     save_and_show_chart(donut_selected, f"{make_chart_file_name(title)}_selected_sectors.html")
 
+######################################################################
+# 6.3 BARS VS TOTAL (ratios, per worker, expectations)
+# A donut makes no sense here: a ratio doesn't add up to a total.
+#%%
+# This function is used to create horizontal bars with the latest value of each sector vs the total.
+def plot_sectors_vs_total(df_clean: pd.DataFrame, df_filtered: pd.DataFrame,
+                          total_row_name: str | None, title: str, unit: str) -> None:
+    """Horizontal bars with the latest value of each selected sector,
+    plus a dashed line with the value of the whole economy (if there is a total row)."""
+    if df_filtered.empty:
+        logger.warning("{}: the filtered DataFrame is EMPTY -> check the sector names in this file", title)
+        return
 
+    df_one_row_per_period = make_one_row_per_sector_and_period(df_filtered)
+    newest_period = find_latest_period_with_data(df_one_row_per_period)
+    df_bar = df_one_row_per_period[df_one_row_per_period["Period"] == newest_period].sort_values("Value")
+
+    bar_chart = px.bar(
+        df_bar, x="Value", y="Sectors", orientation="h",
+        color="Sectors", color_discrete_map=SECTOR_COLORS,
+        title=f"{title}: selected sectors vs. total ({newest_period})",
+        labels={"Value": unit, "Sectors": "Industry Sector"},
+    )
+
+    # Dashed line with the total (only if the file has a total row)
+    if total_row_name is not None:
+        total_row = df_clean[df_clean["Sectors"] == total_row_name]
+        if total_row.empty:
+            logger.warning("{}: total row '{}' not found, plotting without the total line. Row names: {}",
+                           title, total_row_name, df_clean["Sectors"].tolist())
+        else:
+            total_value = total_row[newest_period].values[0]
+            bar_chart.add_vline(x=total_value, line_dash="dash", line_color="#555555",
+                                annotation_text=f"{total_row_name}: {total_value:,.2f}",
+                                annotation_position="top")
+
+    bar_chart.update_layout(template="plotly_white", showlegend=False)
+    save_and_show_chart(bar_chart, f"{make_chart_file_name(title)}_vs_total.html")

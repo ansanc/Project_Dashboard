@@ -286,3 +286,119 @@ AMBER_IF_SCORE_AT_LEAST = 40
 
 # Override rule: with this many Red indicators (or more) a sector can't be Green
 NUMBER_OF_REDS_THAT_BLOCK_GREEN = 2
+
+
+######################################################################
+# 8. DASHBOARD (PART 3)
+######################################################################
+# What each final traffic light suggests for the credit committee
+# (a starting point for the discussion, not an automatic decision)
+CREDIT_SIGNAL = {
+    "Green": "Grow",
+    "Amber": "Grow selectively",
+    "Red": "Slow growth",
+}
+
+# AI analysis (only in the sector zoom of the dashboard), using OpenRouter
+#   The key is NOT written here: it goes in the .env file of the project folder
+#   (never upload .env to git, it is in .gitignore):
+#       OPENROUTER_API_KEY=your-key
+#   If the app is published on Streamlit Community Cloud, the key goes in st.secrets instead.
+#   Model: cost-effective one recommended by the professor (group key with a USD 2 limit).
+#   Price checked on openrouter.ai (Oct 2026): USD 0.0173 input / 0.80 output per million tokens,
+#   about USD 0.0007 per analysis (prompt ~700 tokens + answer up to 800 tokens).
+#   Other option from the professor: "inclusionai/ling-3.0-flash"
+AI_BASE_URL = "https://openrouter.ai/api/v1"
+AI_MODEL = "deepseek/deepseek-v4.1-flash"
+AI_API_KEY_NAME = "OPENROUTER_API_KEY"
+
+# Every AI run is written here (timestamp, view, status, answer). Never the API key
+AI_LOG_FILE = LOG_FOLDER / "ai_runs.log"
+
+# ESG risk profile of each sector (shown in the ESG tab of the dashboard).
+# General tendencies of the sector in Singapore, NOT an assessment of each company.
+# Every text comes from the official sources listed in "Sources" (checked October 2026).
+# If you add a sector in TARGET_SECTORS, add its profile here too.
+ESG_SECTOR_RISKS = {
+    "Manufacturing": {
+        "Physical": "More very hot days and longer dry spells are projected for Singapore (V3 climate "
+                    "study), affecting workers, cooling and water supply. Water management is a key "
+                    "disclosure topic for semiconductors (IFRS S2 industry guidance).",
+        "Transition": "Facilities emitting 25,000 tCO2e or more a year pay the carbon tax: S$45/t in "
+                      "2026-2027 and S$50-80/t expected by 2030. About 50 facilities pay it, in "
+                      "manufacturing, power, waste and water. GHG emissions and energy management in "
+                      "manufacturing are key topics (IFRS S2: Semiconductors, Chemicals).",
+        "Governance": "SASB topics: employee health & safety, waste management, materials sourcing, "
+                      "intellectual property protection & competitive behaviour.",
+        "Sources": [
+            ["NCCS - Carbon tax", "https://www.nccs.gov.sg/singapores-climate-action/mitigation-efforts/carbontax/"],
+            ["NEA - Singapore climate projections (V3)", "https://www.nea.gov.sg/media/news/news/index/latest-climate-projections-for-singapore-show-intensifying-urban-heat-and-more-wet-dry-extremes"],
+            ["IFRS - Industry-based guidance (Semiconductors)", "https://www.ifrs.org/content/dam/ifrs/project/climate-related-disclosures/industry/technology-and-communications/issb-exposure-draft-2022-2-b57-semiconductors.pdf"],
+            ["IFRS - SASB Standards", "https://www.ifrs.org/issued-standards/sasb-standards/"],
+        ],
+    },
+    "Real Estate": {
+        "Physical": "Mean sea level could rise 0.23-1.15 m by 2100 and about 30% of the island is less "
+                    "than 5 m above sea level (NCCS). Properties in flood-prone areas are part of the "
+                    "'Climate Change Adaptation' topic (IFRS S2 Real Estate).",
+        "Transition": "Green Building Masterplan '80-80-80 in 2030' (BCA): 80% of buildings green by "
+                      "floor area, 80% of new developments Super Low Energy from 2030, 80% energy "
+                      "efficiency improvement for best-in-class buildings (about 66% greened by Dec 2025). "
+                      "Energy and water management are key topics (IFRS S2 Real Estate).",
+        "Governance": "SASB topic: management of tenant sustainability impacts (e.g. green leases), "
+                      "and the quality of the energy and water data reported.",
+        "Sources": [
+            ["NCCS - Impact of climate change in Singapore", "https://www.nccs.gov.sg/singapores-climate-action/national-circumstances/impact-of-climate-change-in-singapore/"],
+            ["BCA - Singapore Green Building Masterplan", "https://www1.bca.gov.sg/sustainability/sgbmp/"],
+            ["IFRS - Industry-based guidance (Real Estate)", "https://cdn.ifrs.org/content/dam/ifrs/project/climate-related-disclosures/industry/infrastructure/issb-exposure-draft-2022-2-b36-real-estate.pdf"],
+        ],
+    },
+    "Transportation & Storage": {
+        "Physical": "Sea-level rise and more extreme rainfall (NCCS, V3 study) threaten low-lying "
+                    "port, airport and logistics infrastructure.",
+        "Transition": "IMO 2023 Strategy: net-zero shipping emissions by or around 2050, at least -20% "
+                      "by 2030 and -70% by 2040 (vs 2008), and at least 5% zero/near-zero fuels by 2030. "
+                      "Singapore's sustainable aviation fuel levy applies to tickets sold from "
+                      "1 Oct 2026 for flights departing from 1 Jan 2027 (air cargo one year later).",
+        "Governance": "SASB topics: business ethics, accident & safety management, ecological impacts "
+                      "(marine transport); supply-chain management of contracted carriers (logistics).",
+        "Sources": [
+            ["IMO - 2023 GHG Strategy", "https://www.imo.org/en/mediacentre/pressbriefings/pages/revised-ghg-reduction-strategy-for-global-shipping-adopted-.aspx"],
+            ["CAAS - Sustainable aviation fuel levy", "https://www.caas.gov.sg/resources/media-and-publication/newsroom/caas-to-start-sustainable-aviation-fuel-levy-for-origin-destination-passengers-from-1-october-2026-for-flights-departing-from-1-january-2027/"],
+            ["NCCS - Impact of climate change in Singapore", "https://www.nccs.gov.sg/singapores-climate-action/national-circumstances/impact-of-climate-change-in-singapore/"],
+            ["IFRS - Industry-based guidance (Marine Transportation)", "https://www.ifrs.org/content/dam/ifrs/project/climate-related-disclosures/industry/transportation/issb-exposure-draft-2022-2-b66-marine-transportation.pdf"],
+        ],
+    },
+    "Information & Communications": {
+        "Physical": "Higher temperatures increase cooling needs and energy demand (NCCS), a direct "
+                    "cost for data centres.",
+        "Transition": "IMDA Green Data Centre Roadmap: at least 300 MW of additional capacity, linked to "
+                      "energy efficiency and green energy; all data centres expected to reach a PUE of "
+                      "1.3 or lower. Key topic: environmental footprint of hardware infrastructure "
+                      "(IFRS S2 Software & IT Services).",
+        "Governance": "Managing systemic risks from technology disruptions (service outages), plus "
+                      "data security and data privacy (SASB).",
+        "Sources": [
+            ["IMDA - Green Data Centre Roadmap", "https://imda.gov.sg/how-we-can-help/green-dc-roadmap"],
+            ["IFRS - Industry-based guidance (Software & IT Services)", "https://cdn.ifrs.org/content/dam/ifrs/project/climate-related-disclosures/industry/technology-and-communications/issb-exposure-draft-2022-2-b58-software-and-it-services.pdf"],
+            ["NCCS - Impact of climate change in Singapore", "https://www.nccs.gov.sg/singapores-climate-action/national-circumstances/impact-of-climate-change-in-singapore/"],
+        ],
+    },
+    "Utilities": {
+        "Physical": "Droughts can affect the reliability of water supply and intense rainfall can "
+                    "overwhelm drainage (NCCS). Network resiliency & impacts of climate change is a "
+                    "key topic (IFRS S2 Water Utilities).",
+        "Transition": "About 94% of electricity came from natural gas in 2024; Singapore plans to "
+                      "import around 6 GW of low-carbon electricity by 2035 (about one-third of demand) "
+                      "and reach 3 GWp of solar by 2030 (NCCS). Power plants pay the carbon tax. "
+                      "Key topic: GHG emissions & energy resource planning (IFRS S2 Electric Utilities).",
+        "Governance": "SASB topics: grid resiliency (including cybersecurity), workforce health & "
+                      "safety, energy affordability.",
+        "Sources": [
+            ["NCCS - Power sector", "https://www.nccs.gov.sg/singapores-climate-action/mitigation-efforts/power/"],
+            ["NCCS - Carbon tax", "https://www.nccs.gov.sg/singapores-climate-action/mitigation-efforts/carbontax/"],
+            ["IFRS - Industry-based guidance (Electric Utilities)", "https://www.ifrs.org/content/dam/ifrs/project/climate-related-disclosures/industry/infrastructure/issb-exposure-draft-2022-2-b32-electric-utilities-and-power-generators.pdf"],
+            ["IFRS - Industry-based guidance (Water Utilities)", "https://www.ifrs.org/content/dam/ifrs/project/climate-related-disclosures/industry/infrastructure/issb-exposure-draft-2022-2-b39-water-utilities-and-services.pdf"],
+        ],
+    },
+}
