@@ -1,2 +1,7 @@
-[theme]
+# Dark blue instead of Streamlit's red, in light and dark mode
+# (the dashboard follows each user's system setting)
+[theme.light]
+primaryColor = "#1F3A68"
+
+[theme.dark]
 primaryColor = "#1F3A68"
