@@ -222,13 +222,13 @@ Hard limits:
 Return only the final assessment: no reasoning, no task analysis, no description of the format."""
 
 # 2. USER PROMPT FORMAT: what we want back
-AI_OUTPUT_FORMAT = """Please provide a professional 3-paragraph assessment (maximum 350 words).
+AI_OUTPUT_FORMAT = """Please provide a professional 3-paragraph assessment summarize (maximum 200 words).
 Start each paragraph with its title in bold:
 1. **Key strengths & vulnerabilities**: what is driving the traffic light of the sector.
 2. **Outlook & risk commentary**: key macro or financial risks suggested by the indicator
    traffic lights and their change since the previous quarter, and what it means for the
    credit signal.
-3. **Sector context**: general trends of this sector in Singapore and important worldwide
+3. **Sector current trends**: general trends of this sector in Singapore and important worldwide
    tendencies (not about the indicators). Describe well-known structural trends only.
 End with one line starting with **Limitation:**"""
 
@@ -524,9 +524,12 @@ if selected_page == "Sector zoom":
     st.caption("ESG reporting is not in this map: it comes from the latest ESG report only "
                "(no history), so the same ESG colour is used in every quarter.")
 
-    # 2.4 How the values of each indicator moved (with its Green / Amber limits)
-    st.markdown("**How the indicator values moved**")
-    st.caption("Dashed lines: Green from (top) and Amber from (bottom). ESG is not shown: it has no history.")
+    # 2.4 How the values of each indicator moved (each point coloured with its traffic light)
+    st.markdown(f"**How the indicator values of {selected_sector} moved**")
+    st.caption("Each point is the value of the quarter, coloured with its traffic light "
+               "(🟢 Green · 🟠 Amber · 🔴 Red · grey = no data). Dashed lines are the limits: "
+               "above the green line = Green, between the two lines = Amber, below the amber line = Red. "
+               "ESG is not shown: it has no history.")
     trend_columns = st.columns(2)
     position_in_grid = 0
     for indicator_name, indicator_settings in SCORE_INDICATORS.items():
@@ -534,17 +537,41 @@ if selected_page == "Sector zoom":
             continue
         df_one_indicator = df_sector_indicators[df_sector_indicators["Indicator"] == indicator_name]
 
+        # Name of the y axis: growth indicators vs ratios
+        if indicator_settings["calculation"] == "yearly_growth":
+            y_axis_title = "Growth vs same quarter of last year (%)"
+        else:
+            y_axis_title = indicator_settings["label"]
+
+        # Colour of each point = traffic light of that quarter
+        point_colors = []
+        for light in df_one_indicator["Light"]:
+            point_colors.append(LIGHT_COLOR.get(light, "#9E9E9E"))      # grey = no data
+
         indicator_chart = px.line(
             df_one_indicator, x="Quarter", y="Value", markers=True,
-            title=indicator_settings["label"],
-            labels={"Value": "%", "Quarter": "Quarter"},      # all score indicators are in %
+            title=f"{indicator_settings['label']} — {selected_sector}",
+            labels={"Value": y_axis_title, "Quarter": "Quarter"},
         )
-        indicator_chart.update_traces(line_color=SECTOR_COLORS.get(selected_sector, "#1F3A68"))
-        indicator_chart.add_hline(y=indicator_settings["green_from"], line_dash="dash",
-                                  line_color=LIGHT_COLOR["Green"])
-        indicator_chart.add_hline(y=indicator_settings["amber_from"], line_dash="dash",
-                                  line_color=LIGHT_COLOR["Amber"])
-        indicator_chart.update_layout(template="plotly_white", height=280)
+        indicator_chart.update_traces(line_color="#1F3A68", marker={"size": 10, "color": point_colors})
+
+        # Dashed lines with the limits of the traffic light (with their label)
+        green_from = indicator_settings["green_from"]
+        amber_from = indicator_settings["amber_from"]
+        indicator_chart.add_hline(y=green_from, line_dash="dash", line_color=LIGHT_COLOR["Green"],
+                                  annotation_text=f"Green from {green_from}%",
+                                  annotation_position="top left")
+        indicator_chart.add_hline(y=amber_from, line_dash="dash", line_color=LIGHT_COLOR["Amber"],
+                                  annotation_text=f"Amber from {amber_from}%",
+                                  annotation_position="bottom left")
+
+        # Make sure the values AND the two limits are always visible
+        values_and_limits = list(df_one_indicator["Value"].dropna()) + [green_from, amber_from]
+        lowest = min(values_and_limits)
+        highest = max(values_and_limits)
+        margin = (highest - lowest) * 0.15 + 1
+        indicator_chart.update_yaxes(range=[lowest - margin, highest + margin])
+        indicator_chart.update_layout(template="plotly_white", height=320)
 
         trend_columns[position_in_grid % 2].plotly_chart(indicator_chart, width="stretch")
         position_in_grid = position_in_grid + 1
