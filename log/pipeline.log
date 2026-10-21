@@ -183,3 +183,480 @@ Singapore manufacturing faces rising physical risk: more very hot days and longe
 2026-10-16 22:18:26.222 | WARNING  | main:run_pipeline:106 - 44 indicator values without data (the score was rescaled)
 2026-10-16 22:18:26.223 | WARNING  | main:run_pipeline:109 - Green blocked by the override rule in 5 sector-quarters
 2026-10-16 22:18:26.223 | SUCCESS  | main:run_pipeline:115 - Pipeline completed successfully
+2026-10-21 09:26:19.365 | INFO     | __main__:run_pipeline:52 - Pipeline started
+2026-10-21 09:26:19.366 | INFO     | __main__:run_pipeline:56 - Loading the tables from the database
+2026-10-21 09:26:19.522 | DEBUG    | __main__:run_pipeline:59 - gdp raw shape: (68, 207)
+2026-10-21 09:26:19.522 | DEBUG    | __main__:run_pipeline:59 - gos raw shape: (25, 187)
+2026-10-21 09:26:19.523 | DEBUG    | __main__:run_pipeline:59 - labour_productivity raw shape: (56, 139)
+2026-10-21 09:26:19.523 | DEBUG    | __main__:run_pipeline:59 - equity_ratio raw shape: (13, 32)
+2026-10-21 09:26:19.523 | DEBUG    | __main__:run_pipeline:59 - business_expectations_manufacturing raw shape: (377, 227)
+2026-10-21 09:26:19.523 | DEBUG    | __main__:run_pipeline:59 - business_expectations_services raw shape: (60, 127)
+2026-10-21 09:26:19.523 | DEBUG    | __main__:run_pipeline:59 - esg raw shape: (40, 8)
+2026-10-21 09:26:19.524 | INFO     | __main__:run_pipeline:62 - Cleaning the indicator files
+2026-10-21 09:26:19.552 | INFO     | exploration:clean_indicator_file:175 - gdp: column names found in row 8
+2026-10-21 09:26:19.891 | INFO     | exploration:clean_indicator_file:173 - gos: the column names are already in the header
+2026-10-21 09:26:20.044 | INFO     | exploration:clean_indicator_file:175 - labour_productivity: column names found in row 9
+2026-10-21 09:26:20.208 | INFO     | exploration:clean_indicator_file:173 - equity_ratio: the column names are already in the header
+2026-10-21 09:26:20.254 | INFO     | exploration:clean_indicator_file:175 - business_expectations_manufacturing: column names found in row 9
+2026-10-21 09:26:20.571 | INFO     | exploration:clean_indicator_file:175 - business_expectations_services: column names found in row 9
+2026-10-21 09:26:20.723 | INFO     | __main__:run_pipeline:70 - Merging the files that measure the same thing
+2026-10-21 09:26:20.770 | WARNING  | exploration:merge_indicator_files:213 - Rows with the same name after merging: ['Electronics', 'Semiconductors', 'Computer Peripherals & Data Storage', 'Infocomms & Consumer Electronics', 'Other Electronic Modules & Components', 'Chemicals', 'Petroleum', 'Petrochemicals', 'Specialty Chemicals', 'Others', 'Biomedical Manufacturing', 'Pharmaceuticals', 'Medical Technology', 'Precision Engineering', 'Machinery & Systems', 'Precision Modules & Components', 'Transport Engineering', 'Marine & Offshore Engineering', 'Aerospace', 'Land', 'General Manufacturing Industries', 'Food, Beverages & Tobacco', 'Printing', 'Miscellaneous']
+2026-10-21 09:26:20.770 | INFO     | __main__:run_pipeline:79 - Keeping the target sectors
+2026-10-21 09:26:20.774 | DEBUG    | __main__:run_pipeline:86 - gdp filtered shape: (5, 207)
+2026-10-21 09:26:20.775 | DEBUG    | __main__:run_pipeline:86 - gos filtered shape: (5, 187)
+2026-10-21 09:26:20.776 | DEBUG    | __main__:run_pipeline:86 - labour_productivity filtered shape: (4, 139)
+2026-10-21 09:26:20.777 | DEBUG    | __main__:run_pipeline:86 - equity_ratio filtered shape: (4, 32)
+2026-10-21 09:26:20.778 | DEBUG    | __main__:run_pipeline:86 - business_expectations filtered shape: (3, 227)
+2026-10-21 09:26:20.778 | INFO     | __main__:run_pipeline:89 - Building the ESG risk table
+2026-10-21 09:26:20.816 | WARNING  | exploration:build_esg_risk_table:385 - ESG: target sectors with no data, set to High risk: ['Transportation & Storage', 'Information & Communications', 'Utilities']
+2026-10-21 09:26:20.817 | INFO     | __main__:run_pipeline:93 - Checking the data quality
+2026-10-21 09:26:20.817 | INFO     | exploration:check_data_quality:419 - Data check: Real GDP
+2026-10-21 09:26:20.921 | WARNING  | exploration:check_data_quality:467 - Real GDP: 17 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2022 1Q'), ('Information & Communications', '2023 2Q'), ('Information & Communications', '2024 2Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 2Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2010 2Q'), ('Manufacturing', '2024 3Q'), ('Manufacturing', '2026 1Q'), ('Real Estate', '2020 2Q'), ('Real Estate', '2020 4Q'), ('Transportation & Storage', '2020 1Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2020 3Q'), ('Utilities', '2004 2Q'), ('Utilities', '2009 2Q')]
+2026-10-21 09:26:20.921 | INFO     | exploration:check_data_quality:419 - Data check: Gross Operating Surplus
+2026-10-21 09:26:21.017 | WARNING  | exploration:check_data_quality:467 - Gross Operating Surplus: 21 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2024 3Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 3Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2021 1Q'), ('Manufacturing', '2022 1Q'), ('Manufacturing', '2022 4Q'), ('Manufacturing', '2026 2Q'), ('Transportation & Storage', '2022 1Q'), ('Transportation & Storage', '2022 4Q'), ('Transportation & Storage', '2024 3Q'), ('Transportation & Storage', '2024 4Q'), ('Transportation & Storage', '2025 1Q'), ('Utilities', '2023 1Q'), ('Utilities', '2023 2Q'), ('Utilities', '2024 1Q'), ('Utilities', '2024 2Q'), ('Utilities', '2025 1Q'), ('Utilities', '2025 2Q'), ('Utilities', '2026 1Q')]
+2026-10-21 09:26:21.017 | INFO     | exploration:check_data_quality:419 - Data check: Labour Productivity
+2026-10-21 09:26:21.089 | WARNING  | exploration:check_data_quality:467 - Labour Productivity: 9 unusual jumps (more than 3 standard deviations): [('Manufacturing', '2009 2Q'), ('Manufacturing', '2010 1Q'), ('Manufacturing', '2010 3Q'), ('Real Estate', '2020 4Q'), ('Real Estate', '2021 2Q'), ('Real Estate', '2021 4Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2021 2Q'), ('Transportation & Storage', '2021 3Q')]
+2026-10-21 09:26:21.090 | INFO     | exploration:check_data_quality:419 - Data check: Equity Ratio
+2026-10-21 09:26:21.132 | WARNING  | exploration:check_data_quality:467 - Equity Ratio: 1 unusual jumps (more than 3 standard deviations): [('Information & Communications', '1997')]
+2026-10-21 09:26:21.132 | INFO     | exploration:check_data_quality:419 - Data check: Business Expectations
+2026-10-21 09:26:21.219 | WARNING  | exploration:check_data_quality:467 - Business Expectations: 8 unusual jumps (more than 3 standard deviations): [('Real Estate', '2003 2Q'), ('Real Estate', '2004 1Q'), ('Real Estate', '2020 1Q'), ('Transportation & Storage', '1997 2Q'), ('Transportation & Storage', '1997 4Q'), ('Transportation & Storage', '1998 2Q'), ('Transportation & Storage', '2001 2Q'), ('Transportation & Storage', '2002 2Q')]
+2026-10-21 09:26:21.220 | INFO     | __main__:run_pipeline:98 - Calculating the risk score
+2026-10-21 09:26:23.119 | WARNING  | __main__:run_pipeline:106 - 44 indicator values without data (the score was rescaled)
+2026-10-21 09:26:23.120 | WARNING  | __main__:run_pipeline:109 - Green blocked by the override rule in 5 sector-quarters
+2026-10-21 09:26:23.120 | SUCCESS  | __main__:run_pipeline:115 - Pipeline completed successfully
+2026-10-21 09:26:23.148 | SUCCESS  | __main__:save_results:133 - Results saved in C:\Users\angye\Documents\Project_Dashboard\output
+2026-10-21 09:26:23.157 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Manufacturing: Green
+2026-10-21 09:26:23.160 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Real Estate: Green
+2026-10-21 09:26:23.160 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Transportation & Storage: Amber
+2026-10-21 09:26:23.161 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Information & Communications: Green
+2026-10-21 09:26:23.161 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Utilities: Red
+2026-10-21 09:26:23.161 | INFO     | __main__:make_charts:150 - Making the charts
+2026-10-21 09:26:25.208 | WARNING  | exploration:plot_share_of_total_donuts:561 - Gross Operating Surplus: total row 'Gross Operating Surplus' not found. Row names in this df are: ['Total', 'Manufacturing', 'Construction', 'Utilities', 'Other Goods Industries', 'Wholesale & Retail Trade', 'Wholesale Trade', 'Retail Trade', 'Transportation & Storage', 'Accommodation & Food Services', 'Accommodation', 'Food & Beverage Services', 'Information & Communications', 'Finance & Insurance', 'Real Estate, Professional Services And Administrative & Support Services', 'Real Estate', 'Professional Services', 'Administrative & Support Services', 'Other Services Industries', 'Public Administration & Defence', 'Education', 'Health & Social Services', 'Arts, Entertainment & Recreation', 'Other Services - Others', 'Ownership Of Dwellings']
+2026-10-21 09:26:25.570 | WARNING  | exploration:plot_sectors_vs_total:629 - Labour Productivity: total row 'Overall Economy' not found, plotting without the total line. Row names: ['Total (Based On GDP In Chained (2015) Dollars)', 'Goods Producing Industries', 'Manufacturing', 'Construction', 'Services Producing Industries', 'Wholesale & Retail Trade', 'Wholesale Trade', 'Retail Trade', 'Transportation & Storage', 'Accommodation & Food Services', 'Accommodation', 'Food & Beverage Services', 'Information & Communications', 'Finance & Insurance', 'Real Estate, Professional Services And Administrative & Support Services', 'Real Estate', 'Professional Services', 'Administrative & Support Services', 'Other Services Industries', 'Public Administration & Defence', 'Education', 'Health & Social Services', 'Arts, Entertainment & Recreation', 'Other Services - Others']
+2026-10-21 09:26:25.856 | WARNING  | exploration:plot_sectors_vs_total:629 - Equity Ratio: total row 'All Industries' not found, plotting without the total line. Row names: ['Total', 'Manufacturing', 'Construction', 'Wholesale & Retail Trade', 'Transportation & Storage', 'Accommodation & Food Services', 'Information & Communications', 'Publishing, Broadcasting & Content Production', 'Telecommunications & Information Technology Services', 'Finance & Insurance', 'Real Estate', 'Professional And Administrative & Support Services', 'Others']
+2026-10-21 09:26:26.228 | SUCCESS  | __main__:make_charts:168 - Charts saved in C:\Users\angye\Documents\Project_Dashboard\output
+2026-10-21 09:27:44.268 | INFO     | __main__:run_pipeline:52 - Pipeline started
+2026-10-21 09:27:44.268 | INFO     | __main__:run_pipeline:56 - Loading the tables from the database
+2026-10-21 09:27:44.387 | DEBUG    | __main__:run_pipeline:59 - gdp raw shape: (68, 207)
+2026-10-21 09:27:44.388 | DEBUG    | __main__:run_pipeline:59 - gos raw shape: (25, 187)
+2026-10-21 09:27:44.388 | DEBUG    | __main__:run_pipeline:59 - labour_productivity raw shape: (56, 139)
+2026-10-21 09:27:44.388 | DEBUG    | __main__:run_pipeline:59 - equity_ratio raw shape: (13, 32)
+2026-10-21 09:27:44.389 | DEBUG    | __main__:run_pipeline:59 - business_expectations_manufacturing raw shape: (377, 227)
+2026-10-21 09:27:44.389 | DEBUG    | __main__:run_pipeline:59 - business_expectations_services raw shape: (60, 127)
+2026-10-21 09:27:44.389 | DEBUG    | __main__:run_pipeline:59 - esg raw shape: (40, 8)
+2026-10-21 09:27:44.389 | INFO     | __main__:run_pipeline:62 - Cleaning the indicator files
+2026-10-21 09:27:44.395 | INFO     | exploration:clean_indicator_file:175 - gdp: column names found in row 8
+2026-10-21 09:27:44.648 | INFO     | exploration:clean_indicator_file:173 - gos: the column names are already in the header
+2026-10-21 09:27:44.789 | INFO     | exploration:clean_indicator_file:175 - labour_productivity: column names found in row 9
+2026-10-21 09:27:44.967 | INFO     | exploration:clean_indicator_file:173 - equity_ratio: the column names are already in the header
+2026-10-21 09:27:45.006 | INFO     | exploration:clean_indicator_file:175 - business_expectations_manufacturing: column names found in row 9
+2026-10-21 09:27:45.314 | INFO     | exploration:clean_indicator_file:175 - business_expectations_services: column names found in row 9
+2026-10-21 09:27:45.469 | INFO     | __main__:run_pipeline:70 - Merging the files that measure the same thing
+2026-10-21 09:27:45.482 | WARNING  | exploration:merge_indicator_files:213 - Rows with the same name after merging: ['Electronics', 'Semiconductors', 'Computer Peripherals & Data Storage', 'Infocomms & Consumer Electronics', 'Other Electronic Modules & Components', 'Chemicals', 'Petroleum', 'Petrochemicals', 'Specialty Chemicals', 'Others', 'Biomedical Manufacturing', 'Pharmaceuticals', 'Medical Technology', 'Precision Engineering', 'Machinery & Systems', 'Precision Modules & Components', 'Transport Engineering', 'Marine & Offshore Engineering', 'Aerospace', 'Land', 'General Manufacturing Industries', 'Food, Beverages & Tobacco', 'Printing', 'Miscellaneous']
+2026-10-21 09:27:45.483 | INFO     | __main__:run_pipeline:79 - Keeping the target sectors
+2026-10-21 09:27:45.484 | DEBUG    | __main__:run_pipeline:86 - gdp filtered shape: (5, 207)
+2026-10-21 09:27:45.485 | DEBUG    | __main__:run_pipeline:86 - gos filtered shape: (5, 187)
+2026-10-21 09:27:45.486 | DEBUG    | __main__:run_pipeline:86 - labour_productivity filtered shape: (4, 139)
+2026-10-21 09:27:45.487 | DEBUG    | __main__:run_pipeline:86 - equity_ratio filtered shape: (4, 32)
+2026-10-21 09:27:45.489 | DEBUG    | __main__:run_pipeline:86 - business_expectations filtered shape: (3, 227)
+2026-10-21 09:27:45.490 | INFO     | __main__:run_pipeline:89 - Building the ESG risk table
+2026-10-21 09:27:45.498 | WARNING  | exploration:build_esg_risk_table:385 - ESG: target sectors with no data, set to High risk: ['Transportation & Storage', 'Information & Communications', 'Utilities']
+2026-10-21 09:27:45.499 | INFO     | __main__:run_pipeline:93 - Checking the data quality
+2026-10-21 09:27:45.499 | INFO     | exploration:check_data_quality:419 - Data check: Real GDP
+2026-10-21 09:27:45.600 | WARNING  | exploration:check_data_quality:467 - Real GDP: 17 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2022 1Q'), ('Information & Communications', '2023 2Q'), ('Information & Communications', '2024 2Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 2Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2010 2Q'), ('Manufacturing', '2024 3Q'), ('Manufacturing', '2026 1Q'), ('Real Estate', '2020 2Q'), ('Real Estate', '2020 4Q'), ('Transportation & Storage', '2020 1Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2020 3Q'), ('Utilities', '2004 2Q'), ('Utilities', '2009 2Q')]
+2026-10-21 09:27:45.600 | INFO     | exploration:check_data_quality:419 - Data check: Gross Operating Surplus
+2026-10-21 09:27:45.694 | WARNING  | exploration:check_data_quality:467 - Gross Operating Surplus: 21 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2024 3Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 3Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2021 1Q'), ('Manufacturing', '2022 1Q'), ('Manufacturing', '2022 4Q'), ('Manufacturing', '2026 2Q'), ('Transportation & Storage', '2022 1Q'), ('Transportation & Storage', '2022 4Q'), ('Transportation & Storage', '2024 3Q'), ('Transportation & Storage', '2024 4Q'), ('Transportation & Storage', '2025 1Q'), ('Utilities', '2023 1Q'), ('Utilities', '2023 2Q'), ('Utilities', '2024 1Q'), ('Utilities', '2024 2Q'), ('Utilities', '2025 1Q'), ('Utilities', '2025 2Q'), ('Utilities', '2026 1Q')]
+2026-10-21 09:27:45.695 | INFO     | exploration:check_data_quality:419 - Data check: Labour Productivity
+2026-10-21 09:27:45.760 | WARNING  | exploration:check_data_quality:467 - Labour Productivity: 9 unusual jumps (more than 3 standard deviations): [('Manufacturing', '2009 2Q'), ('Manufacturing', '2010 1Q'), ('Manufacturing', '2010 3Q'), ('Real Estate', '2020 4Q'), ('Real Estate', '2021 2Q'), ('Real Estate', '2021 4Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2021 2Q'), ('Transportation & Storage', '2021 3Q')]
+2026-10-21 09:27:45.760 | INFO     | exploration:check_data_quality:419 - Data check: Equity Ratio
+2026-10-21 09:27:45.790 | WARNING  | exploration:check_data_quality:467 - Equity Ratio: 1 unusual jumps (more than 3 standard deviations): [('Information & Communications', '1997')]
+2026-10-21 09:27:45.794 | INFO     | exploration:check_data_quality:419 - Data check: Business Expectations
+2026-10-21 09:27:45.874 | WARNING  | exploration:check_data_quality:467 - Business Expectations: 8 unusual jumps (more than 3 standard deviations): [('Real Estate', '2003 2Q'), ('Real Estate', '2004 1Q'), ('Real Estate', '2020 1Q'), ('Transportation & Storage', '1997 2Q'), ('Transportation & Storage', '1997 4Q'), ('Transportation & Storage', '1998 2Q'), ('Transportation & Storage', '2001 2Q'), ('Transportation & Storage', '2002 2Q')]
+2026-10-21 09:27:45.875 | INFO     | __main__:run_pipeline:98 - Calculating the risk score
+2026-10-21 09:27:47.394 | WARNING  | __main__:run_pipeline:106 - 44 indicator values without data (the score was rescaled)
+2026-10-21 09:27:47.395 | WARNING  | __main__:run_pipeline:109 - Green blocked by the override rule in 5 sector-quarters
+2026-10-21 09:27:47.395 | SUCCESS  | __main__:run_pipeline:115 - Pipeline completed successfully
+2026-10-21 09:27:47.405 | SUCCESS  | __main__:save_results:133 - Results saved in C:\Users\angye\Documents\Project_Dashboard\output
+2026-10-21 09:27:47.409 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Manufacturing: Green
+2026-10-21 09:27:47.410 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Real Estate: Green
+2026-10-21 09:27:47.410 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Transportation & Storage: Amber
+2026-10-21 09:27:47.411 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Information & Communications: Green
+2026-10-21 09:27:47.411 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Utilities: Red
+2026-10-21 09:27:47.412 | INFO     | __main__:make_charts:150 - Making the charts
+2026-10-21 09:27:48.181 | WARNING  | exploration:plot_share_of_total_donuts:561 - Gross Operating Surplus: total row 'Gross Operating Surplus' not found. Row names in this df are: ['Total', 'Manufacturing', 'Construction', 'Utilities', 'Other Goods Industries', 'Wholesale & Retail Trade', 'Wholesale Trade', 'Retail Trade', 'Transportation & Storage', 'Accommodation & Food Services', 'Accommodation', 'Food & Beverage Services', 'Information & Communications', 'Finance & Insurance', 'Real Estate, Professional Services And Administrative & Support Services', 'Real Estate', 'Professional Services', 'Administrative & Support Services', 'Other Services Industries', 'Public Administration & Defence', 'Education', 'Health & Social Services', 'Arts, Entertainment & Recreation', 'Other Services - Others', 'Ownership Of Dwellings']
+2026-10-21 09:27:48.429 | WARNING  | exploration:plot_sectors_vs_total:629 - Labour Productivity: total row 'Overall Economy' not found, plotting without the total line. Row names: ['Total (Based On GDP In Chained (2015) Dollars)', 'Goods Producing Industries', 'Manufacturing', 'Construction', 'Services Producing Industries', 'Wholesale & Retail Trade', 'Wholesale Trade', 'Retail Trade', 'Transportation & Storage', 'Accommodation & Food Services', 'Accommodation', 'Food & Beverage Services', 'Information & Communications', 'Finance & Insurance', 'Real Estate, Professional Services And Administrative & Support Services', 'Real Estate', 'Professional Services', 'Administrative & Support Services', 'Other Services Industries', 'Public Administration & Defence', 'Education', 'Health & Social Services', 'Arts, Entertainment & Recreation', 'Other Services - Others']
+2026-10-21 09:27:48.641 | WARNING  | exploration:plot_sectors_vs_total:629 - Equity Ratio: total row 'All Industries' not found, plotting without the total line. Row names: ['Total', 'Manufacturing', 'Construction', 'Wholesale & Retail Trade', 'Transportation & Storage', 'Accommodation & Food Services', 'Information & Communications', 'Publishing, Broadcasting & Content Production', 'Telecommunications & Information Technology Services', 'Finance & Insurance', 'Real Estate', 'Professional And Administrative & Support Services', 'Others']
+2026-10-21 09:27:48.968 | SUCCESS  | __main__:make_charts:168 - Charts saved in C:\Users\angye\Documents\Project_Dashboard\output
+2026-10-21 09:28:15.465 | INFO     | main:run_pipeline:52 - Pipeline started
+2026-10-21 09:28:15.466 | INFO     | main:run_pipeline:56 - Loading the tables from the database
+2026-10-21 09:28:15.597 | DEBUG    | main:run_pipeline:59 - gdp raw shape: (68, 207)
+2026-10-21 09:28:15.597 | DEBUG    | main:run_pipeline:59 - gos raw shape: (25, 187)
+2026-10-21 09:28:15.598 | DEBUG    | main:run_pipeline:59 - labour_productivity raw shape: (56, 139)
+2026-10-21 09:28:15.601 | DEBUG    | main:run_pipeline:59 - equity_ratio raw shape: (13, 32)
+2026-10-21 09:28:15.601 | DEBUG    | main:run_pipeline:59 - business_expectations_manufacturing raw shape: (377, 227)
+2026-10-21 09:28:15.601 | DEBUG    | main:run_pipeline:59 - business_expectations_services raw shape: (60, 127)
+2026-10-21 09:28:15.601 | DEBUG    | main:run_pipeline:59 - esg raw shape: (40, 8)
+2026-10-21 09:28:15.602 | INFO     | main:run_pipeline:62 - Cleaning the indicator files
+2026-10-21 09:28:15.621 | INFO     | exploration:clean_indicator_file:175 - gdp: column names found in row 8
+2026-10-21 09:28:15.992 | INFO     | exploration:clean_indicator_file:173 - gos: the column names are already in the header
+2026-10-21 09:28:16.234 | INFO     | exploration:clean_indicator_file:175 - labour_productivity: column names found in row 9
+2026-10-21 09:28:16.533 | INFO     | exploration:clean_indicator_file:173 - equity_ratio: the column names are already in the header
+2026-10-21 09:28:16.618 | INFO     | exploration:clean_indicator_file:175 - business_expectations_manufacturing: column names found in row 9
+2026-10-21 09:28:17.224 | INFO     | exploration:clean_indicator_file:175 - business_expectations_services: column names found in row 9
+2026-10-21 09:28:17.474 | INFO     | main:run_pipeline:70 - Merging the files that measure the same thing
+2026-10-21 09:28:17.500 | WARNING  | exploration:merge_indicator_files:213 - Rows with the same name after merging: ['Electronics', 'Semiconductors', 'Computer Peripherals & Data Storage', 'Infocomms & Consumer Electronics', 'Other Electronic Modules & Components', 'Chemicals', 'Petroleum', 'Petrochemicals', 'Specialty Chemicals', 'Others', 'Biomedical Manufacturing', 'Pharmaceuticals', 'Medical Technology', 'Precision Engineering', 'Machinery & Systems', 'Precision Modules & Components', 'Transport Engineering', 'Marine & Offshore Engineering', 'Aerospace', 'Land', 'General Manufacturing Industries', 'Food, Beverages & Tobacco', 'Printing', 'Miscellaneous']
+2026-10-21 09:28:17.501 | INFO     | main:run_pipeline:79 - Keeping the target sectors
+2026-10-21 09:28:17.502 | DEBUG    | main:run_pipeline:86 - gdp filtered shape: (5, 207)
+2026-10-21 09:28:17.504 | DEBUG    | main:run_pipeline:86 - gos filtered shape: (5, 187)
+2026-10-21 09:28:17.506 | DEBUG    | main:run_pipeline:86 - labour_productivity filtered shape: (4, 139)
+2026-10-21 09:28:17.507 | DEBUG    | main:run_pipeline:86 - equity_ratio filtered shape: (4, 32)
+2026-10-21 09:28:17.508 | DEBUG    | main:run_pipeline:86 - business_expectations filtered shape: (3, 227)
+2026-10-21 09:28:17.508 | INFO     | main:run_pipeline:89 - Building the ESG risk table
+2026-10-21 09:28:17.518 | WARNING  | exploration:build_esg_risk_table:385 - ESG: target sectors with no data, set to High risk: ['Transportation & Storage', 'Information & Communications', 'Utilities']
+2026-10-21 09:28:17.519 | INFO     | main:run_pipeline:93 - Checking the data quality
+2026-10-21 09:28:17.519 | INFO     | exploration:check_data_quality:419 - Data check: Real GDP
+2026-10-21 09:28:17.646 | WARNING  | exploration:check_data_quality:467 - Real GDP: 17 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2022 1Q'), ('Information & Communications', '2023 2Q'), ('Information & Communications', '2024 2Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 2Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2010 2Q'), ('Manufacturing', '2024 3Q'), ('Manufacturing', '2026 1Q'), ('Real Estate', '2020 2Q'), ('Real Estate', '2020 4Q'), ('Transportation & Storage', '2020 1Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2020 3Q'), ('Utilities', '2004 2Q'), ('Utilities', '2009 2Q')]
+2026-10-21 09:28:17.647 | INFO     | exploration:check_data_quality:419 - Data check: Gross Operating Surplus
+2026-10-21 09:28:17.755 | WARNING  | exploration:check_data_quality:467 - Gross Operating Surplus: 21 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2024 3Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 3Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2021 1Q'), ('Manufacturing', '2022 1Q'), ('Manufacturing', '2022 4Q'), ('Manufacturing', '2026 2Q'), ('Transportation & Storage', '2022 1Q'), ('Transportation & Storage', '2022 4Q'), ('Transportation & Storage', '2024 3Q'), ('Transportation & Storage', '2024 4Q'), ('Transportation & Storage', '2025 1Q'), ('Utilities', '2023 1Q'), ('Utilities', '2023 2Q'), ('Utilities', '2024 1Q'), ('Utilities', '2024 2Q'), ('Utilities', '2025 1Q'), ('Utilities', '2025 2Q'), ('Utilities', '2026 1Q')]
+2026-10-21 09:28:17.756 | INFO     | exploration:check_data_quality:419 - Data check: Labour Productivity
+2026-10-21 09:28:17.833 | WARNING  | exploration:check_data_quality:467 - Labour Productivity: 9 unusual jumps (more than 3 standard deviations): [('Manufacturing', '2009 2Q'), ('Manufacturing', '2010 1Q'), ('Manufacturing', '2010 3Q'), ('Real Estate', '2020 4Q'), ('Real Estate', '2021 2Q'), ('Real Estate', '2021 4Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2021 2Q'), ('Transportation & Storage', '2021 3Q')]
+2026-10-21 09:28:17.833 | INFO     | exploration:check_data_quality:419 - Data check: Equity Ratio
+2026-10-21 09:28:17.881 | WARNING  | exploration:check_data_quality:467 - Equity Ratio: 1 unusual jumps (more than 3 standard deviations): [('Information & Communications', '1997')]
+2026-10-21 09:28:17.882 | INFO     | exploration:check_data_quality:419 - Data check: Business Expectations
+2026-10-21 09:28:17.972 | WARNING  | exploration:check_data_quality:467 - Business Expectations: 8 unusual jumps (more than 3 standard deviations): [('Real Estate', '2003 2Q'), ('Real Estate', '2004 1Q'), ('Real Estate', '2020 1Q'), ('Transportation & Storage', '1997 2Q'), ('Transportation & Storage', '1997 4Q'), ('Transportation & Storage', '1998 2Q'), ('Transportation & Storage', '2001 2Q'), ('Transportation & Storage', '2002 2Q')]
+2026-10-21 09:28:17.973 | INFO     | main:run_pipeline:98 - Calculating the risk score
+2026-10-21 09:28:20.119 | WARNING  | main:run_pipeline:106 - 44 indicator values without data (the score was rescaled)
+2026-10-21 09:28:20.120 | WARNING  | main:run_pipeline:109 - Green blocked by the override rule in 5 sector-quarters
+2026-10-21 09:28:20.120 | SUCCESS  | main:run_pipeline:115 - Pipeline completed successfully
+2026-10-21 09:41:47.825 | INFO     | __main__:run_pipeline:52 - Pipeline started
+2026-10-21 09:41:47.826 | INFO     | __main__:run_pipeline:56 - Loading the tables from the database
+2026-10-21 09:41:47.951 | DEBUG    | __main__:run_pipeline:59 - gdp raw shape: (68, 207)
+2026-10-21 09:41:47.951 | DEBUG    | __main__:run_pipeline:59 - gos raw shape: (25, 187)
+2026-10-21 09:41:47.952 | DEBUG    | __main__:run_pipeline:59 - labour_productivity raw shape: (56, 139)
+2026-10-21 09:41:47.952 | DEBUG    | __main__:run_pipeline:59 - equity_ratio raw shape: (13, 32)
+2026-10-21 09:41:47.952 | DEBUG    | __main__:run_pipeline:59 - business_expectations_manufacturing raw shape: (377, 227)
+2026-10-21 09:41:47.952 | DEBUG    | __main__:run_pipeline:59 - business_expectations_services raw shape: (60, 127)
+2026-10-21 09:41:47.953 | DEBUG    | __main__:run_pipeline:59 - esg raw shape: (40, 8)
+2026-10-21 09:41:47.953 | INFO     | __main__:run_pipeline:62 - Cleaning the indicator files
+2026-10-21 09:41:48.003 | INFO     | exploration:clean_indicator_file:175 - gdp: column names found in row 8
+2026-10-21 09:41:48.293 | INFO     | exploration:clean_indicator_file:173 - gos: the column names are already in the header
+2026-10-21 09:41:48.476 | INFO     | exploration:clean_indicator_file:175 - labour_productivity: column names found in row 9
+2026-10-21 09:41:48.683 | INFO     | exploration:clean_indicator_file:173 - equity_ratio: the column names are already in the header
+2026-10-21 09:41:48.749 | INFO     | exploration:clean_indicator_file:175 - business_expectations_manufacturing: column names found in row 9
+2026-10-21 09:41:49.174 | INFO     | exploration:clean_indicator_file:175 - business_expectations_services: column names found in row 9
+2026-10-21 09:41:49.345 | INFO     | __main__:run_pipeline:70 - Merging the files that measure the same thing
+2026-10-21 09:41:49.372 | WARNING  | exploration:merge_indicator_files:213 - Rows with the same name after merging: ['Electronics', 'Semiconductors', 'Computer Peripherals & Data Storage', 'Infocomms & Consumer Electronics', 'Other Electronic Modules & Components', 'Chemicals', 'Petroleum', 'Petrochemicals', 'Specialty Chemicals', 'Others', 'Biomedical Manufacturing', 'Pharmaceuticals', 'Medical Technology', 'Precision Engineering', 'Machinery & Systems', 'Precision Modules & Components', 'Transport Engineering', 'Marine & Offshore Engineering', 'Aerospace', 'Land', 'General Manufacturing Industries', 'Food, Beverages & Tobacco', 'Printing', 'Miscellaneous']
+2026-10-21 09:41:49.373 | INFO     | __main__:run_pipeline:79 - Keeping the target sectors
+2026-10-21 09:41:49.376 | DEBUG    | __main__:run_pipeline:86 - gdp filtered shape: (5, 207)
+2026-10-21 09:41:49.378 | DEBUG    | __main__:run_pipeline:86 - gos filtered shape: (5, 187)
+2026-10-21 09:41:49.379 | DEBUG    | __main__:run_pipeline:86 - labour_productivity filtered shape: (4, 139)
+2026-10-21 09:41:49.380 | DEBUG    | __main__:run_pipeline:86 - equity_ratio filtered shape: (4, 32)
+2026-10-21 09:41:49.380 | DEBUG    | __main__:run_pipeline:86 - business_expectations filtered shape: (3, 227)
+2026-10-21 09:41:49.381 | INFO     | __main__:run_pipeline:89 - Building the ESG risk table
+2026-10-21 09:41:49.400 | WARNING  | exploration:build_esg_risk_table:385 - ESG: target sectors with no data, set to High risk: ['Transportation & Storage', 'Information & Communications', 'Utilities']
+2026-10-21 09:41:49.401 | INFO     | __main__:run_pipeline:93 - Checking the data quality
+2026-10-21 09:41:49.402 | INFO     | exploration:check_data_quality:419 - Data check: Real GDP
+2026-10-21 09:41:49.522 | WARNING  | exploration:check_data_quality:467 - Real GDP: 17 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2022 1Q'), ('Information & Communications', '2023 2Q'), ('Information & Communications', '2024 2Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 2Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2010 2Q'), ('Manufacturing', '2024 3Q'), ('Manufacturing', '2026 1Q'), ('Real Estate', '2020 2Q'), ('Real Estate', '2020 4Q'), ('Transportation & Storage', '2020 1Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2020 3Q'), ('Utilities', '2004 2Q'), ('Utilities', '2009 2Q')]
+2026-10-21 09:41:49.522 | INFO     | exploration:check_data_quality:419 - Data check: Gross Operating Surplus
+2026-10-21 09:41:49.623 | WARNING  | exploration:check_data_quality:467 - Gross Operating Surplus: 21 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2024 3Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 3Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2021 1Q'), ('Manufacturing', '2022 1Q'), ('Manufacturing', '2022 4Q'), ('Manufacturing', '2026 2Q'), ('Transportation & Storage', '2022 1Q'), ('Transportation & Storage', '2022 4Q'), ('Transportation & Storage', '2024 3Q'), ('Transportation & Storage', '2024 4Q'), ('Transportation & Storage', '2025 1Q'), ('Utilities', '2023 1Q'), ('Utilities', '2023 2Q'), ('Utilities', '2024 1Q'), ('Utilities', '2024 2Q'), ('Utilities', '2025 1Q'), ('Utilities', '2025 2Q'), ('Utilities', '2026 1Q')]
+2026-10-21 09:41:49.623 | INFO     | exploration:check_data_quality:419 - Data check: Labour Productivity
+2026-10-21 09:41:49.694 | WARNING  | exploration:check_data_quality:467 - Labour Productivity: 9 unusual jumps (more than 3 standard deviations): [('Manufacturing', '2009 2Q'), ('Manufacturing', '2010 1Q'), ('Manufacturing', '2010 3Q'), ('Real Estate', '2020 4Q'), ('Real Estate', '2021 2Q'), ('Real Estate', '2021 4Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2021 2Q'), ('Transportation & Storage', '2021 3Q')]
+2026-10-21 09:41:49.695 | INFO     | exploration:check_data_quality:419 - Data check: Equity Ratio
+2026-10-21 09:41:49.724 | WARNING  | exploration:check_data_quality:467 - Equity Ratio: 1 unusual jumps (more than 3 standard deviations): [('Information & Communications', '1997')]
+2026-10-21 09:41:49.724 | INFO     | exploration:check_data_quality:419 - Data check: Business Expectations
+2026-10-21 09:41:49.854 | WARNING  | exploration:check_data_quality:467 - Business Expectations: 8 unusual jumps (more than 3 standard deviations): [('Real Estate', '2003 2Q'), ('Real Estate', '2004 1Q'), ('Real Estate', '2020 1Q'), ('Transportation & Storage', '1997 2Q'), ('Transportation & Storage', '1997 4Q'), ('Transportation & Storage', '1998 2Q'), ('Transportation & Storage', '2001 2Q'), ('Transportation & Storage', '2002 2Q')]
+2026-10-21 09:41:49.865 | INFO     | __main__:run_pipeline:98 - Calculating the risk score
+2026-10-21 09:41:53.208 | WARNING  | __main__:run_pipeline:106 - 44 indicator values without data (the score was rescaled)
+2026-10-21 09:41:53.209 | WARNING  | __main__:run_pipeline:109 - Green blocked by the override rule in 5 sector-quarters
+2026-10-21 09:41:53.210 | SUCCESS  | __main__:run_pipeline:115 - Pipeline completed successfully
+2026-10-21 09:41:53.249 | SUCCESS  | __main__:save_results:133 - Results saved in C:\Users\angye\Documents\Project_Dashboard\output
+2026-10-21 09:41:53.261 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Manufacturing: Green
+2026-10-21 09:41:53.261 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Real Estate: Green
+2026-10-21 09:41:53.262 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Transportation & Storage: Amber
+2026-10-21 09:41:53.264 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Information & Communications: Green
+2026-10-21 09:41:53.264 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Utilities: Red
+2026-10-21 09:41:53.265 | INFO     | __main__:make_charts:150 - Making the charts
+2026-10-21 09:41:55.298 | WARNING  | exploration:plot_share_of_total_donuts:561 - Gross Operating Surplus: total row 'Gross Operating Surplus' not found. Row names in this df are: ['Total', 'Manufacturing', 'Construction', 'Utilities', 'Other Goods Industries', 'Wholesale & Retail Trade', 'Wholesale Trade', 'Retail Trade', 'Transportation & Storage', 'Accommodation & Food Services', 'Accommodation', 'Food & Beverage Services', 'Information & Communications', 'Finance & Insurance', 'Real Estate, Professional Services And Administrative & Support Services', 'Real Estate', 'Professional Services', 'Administrative & Support Services', 'Other Services Industries', 'Public Administration & Defence', 'Education', 'Health & Social Services', 'Arts, Entertainment & Recreation', 'Other Services - Others', 'Ownership Of Dwellings']
+2026-10-21 09:41:55.900 | WARNING  | exploration:plot_sectors_vs_total:629 - Labour Productivity: total row 'Overall Economy' not found, plotting without the total line. Row names: ['Total (Based On GDP In Chained (2015) Dollars)', 'Goods Producing Industries', 'Manufacturing', 'Construction', 'Services Producing Industries', 'Wholesale & Retail Trade', 'Wholesale Trade', 'Retail Trade', 'Transportation & Storage', 'Accommodation & Food Services', 'Accommodation', 'Food & Beverage Services', 'Information & Communications', 'Finance & Insurance', 'Real Estate, Professional Services And Administrative & Support Services', 'Real Estate', 'Professional Services', 'Administrative & Support Services', 'Other Services Industries', 'Public Administration & Defence', 'Education', 'Health & Social Services', 'Arts, Entertainment & Recreation', 'Other Services - Others']
+2026-10-21 09:41:56.579 | WARNING  | exploration:plot_sectors_vs_total:629 - Equity Ratio: total row 'All Industries' not found, plotting without the total line. Row names: ['Total', 'Manufacturing', 'Construction', 'Wholesale & Retail Trade', 'Transportation & Storage', 'Accommodation & Food Services', 'Information & Communications', 'Publishing, Broadcasting & Content Production', 'Telecommunications & Information Technology Services', 'Finance & Insurance', 'Real Estate', 'Professional And Administrative & Support Services', 'Others']
+2026-10-21 09:41:57.321 | SUCCESS  | __main__:make_charts:168 - Charts saved in C:\Users\angye\Documents\Project_Dashboard\output
+2026-10-21 11:11:33.283 | INFO     | __main__:run_pipeline:52 - Pipeline started
+2026-10-21 11:11:33.284 | INFO     | __main__:run_pipeline:56 - Loading the tables from the database
+2026-10-21 11:11:33.383 | DEBUG    | __main__:run_pipeline:59 - gdp raw shape: (68, 207)
+2026-10-21 11:11:33.384 | DEBUG    | __main__:run_pipeline:59 - gos raw shape: (25, 187)
+2026-10-21 11:11:33.384 | DEBUG    | __main__:run_pipeline:59 - labour_productivity raw shape: (56, 139)
+2026-10-21 11:11:33.384 | DEBUG    | __main__:run_pipeline:59 - equity_ratio raw shape: (13, 32)
+2026-10-21 11:11:33.385 | DEBUG    | __main__:run_pipeline:59 - business_expectations_manufacturing raw shape: (377, 227)
+2026-10-21 11:11:33.385 | DEBUG    | __main__:run_pipeline:59 - business_expectations_services raw shape: (60, 127)
+2026-10-21 11:11:33.385 | DEBUG    | __main__:run_pipeline:59 - esg raw shape: (40, 8)
+2026-10-21 11:11:33.385 | INFO     | __main__:run_pipeline:62 - Cleaning the indicator files
+2026-10-21 11:11:33.403 | INFO     | exploration:clean_indicator_file:175 - gdp: column names found in row 8
+2026-10-21 11:11:33.629 | INFO     | exploration:clean_indicator_file:173 - gos: the column names are already in the header
+2026-10-21 11:11:33.760 | INFO     | exploration:clean_indicator_file:175 - labour_productivity: column names found in row 9
+2026-10-21 11:11:33.899 | INFO     | exploration:clean_indicator_file:173 - equity_ratio: the column names are already in the header
+2026-10-21 11:11:33.934 | INFO     | exploration:clean_indicator_file:175 - business_expectations_manufacturing: column names found in row 9
+2026-10-21 11:11:34.209 | INFO     | exploration:clean_indicator_file:175 - business_expectations_services: column names found in row 9
+2026-10-21 11:11:34.354 | INFO     | __main__:run_pipeline:70 - Merging the files that measure the same thing
+2026-10-21 11:11:34.380 | WARNING  | exploration:merge_indicator_files:213 - Rows with the same name after merging: ['Electronics', 'Semiconductors', 'Computer Peripherals & Data Storage', 'Infocomms & Consumer Electronics', 'Other Electronic Modules & Components', 'Chemicals', 'Petroleum', 'Petrochemicals', 'Specialty Chemicals', 'Others', 'Biomedical Manufacturing', 'Pharmaceuticals', 'Medical Technology', 'Precision Engineering', 'Machinery & Systems', 'Precision Modules & Components', 'Transport Engineering', 'Marine & Offshore Engineering', 'Aerospace', 'Land', 'General Manufacturing Industries', 'Food, Beverages & Tobacco', 'Printing', 'Miscellaneous']
+2026-10-21 11:11:34.380 | INFO     | __main__:run_pipeline:79 - Keeping the target sectors
+2026-10-21 11:11:34.383 | DEBUG    | __main__:run_pipeline:86 - gdp filtered shape: (5, 207)
+2026-10-21 11:11:34.384 | DEBUG    | __main__:run_pipeline:86 - gos filtered shape: (5, 187)
+2026-10-21 11:11:34.384 | DEBUG    | __main__:run_pipeline:86 - labour_productivity filtered shape: (4, 139)
+2026-10-21 11:11:34.385 | DEBUG    | __main__:run_pipeline:86 - equity_ratio filtered shape: (4, 32)
+2026-10-21 11:11:34.386 | DEBUG    | __main__:run_pipeline:86 - business_expectations filtered shape: (3, 227)
+2026-10-21 11:11:34.386 | INFO     | __main__:run_pipeline:89 - Building the ESG risk table
+2026-10-21 11:11:34.420 | WARNING  | exploration:build_esg_risk_table:385 - ESG: target sectors with no data, set to High risk: ['Transportation & Storage', 'Information & Communications', 'Utilities']
+2026-10-21 11:11:34.421 | INFO     | __main__:run_pipeline:93 - Checking the data quality
+2026-10-21 11:11:34.422 | INFO     | exploration:check_data_quality:419 - Data check: Real GDP
+2026-10-21 11:11:34.512 | WARNING  | exploration:check_data_quality:467 - Real GDP: 17 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2022 1Q'), ('Information & Communications', '2023 2Q'), ('Information & Communications', '2024 2Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 2Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2010 2Q'), ('Manufacturing', '2024 3Q'), ('Manufacturing', '2026 1Q'), ('Real Estate', '2020 2Q'), ('Real Estate', '2020 4Q'), ('Transportation & Storage', '2020 1Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2020 3Q'), ('Utilities', '2004 2Q'), ('Utilities', '2009 2Q')]
+2026-10-21 11:11:34.512 | INFO     | exploration:check_data_quality:419 - Data check: Gross Operating Surplus
+2026-10-21 11:11:34.589 | WARNING  | exploration:check_data_quality:467 - Gross Operating Surplus: 21 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2024 3Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 3Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2021 1Q'), ('Manufacturing', '2022 1Q'), ('Manufacturing', '2022 4Q'), ('Manufacturing', '2026 2Q'), ('Transportation & Storage', '2022 1Q'), ('Transportation & Storage', '2022 4Q'), ('Transportation & Storage', '2024 3Q'), ('Transportation & Storage', '2024 4Q'), ('Transportation & Storage', '2025 1Q'), ('Utilities', '2023 1Q'), ('Utilities', '2023 2Q'), ('Utilities', '2024 1Q'), ('Utilities', '2024 2Q'), ('Utilities', '2025 1Q'), ('Utilities', '2025 2Q'), ('Utilities', '2026 1Q')]
+2026-10-21 11:11:34.589 | INFO     | exploration:check_data_quality:419 - Data check: Labour Productivity
+2026-10-21 11:11:34.648 | WARNING  | exploration:check_data_quality:467 - Labour Productivity: 9 unusual jumps (more than 3 standard deviations): [('Manufacturing', '2009 2Q'), ('Manufacturing', '2010 1Q'), ('Manufacturing', '2010 3Q'), ('Real Estate', '2020 4Q'), ('Real Estate', '2021 2Q'), ('Real Estate', '2021 4Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2021 2Q'), ('Transportation & Storage', '2021 3Q')]
+2026-10-21 11:11:34.648 | INFO     | exploration:check_data_quality:419 - Data check: Equity Ratio
+2026-10-21 11:11:34.676 | WARNING  | exploration:check_data_quality:467 - Equity Ratio: 1 unusual jumps (more than 3 standard deviations): [('Information & Communications', '1997')]
+2026-10-21 11:11:34.676 | INFO     | exploration:check_data_quality:419 - Data check: Business Expectations
+2026-10-21 11:11:34.743 | WARNING  | exploration:check_data_quality:467 - Business Expectations: 8 unusual jumps (more than 3 standard deviations): [('Real Estate', '2003 2Q'), ('Real Estate', '2004 1Q'), ('Real Estate', '2020 1Q'), ('Transportation & Storage', '1997 2Q'), ('Transportation & Storage', '1997 4Q'), ('Transportation & Storage', '1998 2Q'), ('Transportation & Storage', '2001 2Q'), ('Transportation & Storage', '2002 2Q')]
+2026-10-21 11:11:34.744 | INFO     | __main__:run_pipeline:98 - Calculating the risk score
+2026-10-21 11:11:36.098 | WARNING  | __main__:run_pipeline:106 - 44 indicator values without data (the score was rescaled)
+2026-10-21 11:11:36.099 | WARNING  | __main__:run_pipeline:109 - Green blocked by the override rule in 5 sector-quarters
+2026-10-21 11:11:36.099 | SUCCESS  | __main__:run_pipeline:115 - Pipeline completed successfully
+2026-10-21 11:11:36.114 | SUCCESS  | __main__:save_results:133 - Results saved in C:\Users\angye\Documents\Project_Dashboard\output
+2026-10-21 11:11:36.120 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Manufacturing: Green
+2026-10-21 11:11:36.120 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Real Estate: Green
+2026-10-21 11:11:36.121 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Transportation & Storage: Amber
+2026-10-21 11:11:36.121 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Information & Communications: Green
+2026-10-21 11:11:36.122 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Utilities: Red
+2026-10-21 11:11:36.122 | INFO     | __main__:make_charts:150 - Making the charts
+2026-10-21 11:11:36.948 | WARNING  | exploration:plot_share_of_total_donuts:561 - Gross Operating Surplus: total row 'Gross Operating Surplus' not found. Row names in this df are: ['Total', 'Manufacturing', 'Construction', 'Utilities', 'Other Goods Industries', 'Wholesale & Retail Trade', 'Wholesale Trade', 'Retail Trade', 'Transportation & Storage', 'Accommodation & Food Services', 'Accommodation', 'Food & Beverage Services', 'Information & Communications', 'Finance & Insurance', 'Real Estate, Professional Services And Administrative & Support Services', 'Real Estate', 'Professional Services', 'Administrative & Support Services', 'Other Services Industries', 'Public Administration & Defence', 'Education', 'Health & Social Services', 'Arts, Entertainment & Recreation', 'Other Services - Others', 'Ownership Of Dwellings']
+2026-10-21 11:11:37.170 | WARNING  | exploration:plot_sectors_vs_total:629 - Labour Productivity: total row 'Overall Economy' not found, plotting without the total line. Row names: ['Total (Based On GDP In Chained (2015) Dollars)', 'Goods Producing Industries', 'Manufacturing', 'Construction', 'Services Producing Industries', 'Wholesale & Retail Trade', 'Wholesale Trade', 'Retail Trade', 'Transportation & Storage', 'Accommodation & Food Services', 'Accommodation', 'Food & Beverage Services', 'Information & Communications', 'Finance & Insurance', 'Real Estate, Professional Services And Administrative & Support Services', 'Real Estate', 'Professional Services', 'Administrative & Support Services', 'Other Services Industries', 'Public Administration & Defence', 'Education', 'Health & Social Services', 'Arts, Entertainment & Recreation', 'Other Services - Others']
+2026-10-21 11:11:37.352 | WARNING  | exploration:plot_sectors_vs_total:629 - Equity Ratio: total row 'All Industries' not found, plotting without the total line. Row names: ['Total', 'Manufacturing', 'Construction', 'Wholesale & Retail Trade', 'Transportation & Storage', 'Accommodation & Food Services', 'Information & Communications', 'Publishing, Broadcasting & Content Production', 'Telecommunications & Information Technology Services', 'Finance & Insurance', 'Real Estate', 'Professional And Administrative & Support Services', 'Others']
+2026-10-21 11:11:37.638 | SUCCESS  | __main__:make_charts:168 - Charts saved in C:\Users\angye\Documents\Project_Dashboard\output
+2026-10-21 11:13:55.139 | INFO     | __main__:run_pipeline:52 - Pipeline started
+2026-10-21 11:13:55.139 | INFO     | __main__:run_pipeline:56 - Loading the tables from the database
+2026-10-21 11:13:55.234 | DEBUG    | __main__:run_pipeline:59 - gdp raw shape: (68, 207)
+2026-10-21 11:13:55.234 | DEBUG    | __main__:run_pipeline:59 - gos raw shape: (25, 187)
+2026-10-21 11:13:55.235 | DEBUG    | __main__:run_pipeline:59 - labour_productivity raw shape: (56, 139)
+2026-10-21 11:13:55.235 | DEBUG    | __main__:run_pipeline:59 - equity_ratio raw shape: (13, 32)
+2026-10-21 11:13:55.235 | DEBUG    | __main__:run_pipeline:59 - business_expectations_manufacturing raw shape: (377, 227)
+2026-10-21 11:13:55.235 | DEBUG    | __main__:run_pipeline:59 - business_expectations_services raw shape: (60, 127)
+2026-10-21 11:13:55.235 | DEBUG    | __main__:run_pipeline:59 - esg raw shape: (40, 8)
+2026-10-21 11:13:55.236 | INFO     | __main__:run_pipeline:62 - Cleaning the indicator files
+2026-10-21 11:13:55.240 | INFO     | exploration:clean_indicator_file:175 - gdp: column names found in row 8
+2026-10-21 11:13:55.452 | INFO     | exploration:clean_indicator_file:173 - gos: the column names are already in the header
+2026-10-21 11:13:55.592 | INFO     | exploration:clean_indicator_file:175 - labour_productivity: column names found in row 9
+2026-10-21 11:13:55.731 | INFO     | exploration:clean_indicator_file:173 - equity_ratio: the column names are already in the header
+2026-10-21 11:13:55.764 | INFO     | exploration:clean_indicator_file:175 - business_expectations_manufacturing: column names found in row 9
+2026-10-21 11:13:56.035 | INFO     | exploration:clean_indicator_file:175 - business_expectations_services: column names found in row 9
+2026-10-21 11:13:56.170 | INFO     | __main__:run_pipeline:70 - Merging the files that measure the same thing
+2026-10-21 11:13:56.181 | WARNING  | exploration:merge_indicator_files:213 - Rows with the same name after merging: ['Electronics', 'Semiconductors', 'Computer Peripherals & Data Storage', 'Infocomms & Consumer Electronics', 'Other Electronic Modules & Components', 'Chemicals', 'Petroleum', 'Petrochemicals', 'Specialty Chemicals', 'Others', 'Biomedical Manufacturing', 'Pharmaceuticals', 'Medical Technology', 'Precision Engineering', 'Machinery & Systems', 'Precision Modules & Components', 'Transport Engineering', 'Marine & Offshore Engineering', 'Aerospace', 'Land', 'General Manufacturing Industries', 'Food, Beverages & Tobacco', 'Printing', 'Miscellaneous']
+2026-10-21 11:13:56.182 | INFO     | __main__:run_pipeline:79 - Keeping the target sectors
+2026-10-21 11:13:56.183 | DEBUG    | __main__:run_pipeline:86 - gdp filtered shape: (5, 207)
+2026-10-21 11:13:56.184 | DEBUG    | __main__:run_pipeline:86 - gos filtered shape: (5, 187)
+2026-10-21 11:13:56.185 | DEBUG    | __main__:run_pipeline:86 - labour_productivity filtered shape: (4, 139)
+2026-10-21 11:13:56.186 | DEBUG    | __main__:run_pipeline:86 - equity_ratio filtered shape: (4, 32)
+2026-10-21 11:13:56.186 | DEBUG    | __main__:run_pipeline:86 - business_expectations filtered shape: (3, 227)
+2026-10-21 11:13:56.186 | INFO     | __main__:run_pipeline:89 - Building the ESG risk table
+2026-10-21 11:13:56.194 | WARNING  | exploration:build_esg_risk_table:385 - ESG: target sectors with no data, set to High risk: ['Transportation & Storage', 'Information & Communications', 'Utilities']
+2026-10-21 11:13:56.195 | INFO     | __main__:run_pipeline:93 - Checking the data quality
+2026-10-21 11:13:56.195 | INFO     | exploration:check_data_quality:419 - Data check: Real GDP
+2026-10-21 11:13:56.285 | WARNING  | exploration:check_data_quality:467 - Real GDP: 17 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2022 1Q'), ('Information & Communications', '2023 2Q'), ('Information & Communications', '2024 2Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 2Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2010 2Q'), ('Manufacturing', '2024 3Q'), ('Manufacturing', '2026 1Q'), ('Real Estate', '2020 2Q'), ('Real Estate', '2020 4Q'), ('Transportation & Storage', '2020 1Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2020 3Q'), ('Utilities', '2004 2Q'), ('Utilities', '2009 2Q')]
+2026-10-21 11:13:56.286 | INFO     | exploration:check_data_quality:419 - Data check: Gross Operating Surplus
+2026-10-21 11:13:56.368 | WARNING  | exploration:check_data_quality:467 - Gross Operating Surplus: 21 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2024 3Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 3Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2021 1Q'), ('Manufacturing', '2022 1Q'), ('Manufacturing', '2022 4Q'), ('Manufacturing', '2026 2Q'), ('Transportation & Storage', '2022 1Q'), ('Transportation & Storage', '2022 4Q'), ('Transportation & Storage', '2024 3Q'), ('Transportation & Storage', '2024 4Q'), ('Transportation & Storage', '2025 1Q'), ('Utilities', '2023 1Q'), ('Utilities', '2023 2Q'), ('Utilities', '2024 1Q'), ('Utilities', '2024 2Q'), ('Utilities', '2025 1Q'), ('Utilities', '2025 2Q'), ('Utilities', '2026 1Q')]
+2026-10-21 11:13:56.368 | INFO     | exploration:check_data_quality:419 - Data check: Labour Productivity
+2026-10-21 11:13:56.426 | WARNING  | exploration:check_data_quality:467 - Labour Productivity: 9 unusual jumps (more than 3 standard deviations): [('Manufacturing', '2009 2Q'), ('Manufacturing', '2010 1Q'), ('Manufacturing', '2010 3Q'), ('Real Estate', '2020 4Q'), ('Real Estate', '2021 2Q'), ('Real Estate', '2021 4Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2021 2Q'), ('Transportation & Storage', '2021 3Q')]
+2026-10-21 11:13:56.426 | INFO     | exploration:check_data_quality:419 - Data check: Equity Ratio
+2026-10-21 11:13:56.453 | WARNING  | exploration:check_data_quality:467 - Equity Ratio: 1 unusual jumps (more than 3 standard deviations): [('Information & Communications', '1997')]
+2026-10-21 11:13:56.453 | INFO     | exploration:check_data_quality:419 - Data check: Business Expectations
+2026-10-21 11:13:56.521 | WARNING  | exploration:check_data_quality:467 - Business Expectations: 8 unusual jumps (more than 3 standard deviations): [('Real Estate', '2003 2Q'), ('Real Estate', '2004 1Q'), ('Real Estate', '2020 1Q'), ('Transportation & Storage', '1997 2Q'), ('Transportation & Storage', '1997 4Q'), ('Transportation & Storage', '1998 2Q'), ('Transportation & Storage', '2001 2Q'), ('Transportation & Storage', '2002 2Q')]
+2026-10-21 11:13:56.522 | INFO     | __main__:run_pipeline:98 - Calculating the risk score
+2026-10-21 11:13:57.880 | WARNING  | __main__:run_pipeline:106 - 44 indicator values without data (the score was rescaled)
+2026-10-21 11:13:57.880 | WARNING  | __main__:run_pipeline:109 - Green blocked by the override rule in 5 sector-quarters
+2026-10-21 11:13:57.881 | SUCCESS  | __main__:run_pipeline:115 - Pipeline completed successfully
+2026-10-21 11:13:57.889 | SUCCESS  | __main__:save_results:133 - Results saved in C:\Users\angye\Documents\Project_Dashboard\output
+2026-10-21 11:13:57.893 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Manufacturing: Green
+2026-10-21 11:13:57.893 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Real Estate: Green
+2026-10-21 11:13:57.894 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Transportation & Storage: Amber
+2026-10-21 11:13:57.894 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Information & Communications: Green
+2026-10-21 11:13:57.894 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Utilities: Red
+2026-10-21 11:13:57.894 | INFO     | __main__:make_charts:150 - Making the charts
+2026-10-21 11:13:58.624 | WARNING  | exploration:plot_share_of_total_donuts:561 - Gross Operating Surplus: total row 'Gross Operating Surplus' not found. Row names in this df are: ['Total', 'Manufacturing', 'Construction', 'Utilities', 'Other Goods Industries', 'Wholesale & Retail Trade', 'Wholesale Trade', 'Retail Trade', 'Transportation & Storage', 'Accommodation & Food Services', 'Accommodation', 'Food & Beverage Services', 'Information & Communications', 'Finance & Insurance', 'Real Estate, Professional Services And Administrative & Support Services', 'Real Estate', 'Professional Services', 'Administrative & Support Services', 'Other Services Industries', 'Public Administration & Defence', 'Education', 'Health & Social Services', 'Arts, Entertainment & Recreation', 'Other Services - Others', 'Ownership Of Dwellings']
+2026-10-21 11:13:58.857 | WARNING  | exploration:plot_sectors_vs_total:629 - Labour Productivity: total row 'Overall Economy' not found, plotting without the total line. Row names: ['Total (Based On GDP In Chained (2015) Dollars)', 'Goods Producing Industries', 'Manufacturing', 'Construction', 'Services Producing Industries', 'Wholesale & Retail Trade', 'Wholesale Trade', 'Retail Trade', 'Transportation & Storage', 'Accommodation & Food Services', 'Accommodation', 'Food & Beverage Services', 'Information & Communications', 'Finance & Insurance', 'Real Estate, Professional Services And Administrative & Support Services', 'Real Estate', 'Professional Services', 'Administrative & Support Services', 'Other Services Industries', 'Public Administration & Defence', 'Education', 'Health & Social Services', 'Arts, Entertainment & Recreation', 'Other Services - Others']
+2026-10-21 11:13:59.055 | WARNING  | exploration:plot_sectors_vs_total:629 - Equity Ratio: total row 'All Industries' not found, plotting without the total line. Row names: ['Total', 'Manufacturing', 'Construction', 'Wholesale & Retail Trade', 'Transportation & Storage', 'Accommodation & Food Services', 'Information & Communications', 'Publishing, Broadcasting & Content Production', 'Telecommunications & Information Technology Services', 'Finance & Insurance', 'Real Estate', 'Professional And Administrative & Support Services', 'Others']
+2026-10-21 11:13:59.361 | SUCCESS  | __main__:make_charts:168 - Charts saved in C:\Users\angye\Documents\Project_Dashboard\output
+2026-10-21 11:14:07.131 | INFO     | main:run_pipeline:52 - Pipeline started
+2026-10-21 11:14:07.131 | INFO     | main:run_pipeline:56 - Loading the tables from the database
+2026-10-21 11:14:07.225 | DEBUG    | main:run_pipeline:59 - gdp raw shape: (68, 207)
+2026-10-21 11:14:07.226 | DEBUG    | main:run_pipeline:59 - gos raw shape: (25, 187)
+2026-10-21 11:14:07.226 | DEBUG    | main:run_pipeline:59 - labour_productivity raw shape: (56, 139)
+2026-10-21 11:14:07.226 | DEBUG    | main:run_pipeline:59 - equity_ratio raw shape: (13, 32)
+2026-10-21 11:14:07.226 | DEBUG    | main:run_pipeline:59 - business_expectations_manufacturing raw shape: (377, 227)
+2026-10-21 11:14:07.226 | DEBUG    | main:run_pipeline:59 - business_expectations_services raw shape: (60, 127)
+2026-10-21 11:14:07.226 | DEBUG    | main:run_pipeline:59 - esg raw shape: (40, 8)
+2026-10-21 11:14:07.226 | INFO     | main:run_pipeline:62 - Cleaning the indicator files
+2026-10-21 11:14:07.233 | INFO     | exploration:clean_indicator_file:175 - gdp: column names found in row 8
+2026-10-21 11:14:07.439 | INFO     | exploration:clean_indicator_file:173 - gos: the column names are already in the header
+2026-10-21 11:14:07.562 | INFO     | exploration:clean_indicator_file:175 - labour_productivity: column names found in row 9
+2026-10-21 11:14:07.707 | INFO     | exploration:clean_indicator_file:173 - equity_ratio: the column names are already in the header
+2026-10-21 11:14:07.744 | INFO     | exploration:clean_indicator_file:175 - business_expectations_manufacturing: column names found in row 9
+2026-10-21 11:14:08.027 | INFO     | exploration:clean_indicator_file:175 - business_expectations_services: column names found in row 9
+2026-10-21 11:14:08.157 | INFO     | main:run_pipeline:70 - Merging the files that measure the same thing
+2026-10-21 11:14:08.170 | WARNING  | exploration:merge_indicator_files:213 - Rows with the same name after merging: ['Electronics', 'Semiconductors', 'Computer Peripherals & Data Storage', 'Infocomms & Consumer Electronics', 'Other Electronic Modules & Components', 'Chemicals', 'Petroleum', 'Petrochemicals', 'Specialty Chemicals', 'Others', 'Biomedical Manufacturing', 'Pharmaceuticals', 'Medical Technology', 'Precision Engineering', 'Machinery & Systems', 'Precision Modules & Components', 'Transport Engineering', 'Marine & Offshore Engineering', 'Aerospace', 'Land', 'General Manufacturing Industries', 'Food, Beverages & Tobacco', 'Printing', 'Miscellaneous']
+2026-10-21 11:14:08.170 | INFO     | main:run_pipeline:79 - Keeping the target sectors
+2026-10-21 11:14:08.171 | DEBUG    | main:run_pipeline:86 - gdp filtered shape: (5, 207)
+2026-10-21 11:14:08.171 | DEBUG    | main:run_pipeline:86 - gos filtered shape: (5, 187)
+2026-10-21 11:14:08.172 | DEBUG    | main:run_pipeline:86 - labour_productivity filtered shape: (4, 139)
+2026-10-21 11:14:08.173 | DEBUG    | main:run_pipeline:86 - equity_ratio filtered shape: (4, 32)
+2026-10-21 11:14:08.173 | DEBUG    | main:run_pipeline:86 - business_expectations filtered shape: (3, 227)
+2026-10-21 11:14:08.173 | INFO     | main:run_pipeline:89 - Building the ESG risk table
+2026-10-21 11:14:08.185 | WARNING  | exploration:build_esg_risk_table:385 - ESG: target sectors with no data, set to High risk: ['Transportation & Storage', 'Information & Communications', 'Utilities']
+2026-10-21 11:14:08.186 | INFO     | main:run_pipeline:93 - Checking the data quality
+2026-10-21 11:14:08.186 | INFO     | exploration:check_data_quality:419 - Data check: Real GDP
+2026-10-21 11:14:08.282 | WARNING  | exploration:check_data_quality:467 - Real GDP: 17 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2022 1Q'), ('Information & Communications', '2023 2Q'), ('Information & Communications', '2024 2Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 2Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2010 2Q'), ('Manufacturing', '2024 3Q'), ('Manufacturing', '2026 1Q'), ('Real Estate', '2020 2Q'), ('Real Estate', '2020 4Q'), ('Transportation & Storage', '2020 1Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2020 3Q'), ('Utilities', '2004 2Q'), ('Utilities', '2009 2Q')]
+2026-10-21 11:14:08.282 | INFO     | exploration:check_data_quality:419 - Data check: Gross Operating Surplus
+2026-10-21 11:14:08.364 | WARNING  | exploration:check_data_quality:467 - Gross Operating Surplus: 21 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2024 3Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 3Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2021 1Q'), ('Manufacturing', '2022 1Q'), ('Manufacturing', '2022 4Q'), ('Manufacturing', '2026 2Q'), ('Transportation & Storage', '2022 1Q'), ('Transportation & Storage', '2022 4Q'), ('Transportation & Storage', '2024 3Q'), ('Transportation & Storage', '2024 4Q'), ('Transportation & Storage', '2025 1Q'), ('Utilities', '2023 1Q'), ('Utilities', '2023 2Q'), ('Utilities', '2024 1Q'), ('Utilities', '2024 2Q'), ('Utilities', '2025 1Q'), ('Utilities', '2025 2Q'), ('Utilities', '2026 1Q')]
+2026-10-21 11:14:08.364 | INFO     | exploration:check_data_quality:419 - Data check: Labour Productivity
+2026-10-21 11:14:08.420 | WARNING  | exploration:check_data_quality:467 - Labour Productivity: 9 unusual jumps (more than 3 standard deviations): [('Manufacturing', '2009 2Q'), ('Manufacturing', '2010 1Q'), ('Manufacturing', '2010 3Q'), ('Real Estate', '2020 4Q'), ('Real Estate', '2021 2Q'), ('Real Estate', '2021 4Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2021 2Q'), ('Transportation & Storage', '2021 3Q')]
+2026-10-21 11:14:08.420 | INFO     | exploration:check_data_quality:419 - Data check: Equity Ratio
+2026-10-21 11:14:08.444 | WARNING  | exploration:check_data_quality:467 - Equity Ratio: 1 unusual jumps (more than 3 standard deviations): [('Information & Communications', '1997')]
+2026-10-21 11:14:08.444 | INFO     | exploration:check_data_quality:419 - Data check: Business Expectations
+2026-10-21 11:14:08.513 | WARNING  | exploration:check_data_quality:467 - Business Expectations: 8 unusual jumps (more than 3 standard deviations): [('Real Estate', '2003 2Q'), ('Real Estate', '2004 1Q'), ('Real Estate', '2020 1Q'), ('Transportation & Storage', '1997 2Q'), ('Transportation & Storage', '1997 4Q'), ('Transportation & Storage', '1998 2Q'), ('Transportation & Storage', '2001 2Q'), ('Transportation & Storage', '2002 2Q')]
+2026-10-21 11:14:08.514 | INFO     | main:run_pipeline:98 - Calculating the risk score
+2026-10-21 11:14:09.800 | WARNING  | main:run_pipeline:106 - 44 indicator values without data (the score was rescaled)
+2026-10-21 11:14:09.801 | WARNING  | main:run_pipeline:109 - Green blocked by the override rule in 5 sector-quarters
+2026-10-21 11:14:09.801 | SUCCESS  | main:run_pipeline:115 - Pipeline completed successfully
+2026-10-21 11:17:29.678 | INFO     | __main__:run_pipeline:52 - Pipeline started
+2026-10-21 11:17:29.679 | INFO     | __main__:run_pipeline:56 - Loading the tables from the database
+2026-10-21 11:17:29.767 | DEBUG    | __main__:run_pipeline:59 - gdp raw shape: (68, 207)
+2026-10-21 11:17:29.768 | DEBUG    | __main__:run_pipeline:59 - gos raw shape: (25, 187)
+2026-10-21 11:17:29.768 | DEBUG    | __main__:run_pipeline:59 - labour_productivity raw shape: (56, 139)
+2026-10-21 11:17:29.768 | DEBUG    | __main__:run_pipeline:59 - equity_ratio raw shape: (13, 32)
+2026-10-21 11:17:29.768 | DEBUG    | __main__:run_pipeline:59 - business_expectations_manufacturing raw shape: (377, 227)
+2026-10-21 11:17:29.768 | DEBUG    | __main__:run_pipeline:59 - business_expectations_services raw shape: (60, 127)
+2026-10-21 11:17:29.768 | DEBUG    | __main__:run_pipeline:59 - esg raw shape: (40, 8)
+2026-10-21 11:17:29.768 | INFO     | __main__:run_pipeline:62 - Cleaning the indicator files
+2026-10-21 11:17:29.772 | INFO     | exploration:clean_indicator_file:175 - gdp: column names found in row 8
+2026-10-21 11:17:29.983 | INFO     | exploration:clean_indicator_file:173 - gos: the column names are already in the header
+2026-10-21 11:17:30.110 | INFO     | exploration:clean_indicator_file:175 - labour_productivity: column names found in row 9
+2026-10-21 11:17:30.250 | INFO     | exploration:clean_indicator_file:173 - equity_ratio: the column names are already in the header
+2026-10-21 11:17:30.288 | INFO     | exploration:clean_indicator_file:175 - business_expectations_manufacturing: column names found in row 9
+2026-10-21 11:17:30.567 | INFO     | exploration:clean_indicator_file:175 - business_expectations_services: column names found in row 9
+2026-10-21 11:17:30.707 | INFO     | __main__:run_pipeline:70 - Merging the files that measure the same thing
+2026-10-21 11:17:30.719 | WARNING  | exploration:merge_indicator_files:213 - Rows with the same name after merging: ['Electronics', 'Semiconductors', 'Computer Peripherals & Data Storage', 'Infocomms & Consumer Electronics', 'Other Electronic Modules & Components', 'Chemicals', 'Petroleum', 'Petrochemicals', 'Specialty Chemicals', 'Others', 'Biomedical Manufacturing', 'Pharmaceuticals', 'Medical Technology', 'Precision Engineering', 'Machinery & Systems', 'Precision Modules & Components', 'Transport Engineering', 'Marine & Offshore Engineering', 'Aerospace', 'Land', 'General Manufacturing Industries', 'Food, Beverages & Tobacco', 'Printing', 'Miscellaneous']
+2026-10-21 11:17:30.720 | INFO     | __main__:run_pipeline:79 - Keeping the target sectors
+2026-10-21 11:17:30.720 | DEBUG    | __main__:run_pipeline:86 - gdp filtered shape: (5, 207)
+2026-10-21 11:17:30.721 | DEBUG    | __main__:run_pipeline:86 - gos filtered shape: (5, 187)
+2026-10-21 11:17:30.722 | DEBUG    | __main__:run_pipeline:86 - labour_productivity filtered shape: (4, 139)
+2026-10-21 11:17:30.723 | DEBUG    | __main__:run_pipeline:86 - equity_ratio filtered shape: (4, 32)
+2026-10-21 11:17:30.725 | DEBUG    | __main__:run_pipeline:86 - business_expectations filtered shape: (3, 227)
+2026-10-21 11:17:30.725 | INFO     | __main__:run_pipeline:89 - Building the ESG risk table
+2026-10-21 11:17:30.733 | WARNING  | exploration:build_esg_risk_table:385 - ESG: target sectors with no data, set to High risk: ['Transportation & Storage', 'Information & Communications', 'Utilities']
+2026-10-21 11:17:30.734 | INFO     | __main__:run_pipeline:93 - Checking the data quality
+2026-10-21 11:17:30.734 | INFO     | exploration:check_data_quality:419 - Data check: Real GDP
+2026-10-21 11:17:30.825 | WARNING  | exploration:check_data_quality:467 - Real GDP: 17 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2022 1Q'), ('Information & Communications', '2023 2Q'), ('Information & Communications', '2024 2Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 2Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2010 2Q'), ('Manufacturing', '2024 3Q'), ('Manufacturing', '2026 1Q'), ('Real Estate', '2020 2Q'), ('Real Estate', '2020 4Q'), ('Transportation & Storage', '2020 1Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2020 3Q'), ('Utilities', '2004 2Q'), ('Utilities', '2009 2Q')]
+2026-10-21 11:17:30.826 | INFO     | exploration:check_data_quality:419 - Data check: Gross Operating Surplus
+2026-10-21 11:17:30.910 | WARNING  | exploration:check_data_quality:467 - Gross Operating Surplus: 21 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2024 3Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 3Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2021 1Q'), ('Manufacturing', '2022 1Q'), ('Manufacturing', '2022 4Q'), ('Manufacturing', '2026 2Q'), ('Transportation & Storage', '2022 1Q'), ('Transportation & Storage', '2022 4Q'), ('Transportation & Storage', '2024 3Q'), ('Transportation & Storage', '2024 4Q'), ('Transportation & Storage', '2025 1Q'), ('Utilities', '2023 1Q'), ('Utilities', '2023 2Q'), ('Utilities', '2024 1Q'), ('Utilities', '2024 2Q'), ('Utilities', '2025 1Q'), ('Utilities', '2025 2Q'), ('Utilities', '2026 1Q')]
+2026-10-21 11:17:30.911 | INFO     | exploration:check_data_quality:419 - Data check: Labour Productivity
+2026-10-21 11:17:30.970 | WARNING  | exploration:check_data_quality:467 - Labour Productivity: 9 unusual jumps (more than 3 standard deviations): [('Manufacturing', '2009 2Q'), ('Manufacturing', '2010 1Q'), ('Manufacturing', '2010 3Q'), ('Real Estate', '2020 4Q'), ('Real Estate', '2021 2Q'), ('Real Estate', '2021 4Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2021 2Q'), ('Transportation & Storage', '2021 3Q')]
+2026-10-21 11:17:30.970 | INFO     | exploration:check_data_quality:419 - Data check: Equity Ratio
+2026-10-21 11:17:30.997 | WARNING  | exploration:check_data_quality:467 - Equity Ratio: 1 unusual jumps (more than 3 standard deviations): [('Information & Communications', '1997')]
+2026-10-21 11:17:30.997 | INFO     | exploration:check_data_quality:419 - Data check: Business Expectations
+2026-10-21 11:17:31.067 | WARNING  | exploration:check_data_quality:467 - Business Expectations: 8 unusual jumps (more than 3 standard deviations): [('Real Estate', '2003 2Q'), ('Real Estate', '2004 1Q'), ('Real Estate', '2020 1Q'), ('Transportation & Storage', '1997 2Q'), ('Transportation & Storage', '1997 4Q'), ('Transportation & Storage', '1998 2Q'), ('Transportation & Storage', '2001 2Q'), ('Transportation & Storage', '2002 2Q')]
+2026-10-21 11:17:31.068 | INFO     | __main__:run_pipeline:98 - Calculating the risk score
+2026-10-21 11:17:32.401 | WARNING  | __main__:run_pipeline:106 - 44 indicator values without data (the score was rescaled)
+2026-10-21 11:17:32.402 | WARNING  | __main__:run_pipeline:109 - Green blocked by the override rule in 5 sector-quarters
+2026-10-21 11:17:32.402 | SUCCESS  | __main__:run_pipeline:115 - Pipeline completed successfully
+2026-10-21 11:17:32.413 | SUCCESS  | __main__:save_results:133 - Results saved in C:\Users\angye\Documents\Project_Dashboard\output
+2026-10-21 11:17:32.417 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Manufacturing: Green
+2026-10-21 11:17:32.418 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Real Estate: Green
+2026-10-21 11:17:32.419 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Transportation & Storage: Amber
+2026-10-21 11:17:32.419 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Information & Communications: Green
+2026-10-21 11:17:32.420 | INFO     | __main__:log_final_lights:144 - 2026 2Q | Utilities: Red
+2026-10-21 11:17:32.420 | INFO     | __main__:make_charts:150 - Making the charts
+2026-10-21 11:17:33.142 | WARNING  | exploration:plot_share_of_total_donuts:561 - Gross Operating Surplus: total row 'Gross Operating Surplus' not found. Row names in this df are: ['Total', 'Manufacturing', 'Construction', 'Utilities', 'Other Goods Industries', 'Wholesale & Retail Trade', 'Wholesale Trade', 'Retail Trade', 'Transportation & Storage', 'Accommodation & Food Services', 'Accommodation', 'Food & Beverage Services', 'Information & Communications', 'Finance & Insurance', 'Real Estate, Professional Services And Administrative & Support Services', 'Real Estate', 'Professional Services', 'Administrative & Support Services', 'Other Services Industries', 'Public Administration & Defence', 'Education', 'Health & Social Services', 'Arts, Entertainment & Recreation', 'Other Services - Others', 'Ownership Of Dwellings']
+2026-10-21 11:17:33.376 | WARNING  | exploration:plot_sectors_vs_total:629 - Labour Productivity: total row 'Overall Economy' not found, plotting without the total line. Row names: ['Total (Based On GDP In Chained (2015) Dollars)', 'Goods Producing Industries', 'Manufacturing', 'Construction', 'Services Producing Industries', 'Wholesale & Retail Trade', 'Wholesale Trade', 'Retail Trade', 'Transportation & Storage', 'Accommodation & Food Services', 'Accommodation', 'Food & Beverage Services', 'Information & Communications', 'Finance & Insurance', 'Real Estate, Professional Services And Administrative & Support Services', 'Real Estate', 'Professional Services', 'Administrative & Support Services', 'Other Services Industries', 'Public Administration & Defence', 'Education', 'Health & Social Services', 'Arts, Entertainment & Recreation', 'Other Services - Others']
+2026-10-21 11:17:33.576 | WARNING  | exploration:plot_sectors_vs_total:629 - Equity Ratio: total row 'All Industries' not found, plotting without the total line. Row names: ['Total', 'Manufacturing', 'Construction', 'Wholesale & Retail Trade', 'Transportation & Storage', 'Accommodation & Food Services', 'Information & Communications', 'Publishing, Broadcasting & Content Production', 'Telecommunications & Information Technology Services', 'Finance & Insurance', 'Real Estate', 'Professional And Administrative & Support Services', 'Others']
+2026-10-21 11:17:33.887 | SUCCESS  | __main__:make_charts:168 - Charts saved in C:\Users\angye\Documents\Project_Dashboard\output
+2026-10-21 11:18:02.571 | SUCCESS  | __main__:save_baseline:178 - Baseline saved in C:\Users\angye\Documents\Project_Dashboard\data
+2026-10-21 11:18:13.477 | INFO     | main:run_pipeline:52 - Pipeline started
+2026-10-21 11:18:13.478 | INFO     | main:run_pipeline:56 - Loading the tables from the database
+2026-10-21 11:18:13.562 | DEBUG    | main:run_pipeline:59 - gdp raw shape: (68, 207)
+2026-10-21 11:18:13.562 | DEBUG    | main:run_pipeline:59 - gos raw shape: (25, 187)
+2026-10-21 11:18:13.562 | DEBUG    | main:run_pipeline:59 - labour_productivity raw shape: (56, 139)
+2026-10-21 11:18:13.562 | DEBUG    | main:run_pipeline:59 - equity_ratio raw shape: (13, 32)
+2026-10-21 11:18:13.562 | DEBUG    | main:run_pipeline:59 - business_expectations_manufacturing raw shape: (377, 227)
+2026-10-21 11:18:13.562 | DEBUG    | main:run_pipeline:59 - business_expectations_services raw shape: (60, 127)
+2026-10-21 11:18:13.562 | DEBUG    | main:run_pipeline:59 - esg raw shape: (40, 8)
+2026-10-21 11:18:13.562 | INFO     | main:run_pipeline:62 - Cleaning the indicator files
+2026-10-21 11:18:13.570 | INFO     | exploration:clean_indicator_file:175 - gdp: column names found in row 8
+2026-10-21 11:18:13.796 | INFO     | exploration:clean_indicator_file:173 - gos: the column names are already in the header
+2026-10-21 11:18:13.920 | INFO     | exploration:clean_indicator_file:175 - labour_productivity: column names found in row 9
+2026-10-21 11:18:14.057 | INFO     | exploration:clean_indicator_file:173 - equity_ratio: the column names are already in the header
+2026-10-21 11:18:14.087 | INFO     | exploration:clean_indicator_file:175 - business_expectations_manufacturing: column names found in row 9
+2026-10-21 11:18:14.528 | INFO     | exploration:clean_indicator_file:175 - business_expectations_services: column names found in row 9
+2026-10-21 11:18:14.733 | INFO     | main:run_pipeline:70 - Merging the files that measure the same thing
+2026-10-21 11:18:14.744 | WARNING  | exploration:merge_indicator_files:213 - Rows with the same name after merging: ['Electronics', 'Semiconductors', 'Computer Peripherals & Data Storage', 'Infocomms & Consumer Electronics', 'Other Electronic Modules & Components', 'Chemicals', 'Petroleum', 'Petrochemicals', 'Specialty Chemicals', 'Others', 'Biomedical Manufacturing', 'Pharmaceuticals', 'Medical Technology', 'Precision Engineering', 'Machinery & Systems', 'Precision Modules & Components', 'Transport Engineering', 'Marine & Offshore Engineering', 'Aerospace', 'Land', 'General Manufacturing Industries', 'Food, Beverages & Tobacco', 'Printing', 'Miscellaneous']
+2026-10-21 11:18:14.744 | INFO     | main:run_pipeline:79 - Keeping the target sectors
+2026-10-21 11:18:14.745 | DEBUG    | main:run_pipeline:86 - gdp filtered shape: (5, 207)
+2026-10-21 11:18:14.746 | DEBUG    | main:run_pipeline:86 - gos filtered shape: (5, 187)
+2026-10-21 11:18:14.746 | DEBUG    | main:run_pipeline:86 - labour_productivity filtered shape: (4, 139)
+2026-10-21 11:18:14.747 | DEBUG    | main:run_pipeline:86 - equity_ratio filtered shape: (4, 32)
+2026-10-21 11:18:14.747 | DEBUG    | main:run_pipeline:86 - business_expectations filtered shape: (3, 227)
+2026-10-21 11:18:14.748 | INFO     | main:run_pipeline:89 - Building the ESG risk table
+2026-10-21 11:18:14.757 | WARNING  | exploration:build_esg_risk_table:385 - ESG: target sectors with no data, set to High risk: ['Transportation & Storage', 'Information & Communications', 'Utilities']
+2026-10-21 11:18:14.758 | INFO     | main:run_pipeline:93 - Checking the data quality
+2026-10-21 11:18:14.758 | INFO     | exploration:check_data_quality:419 - Data check: Real GDP
+2026-10-21 11:18:14.860 | WARNING  | exploration:check_data_quality:467 - Real GDP: 17 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2022 1Q'), ('Information & Communications', '2023 2Q'), ('Information & Communications', '2024 2Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 2Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2010 2Q'), ('Manufacturing', '2024 3Q'), ('Manufacturing', '2026 1Q'), ('Real Estate', '2020 2Q'), ('Real Estate', '2020 4Q'), ('Transportation & Storage', '2020 1Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2020 3Q'), ('Utilities', '2004 2Q'), ('Utilities', '2009 2Q')]
+2026-10-21 11:18:14.861 | INFO     | exploration:check_data_quality:419 - Data check: Gross Operating Surplus
+2026-10-21 11:18:14.936 | WARNING  | exploration:check_data_quality:467 - Gross Operating Surplus: 21 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2024 3Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 3Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2021 1Q'), ('Manufacturing', '2022 1Q'), ('Manufacturing', '2022 4Q'), ('Manufacturing', '2026 2Q'), ('Transportation & Storage', '2022 1Q'), ('Transportation & Storage', '2022 4Q'), ('Transportation & Storage', '2024 3Q'), ('Transportation & Storage', '2024 4Q'), ('Transportation & Storage', '2025 1Q'), ('Utilities', '2023 1Q'), ('Utilities', '2023 2Q'), ('Utilities', '2024 1Q'), ('Utilities', '2024 2Q'), ('Utilities', '2025 1Q'), ('Utilities', '2025 2Q'), ('Utilities', '2026 1Q')]
+2026-10-21 11:18:14.936 | INFO     | exploration:check_data_quality:419 - Data check: Labour Productivity
+2026-10-21 11:18:14.990 | WARNING  | exploration:check_data_quality:467 - Labour Productivity: 9 unusual jumps (more than 3 standard deviations): [('Manufacturing', '2009 2Q'), ('Manufacturing', '2010 1Q'), ('Manufacturing', '2010 3Q'), ('Real Estate', '2020 4Q'), ('Real Estate', '2021 2Q'), ('Real Estate', '2021 4Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2021 2Q'), ('Transportation & Storage', '2021 3Q')]
+2026-10-21 11:18:14.990 | INFO     | exploration:check_data_quality:419 - Data check: Equity Ratio
+2026-10-21 11:18:15.013 | WARNING  | exploration:check_data_quality:467 - Equity Ratio: 1 unusual jumps (more than 3 standard deviations): [('Information & Communications', '1997')]
+2026-10-21 11:18:15.014 | INFO     | exploration:check_data_quality:419 - Data check: Business Expectations
+2026-10-21 11:18:15.079 | WARNING  | exploration:check_data_quality:467 - Business Expectations: 8 unusual jumps (more than 3 standard deviations): [('Real Estate', '2003 2Q'), ('Real Estate', '2004 1Q'), ('Real Estate', '2020 1Q'), ('Transportation & Storage', '1997 2Q'), ('Transportation & Storage', '1997 4Q'), ('Transportation & Storage', '1998 2Q'), ('Transportation & Storage', '2001 2Q'), ('Transportation & Storage', '2002 2Q')]
+2026-10-21 11:18:15.079 | INFO     | main:run_pipeline:98 - Calculating the risk score
+2026-10-21 11:18:16.545 | WARNING  | main:run_pipeline:106 - 44 indicator values without data (the score was rescaled)
+2026-10-21 11:18:16.545 | WARNING  | main:run_pipeline:109 - Green blocked by the override rule in 5 sector-quarters
+2026-10-21 11:18:16.545 | SUCCESS  | main:run_pipeline:115 - Pipeline completed successfully
+2026-10-21 11:20:26.755 | INFO     | main:run_pipeline:52 - Pipeline started
+2026-10-21 11:20:26.756 | INFO     | main:run_pipeline:56 - Loading the tables from the database
+2026-10-21 11:20:27.281 | DEBUG    | main:run_pipeline:59 - gdp raw shape: (68, 207)
+2026-10-21 11:20:27.286 | DEBUG    | main:run_pipeline:59 - gos raw shape: (25, 187)
+2026-10-21 11:20:27.289 | DEBUG    | main:run_pipeline:59 - labour_productivity raw shape: (56, 139)
+2026-10-21 11:20:27.293 | DEBUG    | main:run_pipeline:59 - equity_ratio raw shape: (13, 32)
+2026-10-21 11:20:27.296 | DEBUG    | main:run_pipeline:59 - business_expectations_manufacturing raw shape: (377, 227)
+2026-10-21 11:20:27.304 | DEBUG    | main:run_pipeline:59 - business_expectations_services raw shape: (60, 127)
+2026-10-21 11:20:27.313 | DEBUG    | main:run_pipeline:59 - esg raw shape: (40, 8)
+2026-10-21 11:20:27.325 | INFO     | main:run_pipeline:62 - Cleaning the indicator files
+2026-10-21 11:20:27.365 | INFO     | exploration:clean_indicator_file:175 - gdp: column names found in row 8
+2026-10-21 11:20:29.795 | INFO     | exploration:clean_indicator_file:173 - gos: the column names are already in the header
+2026-10-21 11:20:30.987 | INFO     | exploration:clean_indicator_file:175 - labour_productivity: column names found in row 9
+2026-10-21 11:20:32.194 | INFO     | exploration:clean_indicator_file:173 - equity_ratio: the column names are already in the header
+2026-10-21 11:20:32.442 | INFO     | exploration:clean_indicator_file:175 - business_expectations_manufacturing: column names found in row 9
+2026-10-21 11:20:35.274 | INFO     | exploration:clean_indicator_file:175 - business_expectations_services: column names found in row 9
+2026-10-21 11:20:36.872 | INFO     | main:run_pipeline:70 - Merging the files that measure the same thing
+2026-10-21 11:20:36.991 | WARNING  | exploration:merge_indicator_files:213 - Rows with the same name after merging: ['Electronics', 'Semiconductors', 'Computer Peripherals & Data Storage', 'Infocomms & Consumer Electronics', 'Other Electronic Modules & Components', 'Chemicals', 'Petroleum', 'Petrochemicals', 'Specialty Chemicals', 'Others', 'Biomedical Manufacturing', 'Pharmaceuticals', 'Medical Technology', 'Precision Engineering', 'Machinery & Systems', 'Precision Modules & Components', 'Transport Engineering', 'Marine & Offshore Engineering', 'Aerospace', 'Land', 'General Manufacturing Industries', 'Food, Beverages & Tobacco', 'Printing', 'Miscellaneous']
+2026-10-21 11:20:36.993 | INFO     | main:run_pipeline:79 - Keeping the target sectors
+2026-10-21 11:20:36.997 | DEBUG    | main:run_pipeline:86 - gdp filtered shape: (5, 207)
+2026-10-21 11:20:37.003 | DEBUG    | main:run_pipeline:86 - gos filtered shape: (5, 187)
+2026-10-21 11:20:37.007 | DEBUG    | main:run_pipeline:86 - labour_productivity filtered shape: (4, 139)
+2026-10-21 11:20:37.018 | DEBUG    | main:run_pipeline:86 - equity_ratio filtered shape: (4, 32)
+2026-10-21 11:20:37.032 | DEBUG    | main:run_pipeline:86 - business_expectations filtered shape: (3, 227)
+2026-10-21 11:20:37.039 | INFO     | main:run_pipeline:89 - Building the ESG risk table
+2026-10-21 11:20:37.091 | WARNING  | exploration:build_esg_risk_table:385 - ESG: target sectors with no data, set to High risk: ['Transportation & Storage', 'Information & Communications', 'Utilities']
+2026-10-21 11:20:37.095 | INFO     | main:run_pipeline:93 - Checking the data quality
+2026-10-21 11:20:37.097 | INFO     | exploration:check_data_quality:419 - Data check: Real GDP
+2026-10-21 11:20:37.986 | WARNING  | exploration:check_data_quality:467 - Real GDP: 17 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2022 1Q'), ('Information & Communications', '2023 2Q'), ('Information & Communications', '2024 2Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 2Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2010 2Q'), ('Manufacturing', '2024 3Q'), ('Manufacturing', '2026 1Q'), ('Real Estate', '2020 2Q'), ('Real Estate', '2020 4Q'), ('Transportation & Storage', '2020 1Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2020 3Q'), ('Utilities', '2004 2Q'), ('Utilities', '2009 2Q')]
+2026-10-21 11:20:37.988 | INFO     | exploration:check_data_quality:419 - Data check: Gross Operating Surplus
+2026-10-21 11:20:38.685 | WARNING  | exploration:check_data_quality:467 - Gross Operating Surplus: 21 unusual jumps (more than 3 standard deviations): [('Information & Communications', '2024 3Q'), ('Information & Communications', '2025 1Q'), ('Information & Communications', '2025 3Q'), ('Information & Communications', '2026 1Q'), ('Information & Communications', '2026 2Q'), ('Manufacturing', '2021 1Q'), ('Manufacturing', '2022 1Q'), ('Manufacturing', '2022 4Q'), ('Manufacturing', '2026 2Q'), ('Transportation & Storage', '2022 1Q'), ('Transportation & Storage', '2022 4Q'), ('Transportation & Storage', '2024 3Q'), ('Transportation & Storage', '2024 4Q'), ('Transportation & Storage', '2025 1Q'), ('Utilities', '2023 1Q'), ('Utilities', '2023 2Q'), ('Utilities', '2024 1Q'), ('Utilities', '2024 2Q'), ('Utilities', '2025 1Q'), ('Utilities', '2025 2Q'), ('Utilities', '2026 1Q')]
+2026-10-21 11:20:38.687 | INFO     | exploration:check_data_quality:419 - Data check: Labour Productivity
+2026-10-21 11:20:39.142 | WARNING  | exploration:check_data_quality:467 - Labour Productivity: 9 unusual jumps (more than 3 standard deviations): [('Manufacturing', '2009 2Q'), ('Manufacturing', '2010 1Q'), ('Manufacturing', '2010 3Q'), ('Real Estate', '2020 4Q'), ('Real Estate', '2021 2Q'), ('Real Estate', '2021 4Q'), ('Transportation & Storage', '2020 2Q'), ('Transportation & Storage', '2021 2Q'), ('Transportation & Storage', '2021 3Q')]
+2026-10-21 11:20:39.144 | INFO     | exploration:check_data_quality:419 - Data check: Equity Ratio
+2026-10-21 11:20:39.307 | WARNING  | exploration:check_data_quality:467 - Equity Ratio: 1 unusual jumps (more than 3 standard deviations): [('Information & Communications', '1997')]
+2026-10-21 11:20:39.307 | INFO     | exploration:check_data_quality:419 - Data check: Business Expectations
+2026-10-21 11:20:39.846 | WARNING  | exploration:check_data_quality:467 - Business Expectations: 8 unusual jumps (more than 3 standard deviations): [('Real Estate', '2003 2Q'), ('Real Estate', '2004 1Q'), ('Real Estate', '2020 1Q'), ('Transportation & Storage', '1997 2Q'), ('Transportation & Storage', '1997 4Q'), ('Transportation & Storage', '1998 2Q'), ('Transportation & Storage', '2001 2Q'), ('Transportation & Storage', '2002 2Q')]
+2026-10-21 11:20:39.848 | INFO     | main:run_pipeline:98 - Calculating the risk score
+2026-10-21 11:20:50.215 | WARNING  | main:run_pipeline:106 - 44 indicator values without data (the score was rescaled)
+2026-10-21 11:20:50.216 | WARNING  | main:run_pipeline:109 - Green blocked by the override rule in 5 sector-quarters
+2026-10-21 11:20:50.218 | SUCCESS  | main:run_pipeline:115 - Pipeline completed successfully

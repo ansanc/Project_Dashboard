@@ -1,0 +1,91 @@
+Sectors,Quarter,Score,Light by score,Red indicators,Override applied,Final light,Warning,Data coverage %
+Manufacturing,2022 1Q,90.0,Green,1,False,Green,Risk warning: Labour productivity growth (YoY %) is Red,100.0
+Manufacturing,2022 2Q,90.0,Green,1,False,Green,Risk warning: Labour productivity growth (YoY %) is Red,100.0
+Manufacturing,2022 3Q,80.0,Green,1,False,Green,Risk warning: Labour productivity growth (YoY %) is Red,100.0
+Manufacturing,2022 4Q,60.0,Amber,2,False,Amber,,100.0
+Manufacturing,2023 1Q,50.0,Amber,3,False,Amber,,100.0
+Manufacturing,2023 2Q,50.0,Amber,3,False,Amber,,100.0
+Manufacturing,2023 3Q,60.0,Amber,2,False,Amber,,100.0
+Manufacturing,2023 4Q,60.0,Amber,2,False,Amber,,100.0
+Manufacturing,2024 1Q,60.0,Amber,2,False,Amber,,100.0
+Manufacturing,2024 2Q,70.0,Amber,2,False,Amber,,100.0
+Manufacturing,2024 3Q,90.0,Green,1,False,Green,Risk warning: Labour productivity growth (YoY %) is Red,100.0
+Manufacturing,2024 4Q,100.0,Green,0,False,Green,,100.0
+Manufacturing,2025 1Q,90.0,Green,1,False,Green,Risk warning: Labour productivity growth (YoY %) is Red,100.0
+Manufacturing,2025 2Q,100.0,Green,0,False,Green,,100.0
+Manufacturing,2025 3Q,90.0,Green,1,False,Green,Risk warning: Labour productivity growth (YoY %) is Red,100.0
+Manufacturing,2025 4Q,100.0,Green,0,False,Green,,100.0
+Manufacturing,2026 1Q,83.33,Green,1,False,Green,Risk warning: Labour productivity growth (YoY %) is Red,60.0
+Manufacturing,2026 2Q,83.33,Green,1,False,Green,Risk warning: Labour productivity growth (YoY %) is Red,60.0
+Real Estate,2022 1Q,85.0,Green,1,False,Green,Risk warning: Labour productivity growth (YoY %) is Red,100.0
+Real Estate,2022 2Q,85.0,Green,1,False,Green,Risk warning: Labour productivity growth (YoY %) is Red,100.0
+Real Estate,2022 3Q,85.0,Green,1,False,Green,Risk warning: Labour productivity growth (YoY %) is Red,100.0
+Real Estate,2022 4Q,85.0,Green,1,False,Green,Risk warning: Labour productivity growth (YoY %) is Red,100.0
+Real Estate,2023 1Q,75.0,Green,1,False,Green,Risk warning: Labour productivity growth (YoY %) is Red,100.0
+Real Estate,2023 2Q,85.0,Green,1,False,Green,Risk warning: Labour productivity growth (YoY %) is Red,100.0
+Real Estate,2023 3Q,85.0,Green,0,False,Green,,100.0
+Real Estate,2023 4Q,55.0,Amber,2,False,Amber,,100.0
+Real Estate,2024 1Q,55.0,Amber,2,False,Amber,,100.0
+Real Estate,2024 2Q,85.0,Green,1,False,Green,Risk warning: Labour productivity growth (YoY %) is Red,100.0
+Real Estate,2024 3Q,85.0,Green,1,False,Green,Risk warning: Labour productivity growth (YoY %) is Red,100.0
+Real Estate,2024 4Q,85.0,Green,1,False,Green,Risk warning: Labour productivity growth (YoY %) is Red,100.0
+Real Estate,2025 1Q,95.0,Green,0,False,Green,,100.0
+Real Estate,2025 2Q,85.0,Green,1,False,Green,Risk warning: Labour productivity growth (YoY %) is Red,100.0
+Real Estate,2025 3Q,95.0,Green,0,False,Green,,100.0
+Real Estate,2025 4Q,85.0,Green,0,False,Green,,100.0
+Real Estate,2026 1Q,91.67,Green,0,False,Green,,60.0
+Real Estate,2026 2Q,75.0,Green,1,False,Green,Risk warning: Labour productivity growth (YoY %) is Red,60.0
+Transportation & Storage,2022 1Q,80.0,Green,2,True,Amber,"Green blocked: 2 Red indicators (Labour productivity growth (YoY %), ESG reporting)",100.0
+Transportation & Storage,2022 2Q,80.0,Green,2,True,Amber,"Green blocked: 2 Red indicators (Labour productivity growth (YoY %), ESG reporting)",100.0
+Transportation & Storage,2022 3Q,80.0,Green,2,True,Amber,"Green blocked: 2 Red indicators (Labour productivity growth (YoY %), ESG reporting)",100.0
+Transportation & Storage,2022 4Q,60.0,Amber,3,False,Amber,,100.0
+Transportation & Storage,2023 1Q,50.0,Amber,3,False,Amber,,100.0
+Transportation & Storage,2023 2Q,60.0,Amber,3,False,Amber,,100.0
+Transportation & Storage,2023 3Q,50.0,Amber,3,False,Amber,,100.0
+Transportation & Storage,2023 4Q,70.0,Amber,2,False,Amber,,100.0
+Transportation & Storage,2024 1Q,70.0,Amber,2,False,Amber,,100.0
+Transportation & Storage,2024 2Q,90.0,Green,1,False,Green,Risk warning: ESG reporting is Red,100.0
+Transportation & Storage,2024 3Q,80.0,Green,2,True,Amber,"Green blocked: 2 Red indicators (Labour productivity growth (YoY %), ESG reporting)",100.0
+Transportation & Storage,2024 4Q,80.0,Green,2,True,Amber,"Green blocked: 2 Red indicators (Labour productivity growth (YoY %), ESG reporting)",100.0
+Transportation & Storage,2025 1Q,70.0,Amber,2,False,Amber,,100.0
+Transportation & Storage,2025 2Q,60.0,Amber,3,False,Amber,,100.0
+Transportation & Storage,2025 3Q,50.0,Amber,3,False,Amber,,100.0
+Transportation & Storage,2025 4Q,50.0,Amber,3,False,Amber,,100.0
+Transportation & Storage,2026 1Q,16.67,Red,3,False,Red,,60.0
+Transportation & Storage,2026 2Q,50.0,Amber,2,False,Amber,,60.0
+Information & Communications,2022 1Q,30.0,Red,3,False,Red,,100.0
+Information & Communications,2022 2Q,40.0,Amber,3,False,Amber,,100.0
+Information & Communications,2022 3Q,30.0,Red,3,False,Red,,100.0
+Information & Communications,2022 4Q,30.0,Red,3,False,Red,,100.0
+Information & Communications,2023 1Q,50.0,Amber,2,False,Amber,,100.0
+Information & Communications,2023 2Q,60.0,Amber,2,False,Amber,,100.0
+Information & Communications,2023 3Q,60.0,Amber,2,False,Amber,,100.0
+Information & Communications,2023 4Q,60.0,Amber,2,False,Amber,,100.0
+Information & Communications,2024 1Q,70.0,Amber,1,False,Amber,,100.0
+Information & Communications,2024 2Q,70.0,Amber,1,False,Amber,,100.0
+Information & Communications,2024 3Q,70.0,Amber,1,False,Amber,,100.0
+Information & Communications,2024 4Q,60.0,Amber,2,False,Amber,,100.0
+Information & Communications,2025 1Q,60.0,Amber,2,False,Amber,,100.0
+Information & Communications,2025 2Q,60.0,Amber,2,False,Amber,,100.0
+Information & Communications,2025 3Q,60.0,Amber,2,False,Amber,,100.0
+Information & Communications,2025 4Q,60.0,Amber,2,False,Amber,,100.0
+Information & Communications,2026 1Q,83.33,Green,1,False,Green,Risk warning: ESG reporting is Red,60.0
+Information & Communications,2026 2Q,83.33,Green,1,False,Green,Risk warning: ESG reporting is Red,60.0
+Utilities,2022 1Q,60.0,Amber,1,False,Amber,,50.0
+Utilities,2022 2Q,60.0,Amber,1,False,Amber,,50.0
+Utilities,2022 3Q,60.0,Amber,1,False,Amber,,50.0
+Utilities,2022 4Q,60.0,Amber,1,False,Amber,,50.0
+Utilities,2023 1Q,60.0,Amber,1,False,Amber,,50.0
+Utilities,2023 2Q,60.0,Amber,1,False,Amber,,50.0
+Utilities,2023 3Q,60.0,Amber,1,False,Amber,,50.0
+Utilities,2023 4Q,60.0,Amber,1,False,Amber,,50.0
+Utilities,2024 1Q,20.0,Red,2,False,Red,,50.0
+Utilities,2024 2Q,40.0,Amber,2,False,Amber,,50.0
+Utilities,2024 3Q,40.0,Amber,2,False,Amber,,50.0
+Utilities,2024 4Q,40.0,Amber,2,False,Amber,,50.0
+Utilities,2025 1Q,20.0,Red,2,False,Red,,50.0
+Utilities,2025 2Q,20.0,Red,2,False,Red,,50.0
+Utilities,2025 3Q,20.0,Red,2,False,Red,,50.0
+Utilities,2025 4Q,20.0,Red,2,False,Red,,50.0
+Utilities,2026 1Q,20.0,Red,2,False,Red,,50.0
+Utilities,2026 2Q,20.0,Red,2,False,Red,,50.0

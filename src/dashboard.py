@@ -531,8 +531,6 @@ if selected_page == "Overview":
                                            x_title="Pillar"),
                             width="stretch")
 
-        st.caption("Click a sector in the table, or go to **Sector zoom**, to see why it has its colour.")
-
 
 ######################################################################
 # TAB 2. SECTOR ZOOM: one sector, why it has its colour

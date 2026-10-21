@@ -6,7 +6,7 @@ This repository covers:
 
 - **Part 1 – Data:** loading, cleaning, exploration and charts.
 - **Part 2 – Risk score:** indicator traffic lights, pillar scores and the overall score.
-- **Part 3 - Dashboard:** Dashboard based on the risk scoring
+- **Part 3 – Dashboard:** Streamlit dashboard for the credit committee, with an AI commentary per sector.
 
 ---
 
@@ -36,20 +36,26 @@ Project_Dashboard/
 │   ├── BusinessExpectationsOfTheManufacturingSector.csv
 │   ├── BusinessExpectationsOfTheServiceSector.csv
 │   ├── ESGReports.xlsx
+│   ├── IndustryPulse_logo.png     <- logo shown at the top of the dashboard sidebar
 │   ├── Database_RiskDashboard.db  <- created by database.py
 │   └── reconciliation_baseline_*.csv  <- trusted results the tests compare against
 ├── output/                       <- HTML charts + result CSVs
 ├── log/
-│   └── pipeline.log              <- what happened in each run
+│   ├── pipeline.log              <- what happened in each run (main.py and dashboard)
+│   └── ai_runs.log               <- each AI analysis requested in the dashboard
 ├── src/                          <- all the code
 │   ├── config.py                 <- all the settings
 │   ├── database.py               <- creates and reads the database
 │   ├── exploration.py            <- cleaning, merging, ESG, data checks and charts
 │   ├── scoring.py                <- risk score and traffic lights
 │   ├── main.py                   <- RUNS the whole project with one command (logs, results, charts)
+│   ├── dashboard.py              <- Streamlit dashboard (Part 3)
 │   └── AllCode.py                <- to EXPLORE: the whole project in one file, without functions, cell by cell
 ├── test/
-│   └── test_pipeline.py          <- 4 simple pytest tests
+│   └── test_pipeline.py          <- 7 simple pytest tests
+├── .streamlit/
+│   └── config.toml               <- dashboard colours (dark blue accent, light and dark theme)
+├── .env                          <- your OpenRouter API key (NOT on GitHub)
 ├── check_setup.py                <- checks that the environment is ready
 ├── pyproject.toml                <- project and dependencies (uv)
 ├── uv.lock                       <- exact versions of the dependencies (uv)
@@ -65,18 +71,19 @@ Project_Dashboard/
 | `exploration.py` | Cleans the SingStat files, merges files that measure the same thing, calculates the share of total GDP, builds the ESG risk, runs the data checks and makes the charts (line trends, grouped bars, donuts and bars vs. total, saved as HTML in `output/`). |
 | `scoring.py` | Yearly growth, traffic lights, pillar scores (W1, W2, W3), overall score, override rules and the report per sector. |
 | `main.py` | **Runs** the whole project with one command: load, clean, merge, filter, ESG, data checks, score, save the results in `output/` (which the tests read), charts and, when asked, the baseline. Everything is written in `log/pipeline.log`. |
+| `dashboard.py` | **Shows** the results in a Streamlit dashboard for the credit committee: overview, sector zoom with AI commentary, indicator data, ESG and methodology (see Part 3). |
 | `AllCode.py` | **Explores** the data: the whole project in one file, without functions, cell by cell (`# %%`), reviewing each df (head, tail, info, describe) before changing it. |
 
 ---
 
 ## How to run
 
-The project uses [uv](https://docs.astral.sh/uv/) to manage Python and the dependencies (`pandas`, `numpy`, `plotly`, `openpyxl`, `loguru`, and `pytest` for the tests). All the commands are run from the `Project_Dashboard/` folder.
+The project uses [uv](https://docs.astral.sh/uv/) to manage Python and the dependencies (`pandas`, `numpy`, `plotly`, `openpyxl`, `loguru`, `streamlit`, `openai`, `dotenv`, and `pytest` for the tests). All the commands are run from the `Project_Dashboard/` folder.
 
 0. **Install the environment** (first time only):
    ```bash
    uv sync
-   uv add pandas numpy plotly openpyxl loguru   # if they are not in pyproject.toml yet
+   uv add pandas numpy plotly openpyxl loguru streamlit openai dotenv   # if they are not in pyproject.toml yet
    uv add --dev pytest
    ```
 1. **Create the database.** Run this only the first time, or when you get new or updated files.
@@ -87,12 +94,18 @@ The project uses [uv](https://docs.astral.sh/uv/) to manage Python and the depen
    ```bash
    uv run python src/main.py
    ```
-3. **Create the baseline.** Do this only once, when you are sure the results are correct:
-   put `SAVE_BASELINE = True` in `config.py`, run `uv run python src/main.py` once, and put it back to `False`.
+3. **Create the baseline.** If there is no baseline yet (for example after cloning from GitHub), `main.py` asks at the end:
+   `There is no baseline yet. Will you run the test files? (yes/no)`. Answer `yes` and the baseline is saved in `data/`.
+   If the baseline already exists, it doesn't ask. Keep `SAVE_BASELINE = False` in `config.py`.
 4. **Run the tests** (after running `main.py`, because they read `output/overall_results.csv`):
    ```bash
    uv run pytest -v
    ```
+5. **Open the dashboard** (after creating the database in step 1):
+   ```bash
+   uv run streamlit run src/dashboard.py
+   ```
+   For the AI analysis, create a `.env` file in the `Project_Dashboard/` folder with `OPENROUTER_API_KEY=your-key` (see Part 3).
 
 > The `.py` files import each other (`from config import ...`), so Python must look for them in `src/`. From the terminal the commands above already do it. In the VS Code interactive window, if you get `ModuleNotFoundError: No module named 'config'`, add `"jupyter.notebookFileRoot": "${fileDirname}"` to `.vscode/settings.json`.
 
@@ -192,7 +205,7 @@ The overall score is the weighted sum of three pillars. Each pillar is also a tr
 |---|---|---|---|---|---|---|
 | **W1** Economic performance | 40 | Real GDP growth (YoY) | 20 | > 3% | 0% to 3% | < 0% |
 | | | GOS growth (YoY) | 20 | > 5% | 0% to 5% | < 0% |
-| **W2** Financial health | 40 | Equity ratio | 40 | ≥ 40% | 20% to < 40% | < 20% |
+| **W2** Financial health | 40 | Equity ratio (a ratio, not %) | 40 | ≥ 0.40 | 0.20 to < 0.40 | < 0.20 |
 | **W3** Workforce / operational | 20 | Labour productivity growth (YoY) | 10 | ≥ 0% | −3% to < 0% | < −3% |
 | | | ESG reporting | 10 | Low risk | Medium risk | High risk |
 
@@ -245,9 +258,65 @@ The same tables can be made from the CSVs with `make_sector_by_quarter_table()` 
 
 ---
 
+## Part 3 – Dashboard
+
+`dashboard.py` is a Streamlit dashboard for the monthly / quarterly meeting between the credit area and the credit risk area. It goes from the **general picture to the details**, and it shows **colours, not scores**: the score stays in the Methodology tab.
+
+```bash
+uv run streamlit run src/dashboard.py
+```
+
+When it opens, it runs the same pipeline as `main.py` once (from the database) and keeps the results in memory, so it doesn't need the files in `output/`.
+
+### Sidebar (filters for every tab)
+
+| Element | What it does |
+|---|---|
+| Logo | `data/IndustryPulse_logo.png` (only if the file exists) |
+| Assessment quarter | The quarter shown in every tab (latest quarter by default) |
+| Traffic light | Shows only the sectors with the selected colours in that quarter |
+| Reset | Back to the latest quarter and all the colours |
+| Reload data | Runs the pipeline again (after changing the data files or `config.py`) |
+
+### Tabs
+
+| Tab | What it shows |
+|---|---|
+| **Overview** | Number of sectors per colour, the committee table (traffic light, change vs. previous quarter, W1–W3 and Red indicators, with CSV download), a light map of all the sectors over time and a pillar map. **Click a sector in the table to open it in Sector zoom.** |
+| **Sector zoom** | Traffic light, quarters with the same colour, Red indicators and data coverage; a red box with the risk warning when there is one; each pillar explained with its indicators and units; the history of the colours; one chart per indicator (points coloured with their traffic light, y axis up to 1.5 × the historical maximum, a dotted line on the selected quarter); and the **AI analysis**. |
+| **Indicator data** | The underlying data of each indicator with its unit: line or bars, period slider, latest data and download. Business Expectations is shown for context only. |
+| **ESG** | Latest ESG report only (no history): Yes / Partially / No per sector, the physical, transition and governance risks each sector tends to have, and why ESG / TCFD / TNFD reports matter for credit, with official sources. |
+| **Methodology** | The rules of the score, the limits of each indicator and the technical tables, with downloads. |
+
+### AI analysis (Sector zoom only)
+
+The AI is **complementary**: it comments on what the dashboard already shows, it doesn't decide anything.
+
+- **How:** the button *Generate AI analysis* sends the colours of the sector, its indicators, the change vs. the previous quarter and the ESG profile to a model through [OpenRouter](https://openrouter.ai/).
+- **Answer:** executive, maximum 200 words: *Key strengths & vulnerabilities*, *Outlook & risk commentary* and *Sector trends* (bullets, each with an official source link), plus a limitation line.
+- **Links:** the model has no internet access, so it can only cite the official sources given in `ESG_SECTOR_RISKS` (`config.py`). Any other link is flagged with a warning.
+- **Model:** `AI_MODEL` in `config.py` (`deepseek/deepseek-v4.1-flash`, a low-cost model).
+- **Cost:** answers are cached, so the same sector and quarter is not sent twice; short prompt and `max_tokens=500`.
+- **Log:** each request is written in `log/ai_runs.log` (the API key never is; a test checks it).
+
+**API key** (the key is private and is never written in the code):
+
+| Where | How |
+|---|---|
+| Your computer | A `.env` file in `Project_Dashboard/` with `OPENROUTER_API_KEY=your-key`. `.env` is in `.gitignore`, so it is never committed. |
+| Streamlit Community Cloud | Add `OPENROUTER_API_KEY` in the app's **Secrets** (`st.secrets`). |
+
+Without a key, the dashboard works normally and only the AI section shows how to add it.
+
+### Colours
+
+The dashboard follows the user's light or dark system theme. The accent colour (dark blue) is set in `.streamlit/config.toml`, so it is not confused with the red of the traffic light.
+
+---
+
 ## Tests
 
-`test/test_pipeline.py` has 4 simple tests on the results saved in `output/overall_results.csv`:
+`test/test_pipeline.py` has 7 simple tests on the results saved in `output/overall_results.csv`, the dashboard and the AI log:
 
 | Test | What it checks |
 |---|---|
@@ -255,6 +324,9 @@ The same tables can be made from the CSVs with `make_sector_by_quarter_table()` 
 | `test_weights_add_up_to_100` | The weights of the score add up to 100. |
 | `test_scores_between_0_and_100` | All the scores are between 0 and 100. |
 | `test_lights_are_only_green_amber_red` | The final light is only Green, Amber or Red. |
+| `test_dashboard_runs_without_errors` | The dashboard opens without errors (Streamlit `AppTest`, no browser needed). |
+| `test_every_light_has_a_credit_signal` | Every traffic light has a credit signal in `config.py`. |
+| `test_api_key_is_never_in_the_ai_log` | The API key of `.env` is never written in `log/ai_runs.log`. |
 
 **How to run them:**
 
@@ -263,7 +335,7 @@ uv run python src/main.py          # 1. creates the results in output/
 uv run pytest -v                   # 2. runs the tests
 ```
 
-**The baseline** is a copy of results you have checked and trust. It is created once by putting `SAVE_BASELINE = True` in `config.py` and running `main.py` (then put it back to `False`). The baseline test doesn't prove the results are correct, only that they **haven't changed** since then.
+**The baseline** is a copy of results you have checked and trust. If it doesn't exist yet, `main.py` asks if you will run the tests and creates it when you answer `yes`. The baseline test doesn't prove the results are correct, only that they **haven't changed** since then.
 
 **Break it on purpose:** a test that has never failed hasn't proven anything. For example, change the equity ratio weight from 40 to 30 in `config.py`, run the pipeline and the tests: they must **FAIL**. Then undo the change.
 
@@ -273,7 +345,7 @@ uv run pytest -v                   # 2. runs the tests
 
 ## Logs
 
-Every run of `main.py` writes what happened in `log/pipeline.log` (with [loguru](https://github.com/Delgan/loguru)):
+Every run of `main.py` (and of the dashboard) writes what happened in `log/pipeline.log` (with [loguru](https://github.com/Delgan/loguru)). The AI requests of the dashboard go to `log/ai_runs.log`.
 
 | Level | Used for |
 |---|---|
@@ -292,7 +364,9 @@ Every run of `main.py` writes what happened in `log/pipeline.log` (with [loguru]
 - **ESG sample:** only the 10 biggest companies per sector (see the limitation above).
 - **Business expectations** are cleaned, merged and charted, but they are not part of the score yet.
 - **Total row names** in `config.py` are marked `# CHECK` and must match the source files exactly.
-- **Equity ratio** must be in % (e.g. 45, not 0.45), otherwise every sector will be rated Red.
+- **Equity ratio** is a ratio (e.g. 0.45, not 45%), so its limits are 0.40 and 0.20. If the source file ever changes to %, the limits must change too.
+- **Utilities** is not in the Equity ratio and Labour productivity files, so those charts show "No data" and its score uses the other indicators.
+- **AI analysis** is a commentary to support the discussion: it can be wrong and must be checked before using it.
 
 ---
 

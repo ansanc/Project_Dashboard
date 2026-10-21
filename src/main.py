@@ -176,7 +176,6 @@ def save_baseline(results: dict) -> None:
     results["df_overall_results"].to_csv(BASELINE_OVERALL_RESULTS_FILE, index=False)
     results["df_indicator_results"].to_csv(BASELINE_INDICATOR_RESULTS_FILE, index=False)
     logger.success("Baseline saved in {}", BASELINE_OVERALL_RESULTS_FILE.parent)
-    logger.warning("Remember to put SAVE_BASELINE = False again in config.py")
 
 
 # Runs ONLY with "python main.py", not when another file imports it
@@ -186,5 +185,16 @@ if __name__ == "__main__":
     save_results(pipeline_results)
     log_final_lights(pipeline_results)
     make_charts(pipeline_results)
+
+    # Baseline for the tests
     if SAVE_BASELINE:
+        # Manual way: only when the results changed on purpose (new weights, limits, data...)
         save_baseline(pipeline_results)
+        logger.warning("Remember to put SAVE_BASELINE = False again in config.py")
+    elif not BASELINE_OVERALL_RESULTS_FILE.exists():
+        # No baseline yet (for example after cloning from GitHub): ask the user
+        answer = input("There is no baseline yet. Will you run the test files? (yes/no): ")
+        if answer.strip().lower() in ["yes", "y"]:
+            save_baseline(pipeline_results)
+        else:
+            logger.info("No baseline created. You will be asked again the next time you run main.py")

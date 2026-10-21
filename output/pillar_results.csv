@@ -1,0 +1,271 @@
+Sectors,Quarter,Pillar,Pillar name,Score,Light,Data coverage %
+Manufacturing,2022 1Q,W1,Economic performance,100.0,Green,100.0
+Manufacturing,2022 1Q,W2,Financial health,100.0,Green,100.0
+Manufacturing,2022 1Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Manufacturing,2022 2Q,W1,Economic performance,100.0,Green,100.0
+Manufacturing,2022 2Q,W2,Financial health,100.0,Green,100.0
+Manufacturing,2022 2Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Manufacturing,2022 3Q,W1,Economic performance,75.0,Green,100.0
+Manufacturing,2022 3Q,W2,Financial health,100.0,Green,100.0
+Manufacturing,2022 3Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Manufacturing,2022 4Q,W1,Economic performance,25.0,Red,100.0
+Manufacturing,2022 4Q,W2,Financial health,100.0,Green,100.0
+Manufacturing,2022 4Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Manufacturing,2023 1Q,W1,Economic performance,0.0,Red,100.0
+Manufacturing,2023 1Q,W2,Financial health,100.0,Green,100.0
+Manufacturing,2023 1Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Manufacturing,2023 2Q,W1,Economic performance,0.0,Red,100.0
+Manufacturing,2023 2Q,W2,Financial health,100.0,Green,100.0
+Manufacturing,2023 2Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Manufacturing,2023 3Q,W1,Economic performance,0.0,Red,100.0
+Manufacturing,2023 3Q,W2,Financial health,100.0,Green,100.0
+Manufacturing,2023 3Q,W3,Workforce / operational risk,100.0,Green,100.0
+Manufacturing,2023 4Q,W1,Economic performance,25.0,Red,100.0
+Manufacturing,2023 4Q,W2,Financial health,100.0,Green,100.0
+Manufacturing,2023 4Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Manufacturing,2024 1Q,W1,Economic performance,25.0,Red,100.0
+Manufacturing,2024 1Q,W2,Financial health,100.0,Green,100.0
+Manufacturing,2024 1Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Manufacturing,2024 2Q,W1,Economic performance,50.0,Amber,100.0
+Manufacturing,2024 2Q,W2,Financial health,100.0,Green,100.0
+Manufacturing,2024 2Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Manufacturing,2024 3Q,W1,Economic performance,100.0,Green,100.0
+Manufacturing,2024 3Q,W2,Financial health,100.0,Green,100.0
+Manufacturing,2024 3Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Manufacturing,2024 4Q,W1,Economic performance,100.0,Green,100.0
+Manufacturing,2024 4Q,W2,Financial health,100.0,Green,100.0
+Manufacturing,2024 4Q,W3,Workforce / operational risk,100.0,Green,100.0
+Manufacturing,2025 1Q,W1,Economic performance,100.0,Green,100.0
+Manufacturing,2025 1Q,W2,Financial health,100.0,Green,100.0
+Manufacturing,2025 1Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Manufacturing,2025 2Q,W1,Economic performance,100.0,Green,100.0
+Manufacturing,2025 2Q,W2,Financial health,100.0,Green,100.0
+Manufacturing,2025 2Q,W3,Workforce / operational risk,100.0,Green,100.0
+Manufacturing,2025 3Q,W1,Economic performance,100.0,Green,100.0
+Manufacturing,2025 3Q,W2,Financial health,100.0,Green,100.0
+Manufacturing,2025 3Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Manufacturing,2025 4Q,W1,Economic performance,100.0,Green,100.0
+Manufacturing,2025 4Q,W2,Financial health,100.0,Green,100.0
+Manufacturing,2025 4Q,W3,Workforce / operational risk,100.0,Green,100.0
+Manufacturing,2026 1Q,W1,Economic performance,100.0,Green,100.0
+Manufacturing,2026 1Q,W2,Financial health,,,0.0
+Manufacturing,2026 1Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Manufacturing,2026 2Q,W1,Economic performance,100.0,Green,100.0
+Manufacturing,2026 2Q,W2,Financial health,,,0.0
+Manufacturing,2026 2Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Real Estate,2022 1Q,W1,Economic performance,100.0,Green,100.0
+Real Estate,2022 1Q,W2,Financial health,100.0,Green,100.0
+Real Estate,2022 1Q,W3,Workforce / operational risk,25.0,Red,100.0
+Real Estate,2022 2Q,W1,Economic performance,100.0,Green,100.0
+Real Estate,2022 2Q,W2,Financial health,100.0,Green,100.0
+Real Estate,2022 2Q,W3,Workforce / operational risk,25.0,Red,100.0
+Real Estate,2022 3Q,W1,Economic performance,100.0,Green,100.0
+Real Estate,2022 3Q,W2,Financial health,100.0,Green,100.0
+Real Estate,2022 3Q,W3,Workforce / operational risk,25.0,Red,100.0
+Real Estate,2022 4Q,W1,Economic performance,100.0,Green,100.0
+Real Estate,2022 4Q,W2,Financial health,100.0,Green,100.0
+Real Estate,2022 4Q,W3,Workforce / operational risk,25.0,Red,100.0
+Real Estate,2023 1Q,W1,Economic performance,75.0,Green,100.0
+Real Estate,2023 1Q,W2,Financial health,100.0,Green,100.0
+Real Estate,2023 1Q,W3,Workforce / operational risk,25.0,Red,100.0
+Real Estate,2023 2Q,W1,Economic performance,100.0,Green,100.0
+Real Estate,2023 2Q,W2,Financial health,100.0,Green,100.0
+Real Estate,2023 2Q,W3,Workforce / operational risk,25.0,Red,100.0
+Real Estate,2023 3Q,W1,Economic performance,75.0,Green,100.0
+Real Estate,2023 3Q,W2,Financial health,100.0,Green,100.0
+Real Estate,2023 3Q,W3,Workforce / operational risk,75.0,Green,100.0
+Real Estate,2023 4Q,W1,Economic performance,25.0,Red,100.0
+Real Estate,2023 4Q,W2,Financial health,100.0,Green,100.0
+Real Estate,2023 4Q,W3,Workforce / operational risk,25.0,Red,100.0
+Real Estate,2024 1Q,W1,Economic performance,25.0,Red,100.0
+Real Estate,2024 1Q,W2,Financial health,100.0,Green,100.0
+Real Estate,2024 1Q,W3,Workforce / operational risk,25.0,Red,100.0
+Real Estate,2024 2Q,W1,Economic performance,100.0,Green,100.0
+Real Estate,2024 2Q,W2,Financial health,100.0,Green,100.0
+Real Estate,2024 2Q,W3,Workforce / operational risk,25.0,Red,100.0
+Real Estate,2024 3Q,W1,Economic performance,100.0,Green,100.0
+Real Estate,2024 3Q,W2,Financial health,100.0,Green,100.0
+Real Estate,2024 3Q,W3,Workforce / operational risk,25.0,Red,100.0
+Real Estate,2024 4Q,W1,Economic performance,100.0,Green,100.0
+Real Estate,2024 4Q,W2,Financial health,100.0,Green,100.0
+Real Estate,2024 4Q,W3,Workforce / operational risk,25.0,Red,100.0
+Real Estate,2025 1Q,W1,Economic performance,100.0,Green,100.0
+Real Estate,2025 1Q,W2,Financial health,100.0,Green,100.0
+Real Estate,2025 1Q,W3,Workforce / operational risk,75.0,Green,100.0
+Real Estate,2025 2Q,W1,Economic performance,100.0,Green,100.0
+Real Estate,2025 2Q,W2,Financial health,100.0,Green,100.0
+Real Estate,2025 2Q,W3,Workforce / operational risk,25.0,Red,100.0
+Real Estate,2025 3Q,W1,Economic performance,100.0,Green,100.0
+Real Estate,2025 3Q,W2,Financial health,100.0,Green,100.0
+Real Estate,2025 3Q,W3,Workforce / operational risk,75.0,Green,100.0
+Real Estate,2025 4Q,W1,Economic performance,75.0,Green,100.0
+Real Estate,2025 4Q,W2,Financial health,100.0,Green,100.0
+Real Estate,2025 4Q,W3,Workforce / operational risk,75.0,Green,100.0
+Real Estate,2026 1Q,W1,Economic performance,100.0,Green,100.0
+Real Estate,2026 1Q,W2,Financial health,,,0.0
+Real Estate,2026 1Q,W3,Workforce / operational risk,75.0,Green,100.0
+Real Estate,2026 2Q,W1,Economic performance,100.0,Green,100.0
+Real Estate,2026 2Q,W2,Financial health,,,0.0
+Real Estate,2026 2Q,W3,Workforce / operational risk,25.0,Red,100.0
+Transportation & Storage,2022 1Q,W1,Economic performance,100.0,Green,100.0
+Transportation & Storage,2022 1Q,W2,Financial health,100.0,Green,100.0
+Transportation & Storage,2022 1Q,W3,Workforce / operational risk,0.0,Red,100.0
+Transportation & Storage,2022 2Q,W1,Economic performance,100.0,Green,100.0
+Transportation & Storage,2022 2Q,W2,Financial health,100.0,Green,100.0
+Transportation & Storage,2022 2Q,W3,Workforce / operational risk,0.0,Red,100.0
+Transportation & Storage,2022 3Q,W1,Economic performance,100.0,Green,100.0
+Transportation & Storage,2022 3Q,W2,Financial health,100.0,Green,100.0
+Transportation & Storage,2022 3Q,W3,Workforce / operational risk,0.0,Red,100.0
+Transportation & Storage,2022 4Q,W1,Economic performance,50.0,Amber,100.0
+Transportation & Storage,2022 4Q,W2,Financial health,100.0,Green,100.0
+Transportation & Storage,2022 4Q,W3,Workforce / operational risk,0.0,Red,100.0
+Transportation & Storage,2023 1Q,W1,Economic performance,25.0,Red,100.0
+Transportation & Storage,2023 1Q,W2,Financial health,100.0,Green,100.0
+Transportation & Storage,2023 1Q,W3,Workforce / operational risk,0.0,Red,100.0
+Transportation & Storage,2023 2Q,W1,Economic performance,50.0,Amber,100.0
+Transportation & Storage,2023 2Q,W2,Financial health,100.0,Green,100.0
+Transportation & Storage,2023 2Q,W3,Workforce / operational risk,0.0,Red,100.0
+Transportation & Storage,2023 3Q,W1,Economic performance,25.0,Red,100.0
+Transportation & Storage,2023 3Q,W2,Financial health,100.0,Green,100.0
+Transportation & Storage,2023 3Q,W3,Workforce / operational risk,0.0,Red,100.0
+Transportation & Storage,2023 4Q,W1,Economic performance,50.0,Amber,100.0
+Transportation & Storage,2023 4Q,W2,Financial health,100.0,Green,100.0
+Transportation & Storage,2023 4Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Transportation & Storage,2024 1Q,W1,Economic performance,75.0,Green,100.0
+Transportation & Storage,2024 1Q,W2,Financial health,100.0,Green,100.0
+Transportation & Storage,2024 1Q,W3,Workforce / operational risk,0.0,Red,100.0
+Transportation & Storage,2024 2Q,W1,Economic performance,100.0,Green,100.0
+Transportation & Storage,2024 2Q,W2,Financial health,100.0,Green,100.0
+Transportation & Storage,2024 2Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Transportation & Storage,2024 3Q,W1,Economic performance,100.0,Green,100.0
+Transportation & Storage,2024 3Q,W2,Financial health,100.0,Green,100.0
+Transportation & Storage,2024 3Q,W3,Workforce / operational risk,0.0,Red,100.0
+Transportation & Storage,2024 4Q,W1,Economic performance,100.0,Green,100.0
+Transportation & Storage,2024 4Q,W2,Financial health,100.0,Green,100.0
+Transportation & Storage,2024 4Q,W3,Workforce / operational risk,0.0,Red,100.0
+Transportation & Storage,2025 1Q,W1,Economic performance,75.0,Green,100.0
+Transportation & Storage,2025 1Q,W2,Financial health,100.0,Green,100.0
+Transportation & Storage,2025 1Q,W3,Workforce / operational risk,0.0,Red,100.0
+Transportation & Storage,2025 2Q,W1,Economic performance,50.0,Amber,100.0
+Transportation & Storage,2025 2Q,W2,Financial health,100.0,Green,100.0
+Transportation & Storage,2025 2Q,W3,Workforce / operational risk,0.0,Red,100.0
+Transportation & Storage,2025 3Q,W1,Economic performance,25.0,Red,100.0
+Transportation & Storage,2025 3Q,W2,Financial health,100.0,Green,100.0
+Transportation & Storage,2025 3Q,W3,Workforce / operational risk,0.0,Red,100.0
+Transportation & Storage,2025 4Q,W1,Economic performance,25.0,Red,100.0
+Transportation & Storage,2025 4Q,W2,Financial health,100.0,Green,100.0
+Transportation & Storage,2025 4Q,W3,Workforce / operational risk,0.0,Red,100.0
+Transportation & Storage,2026 1Q,W1,Economic performance,25.0,Red,100.0
+Transportation & Storage,2026 1Q,W2,Financial health,,,0.0
+Transportation & Storage,2026 1Q,W3,Workforce / operational risk,0.0,Red,100.0
+Transportation & Storage,2026 2Q,W1,Economic performance,75.0,Green,100.0
+Transportation & Storage,2026 2Q,W2,Financial health,,,0.0
+Transportation & Storage,2026 2Q,W3,Workforce / operational risk,0.0,Red,100.0
+Information & Communications,2022 1Q,W1,Economic performance,25.0,Red,100.0
+Information & Communications,2022 1Q,W2,Financial health,50.0,Amber,100.0
+Information & Communications,2022 1Q,W3,Workforce / operational risk,0.0,Red,100.0
+Information & Communications,2022 2Q,W1,Economic performance,50.0,Amber,100.0
+Information & Communications,2022 2Q,W2,Financial health,50.0,Amber,100.0
+Information & Communications,2022 2Q,W3,Workforce / operational risk,0.0,Red,100.0
+Information & Communications,2022 3Q,W1,Economic performance,25.0,Red,100.0
+Information & Communications,2022 3Q,W2,Financial health,50.0,Amber,100.0
+Information & Communications,2022 3Q,W3,Workforce / operational risk,0.0,Red,100.0
+Information & Communications,2022 4Q,W1,Economic performance,25.0,Red,100.0
+Information & Communications,2022 4Q,W2,Financial health,50.0,Amber,100.0
+Information & Communications,2022 4Q,W3,Workforce / operational risk,0.0,Red,100.0
+Information & Communications,2023 1Q,W1,Economic performance,75.0,Green,100.0
+Information & Communications,2023 1Q,W2,Financial health,50.0,Amber,100.0
+Information & Communications,2023 1Q,W3,Workforce / operational risk,0.0,Red,100.0
+Information & Communications,2023 2Q,W1,Economic performance,100.0,Green,100.0
+Information & Communications,2023 2Q,W2,Financial health,50.0,Amber,100.0
+Information & Communications,2023 2Q,W3,Workforce / operational risk,0.0,Red,100.0
+Information & Communications,2023 3Q,W1,Economic performance,100.0,Green,100.0
+Information & Communications,2023 3Q,W2,Financial health,50.0,Amber,100.0
+Information & Communications,2023 3Q,W3,Workforce / operational risk,0.0,Red,100.0
+Information & Communications,2023 4Q,W1,Economic performance,100.0,Green,100.0
+Information & Communications,2023 4Q,W2,Financial health,50.0,Amber,100.0
+Information & Communications,2023 4Q,W3,Workforce / operational risk,0.0,Red,100.0
+Information & Communications,2024 1Q,W1,Economic performance,100.0,Green,100.0
+Information & Communications,2024 1Q,W2,Financial health,50.0,Amber,100.0
+Information & Communications,2024 1Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Information & Communications,2024 2Q,W1,Economic performance,100.0,Green,100.0
+Information & Communications,2024 2Q,W2,Financial health,50.0,Amber,100.0
+Information & Communications,2024 2Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Information & Communications,2024 3Q,W1,Economic performance,100.0,Green,100.0
+Information & Communications,2024 3Q,W2,Financial health,50.0,Amber,100.0
+Information & Communications,2024 3Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Information & Communications,2024 4Q,W1,Economic performance,100.0,Green,100.0
+Information & Communications,2024 4Q,W2,Financial health,50.0,Amber,100.0
+Information & Communications,2024 4Q,W3,Workforce / operational risk,0.0,Red,100.0
+Information & Communications,2025 1Q,W1,Economic performance,100.0,Green,100.0
+Information & Communications,2025 1Q,W2,Financial health,50.0,Amber,100.0
+Information & Communications,2025 1Q,W3,Workforce / operational risk,0.0,Red,100.0
+Information & Communications,2025 2Q,W1,Economic performance,100.0,Green,100.0
+Information & Communications,2025 2Q,W2,Financial health,50.0,Amber,100.0
+Information & Communications,2025 2Q,W3,Workforce / operational risk,0.0,Red,100.0
+Information & Communications,2025 3Q,W1,Economic performance,100.0,Green,100.0
+Information & Communications,2025 3Q,W2,Financial health,50.0,Amber,100.0
+Information & Communications,2025 3Q,W3,Workforce / operational risk,0.0,Red,100.0
+Information & Communications,2025 4Q,W1,Economic performance,100.0,Green,100.0
+Information & Communications,2025 4Q,W2,Financial health,50.0,Amber,100.0
+Information & Communications,2025 4Q,W3,Workforce / operational risk,0.0,Red,100.0
+Information & Communications,2026 1Q,W1,Economic performance,100.0,Green,100.0
+Information & Communications,2026 1Q,W2,Financial health,,,0.0
+Information & Communications,2026 1Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Information & Communications,2026 2Q,W1,Economic performance,100.0,Green,100.0
+Information & Communications,2026 2Q,W2,Financial health,,,0.0
+Information & Communications,2026 2Q,W3,Workforce / operational risk,50.0,Amber,100.0
+Utilities,2022 1Q,W1,Economic performance,75.0,Green,100.0
+Utilities,2022 1Q,W2,Financial health,,,0.0
+Utilities,2022 1Q,W3,Workforce / operational risk,0.0,Red,50.0
+Utilities,2022 2Q,W1,Economic performance,75.0,Green,100.0
+Utilities,2022 2Q,W2,Financial health,,,0.0
+Utilities,2022 2Q,W3,Workforce / operational risk,0.0,Red,50.0
+Utilities,2022 3Q,W1,Economic performance,75.0,Green,100.0
+Utilities,2022 3Q,W2,Financial health,,,0.0
+Utilities,2022 3Q,W3,Workforce / operational risk,0.0,Red,50.0
+Utilities,2022 4Q,W1,Economic performance,75.0,Green,100.0
+Utilities,2022 4Q,W2,Financial health,,,0.0
+Utilities,2022 4Q,W3,Workforce / operational risk,0.0,Red,50.0
+Utilities,2023 1Q,W1,Economic performance,75.0,Green,100.0
+Utilities,2023 1Q,W2,Financial health,,,0.0
+Utilities,2023 1Q,W3,Workforce / operational risk,0.0,Red,50.0
+Utilities,2023 2Q,W1,Economic performance,75.0,Green,100.0
+Utilities,2023 2Q,W2,Financial health,,,0.0
+Utilities,2023 2Q,W3,Workforce / operational risk,0.0,Red,50.0
+Utilities,2023 3Q,W1,Economic performance,75.0,Green,100.0
+Utilities,2023 3Q,W2,Financial health,,,0.0
+Utilities,2023 3Q,W3,Workforce / operational risk,0.0,Red,50.0
+Utilities,2023 4Q,W1,Economic performance,75.0,Green,100.0
+Utilities,2023 4Q,W2,Financial health,,,0.0
+Utilities,2023 4Q,W3,Workforce / operational risk,0.0,Red,50.0
+Utilities,2024 1Q,W1,Economic performance,25.0,Red,100.0
+Utilities,2024 1Q,W2,Financial health,,,0.0
+Utilities,2024 1Q,W3,Workforce / operational risk,0.0,Red,50.0
+Utilities,2024 2Q,W1,Economic performance,50.0,Amber,100.0
+Utilities,2024 2Q,W2,Financial health,,,0.0
+Utilities,2024 2Q,W3,Workforce / operational risk,0.0,Red,50.0
+Utilities,2024 3Q,W1,Economic performance,50.0,Amber,100.0
+Utilities,2024 3Q,W2,Financial health,,,0.0
+Utilities,2024 3Q,W3,Workforce / operational risk,0.0,Red,50.0
+Utilities,2024 4Q,W1,Economic performance,50.0,Amber,100.0
+Utilities,2024 4Q,W2,Financial health,,,0.0
+Utilities,2024 4Q,W3,Workforce / operational risk,0.0,Red,50.0
+Utilities,2025 1Q,W1,Economic performance,25.0,Red,100.0
+Utilities,2025 1Q,W2,Financial health,,,0.0
+Utilities,2025 1Q,W3,Workforce / operational risk,0.0,Red,50.0
+Utilities,2025 2Q,W1,Economic performance,25.0,Red,100.0
+Utilities,2025 2Q,W2,Financial health,,,0.0
+Utilities,2025 2Q,W3,Workforce / operational risk,0.0,Red,50.0
+Utilities,2025 3Q,W1,Economic performance,25.0,Red,100.0
+Utilities,2025 3Q,W2,Financial health,,,0.0
+Utilities,2025 3Q,W3,Workforce / operational risk,0.0,Red,50.0
+Utilities,2025 4Q,W1,Economic performance,25.0,Red,100.0
+Utilities,2025 4Q,W2,Financial health,,,0.0
+Utilities,2025 4Q,W3,Workforce / operational risk,0.0,Red,50.0
+Utilities,2026 1Q,W1,Economic performance,25.0,Red,100.0
+Utilities,2026 1Q,W2,Financial health,,,0.0
+Utilities,2026 1Q,W3,Workforce / operational risk,0.0,Red,50.0
+Utilities,2026 2Q,W1,Economic performance,25.0,Red,100.0
+Utilities,2026 2Q,W2,Financial health,,,0.0
+Utilities,2026 2Q,W3,Workforce / operational risk,0.0,Red,50.0
