@@ -1,8 +1,5 @@
 ######################################################################
-# dashboard.py
-# Industry Monitoring Dashboard (Streamlit)
-#
-# Used in the monthly / quarterly meetings between the credit area and the
+## Used in the monthly / quarterly meetings between the credit area and the
 # credit risk area, to follow the behaviour of each sector and decide where
 # to grow or slow the growth.
 #
@@ -24,6 +21,7 @@
 # To stop it: Ctrl + C in the terminal
 ######################################################################
 
+# import the libraries
 import os
 import re
 
@@ -35,6 +33,7 @@ from dotenv import load_dotenv
 from loguru import logger
 from openai import OpenAI
 
+# import the functions and constants of the other files of the project
 from config import (PROJECT_FOLDER, DATA_FILES, TARGET_SECTORS, SECTOR_COLORS,
                     INDICATORS_TO_ANALYSE, PILLARS, SCORE_INDICATORS, ESG_RISK_TO_LIGHT,
                     POINTS_PER_LIGHT, GREEN_IF_SCORE_AT_LEAST, AMBER_IF_SCORE_AT_LEAST,
@@ -50,6 +49,7 @@ from main import run_pipeline, setup_logging
 # PAGE SETUP
 ######################################################################
 
+#
 st.set_page_config(page_title="Industry Monitoring System", page_icon="📊", layout="wide")
 
 # How each traffic light is shown in the dashboard
@@ -59,7 +59,7 @@ LIGHT_COLOR = {"Green": "#2E8B57", "Amber": "#E69F00", "Red": "#D64545"}
 # Traffic light -> number (to compare lights and draw the colour maps: the higher, the better)
 LIGHT_NUMBER = {"Red": 0, "Amber": 1, "Green": 2}
 
-# The indicators that come from the ESG report (they have no history)
+# The indicators that come from the ESG report as is a variable that for now is not historical.
 ESG_INDICATORS = []
 for indicator_name, indicator_settings in SCORE_INDICATORS.items():
     if indicator_settings["calculation"] == "esg":
@@ -122,40 +122,41 @@ quarter_options = sorted(df_overall_results["Quarter"].unique(), key=convert_per
 ######################################################################
 # SMALL HELPERS
 ######################################################################
-
+# the functions below are used in several places of the dashboard 
+# (for example to show a light or a value in the committee table)
 def light_text(light) -> str:
     """'Green' -> '🟢 Green'. No light -> 'No data'."""
     if pd.isna(light):
         return "No data"
     return f"{LIGHT_ICON[light]} {light}"
 
-
+# this function is used in the committee table and in the indicator data table
 def value_text(value) -> str:
     """Number with 2 decimals, or 'No data'."""
     if pd.isna(value):
         return "No data"
     return f"{value:,.2f}"
 
-
+# this function is used in the committee table and in the indicator data table
 def quarter_text(quarter: str) -> str:
     """'2025 2Q' -> '2025 Q2' (only how it is shown, the data keeps '2025 2Q')."""
     year, quarter_number = quarter.split()
     return f"{year} Q{quarter_number[0]}"
 
-
+# this function is used in the committee table and in the indicator data table
 def download_csv_button(df_to_download: pd.DataFrame, file_name: str) -> None:
     """Button to download a table as a CSV file (to take it to the committee)."""
     st.download_button("⬇️ Download CSV", df_to_download.to_csv(index=False).encode("utf-8"),
                        file_name=file_name, mime="text/csv", key=f"download_{file_name}")
 
-
+# this function is used in the committee table and in the indicator data table
 def mark_selected_quarter(figure, quarter: str) -> None:
     """Vertical line on the selected quarter, to separate it from the rest of the trend."""
     figure.add_vline(x=quarter, line_dash="dot", line_width=2, line_color="#9E9E9E")
     figure.add_annotation(x=quarter, y=1, yref="paper", yanchor="bottom", showarrow=False,
                           text=f"Selected: {quarter_text(quarter)}", font={"color": "#9E9E9E"})
 
-
+# this function is used in the committee table and in the indicator data table
 def compare_lights(light_before, light_now) -> str:
     """Did the light get better, worse or stay the same?"""
     if pd.isna(light_before) or pd.isna(light_now):
@@ -167,7 +168,7 @@ def compare_lights(light_before, light_now) -> str:
     else:
         return "= Same"
 
-
+# this function is used in the sector zoom to show how many quarters in a row have the same light
 def count_quarters_with_same_light(lights_oldest_to_newest: list) -> int:
     """How many quarters in a row (ending in the last one) have the same light."""
     last_light = lights_oldest_to_newest[-1]
@@ -178,7 +179,7 @@ def count_quarters_with_same_light(lights_oldest_to_newest: list) -> int:
         number_of_quarters = number_of_quarters + 1
     return number_of_quarters
 
-
+# this function is used in the overview and in the sector zoom to draw the coloured squares
 def make_light_map(df_light_table: pd.DataFrame, title: str, show_text: bool = False,
                    x_title: str = "Quarter") -> go.Figure:
     """Grid of coloured squares. df_light_table: 'Green' / 'Amber' / 'Red' in each cell
@@ -210,7 +211,7 @@ def make_light_map(df_light_table: pd.DataFrame, title: str, show_text: bool = F
                             yaxis={"autorange": "reversed"})   # first row on top
     return light_map
 
-
+# this function is used in the indicator data tab to limit the y axis of the charts
 def y_axis_range(values: list) -> list:
     """Limits of the y axis: from 0 (or 1.5 x the lowest value if it is negative)
     up to 1.5 x the highest value (= historical maximum + 50%, so there is space above)."""
@@ -226,7 +227,7 @@ def y_axis_range(values: list) -> list:
         bottom = 0
     return [bottom, top]
 
-
+# this function is used in the indicator data tab to show the GDP share of each sector
 def make_gdp_share_table() -> pd.DataFrame:
     """% of each target sector in the total GDP: sector value / total GDP value * 100."""
     df_gdp = clean_data["gdp"]
@@ -247,7 +248,6 @@ def make_gdp_share_table() -> pd.DataFrame:
 #   2. User prompt   -> the current view + its data + the output format
 #   3. Ask AI        -> one call to OpenRouter
 #   4. Log           -> every AI run is written in log/ai_runs.log (never the API key)
-# Same structure as the class demos (week9_streamlit_demo.py, week10_openrouter_demo.py)
 # The API key is NOT in the code:
 #   Local (our laptops)               -> .env file  -> os.getenv()
 #   Cloud (Streamlit Community Cloud) -> st.secrets -> st.secrets.get()
@@ -282,7 +282,7 @@ Start each part with its title in bold:
    End each bullet with its source as a markdown link [name](URL), using ONLY the URLs listed.
 End with one line starting with **Limitation:**"""
 
-
+#this function is used in the sector zoom to build the prompt for the AI
 def build_ai_prompt(current_view_text: str, df_quarter_indicators: pd.DataFrame,
                     df_previous_indicators: pd.DataFrame, sector: str) -> str:
     """User prompt: the current view + the indicators of the sector
@@ -322,7 +322,7 @@ def build_ai_prompt(current_view_text: str, df_quarter_indicators: pd.DataFrame,
 
     return prompt + "\n" + AI_OUTPUT_FORMAT
 
-
+# this function is used in the sector zoom to check if the AI wrote any unofficial URL
 def find_unofficial_links(ai_summary: str, sector: str) -> list:
     """Guardrail: URLs written by the AI that are NOT in the official sources of the sector."""
     official_urls = []
@@ -337,7 +337,7 @@ def find_unofficial_links(ai_summary: str, sector: str) -> list:
             unofficial_links.append(url)
     return unofficial_links
 
-
+# this function is used in the sector zoom to get the API key of OpenRouter
 def get_ai_api_key() -> str | None:
     """API key of OpenRouter. None if it is not found.
     1. Local: the .env file of the project folder (OPENROUTER_API_KEY=...)
@@ -354,7 +354,7 @@ def get_ai_api_key() -> str | None:
 
 # 3. ASK THE AI
 # st.cache_data = if the same prompt was already sent, reuse the answer and do NOT call
-# the API again (professor's instruction 4: avoid unnecessary repeated calls)
+
 @st.cache_data(show_spinner=False)
 def ask_ai(user_prompt: str, _api_key: str) -> tuple[str, str]:
     """One call to OpenRouter. Returns (answer, name of the model that answered)."""
@@ -373,9 +373,6 @@ def ask_ai(user_prompt: str, _api_key: str) -> tuple[str, str]:
     if not ai_summary:
         raise ValueError("The model returned an empty answer")
     return ai_summary, response.model
-
-
-# 4. LOG EVERY AI RUN: with ai_logger (see LOGS at the top). Never the API key
 
 
 ######################################################################

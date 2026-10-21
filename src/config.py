@@ -8,9 +8,6 @@
 # Note that this code uses the help of Copilot or Claude IA, own knowledge and what was learnt in class.
 
 
-
-
-
 ######################################################################
 # 1. FOLDERS
 # Project_Dashboard/
@@ -40,8 +37,6 @@ PILLAR_RESULTS_FILE = OUTPUT_FOLDER / "pillar_results.csv"
 OVERALL_RESULTS_FILE = OUTPUT_FOLDER / "overall_results.csv"
 
 # Baseline: a copy of a result we trust. The tests compare every new run against it
-# Put True ONLY for one run, when you are sure the results are correct,
-# and then put it back to False (if not, every run overwrites the baseline)
 SAVE_BASELINE = False
 BASELINE_OVERALL_RESULTS_FILE = DATA_FOLDER / "reconciliation_baseline_overall_results.csv"
 BASELINE_INDICATOR_RESULTS_FILE = DATA_FOLDER / "reconciliation_baseline_indicator_results.csv"
@@ -52,7 +47,7 @@ BASELINE_INDICATOR_RESULTS_FILE = DATA_FOLDER / "reconciliation_baseline_indicat
 # For each file:
 #   file_name  : name of the file inside the data folder
 #   table_name : name of the table inside the database
-#   (the row with the column names is found automatically: the one that says "Data Series")
+#   the row with the column names is found automatically: the one that says "Data Series"
 ######################################################################
 
 DATA_FILES = {
@@ -96,7 +91,7 @@ FILES_TO_MERGE = {
 ######################################################################
 # 3. SECTORS
 ######################################################################
-
+# the name of the sectors we will focus on
 TARGET_SECTORS = [
     'Manufacturing',
     'Real Estate',
@@ -136,19 +131,19 @@ INDICATORS_TO_ANALYSE = {
     "gos": {
         "title": "Gross Operating Surplus",
         "unit": "Million dollars",
-        "total_row": "Gross Operating Surplus",          # CHECK
+        "total_row": "Gross Operating Surplus",          
         "adds_up_to_total": True,
     },
     "labour_productivity": {
         "title": "Labour Productivity",
         "unit": "Value added per worker",
-        "total_row": "Overall Economy",                  # CHECK
+        "total_row": "Overall Economy",                  
         "adds_up_to_total": False,
     },
     "equity_ratio": {
         "title": "Equity Ratio",
         "unit": "Ratio (not %)",
-        "total_row": "All Industries",                   # CHECK
+        "total_row": "All Industries",                   
         "adds_up_to_total": False,
     },
     "business_expectations": {
@@ -164,7 +159,7 @@ INDICATORS_TO_ANALYSE = {
 # 5. ESG FILE
 ######################################################################
 
-ESG_SECTOR_COLUMN = "Sector"            # CHECK: real name of the sector column
+ESG_SECTOR_COLUMN = "Sector"            
 ESG_REPORTING_COLUMN = "ESG reporting"
 ESG_VALID_ANSWERS = ["Yes", "Partially", "No"]
 ESG_LOW_RISK_IF_YES_AT_LEAST = 75       # >= 75% Yes -> Low risk
@@ -177,7 +172,8 @@ ESG_HIGH_RISK_IF_NO_AT_LEAST = 60       # >= 60% No  -> High risk
 # Text values that mean "no data" in the files
 MISSING_VALUE_TEXTS = ['NaN', 'nan', 'na', '-', ' ', '']
 
-# Open the charts in the browser? False = only save the HTML files in output/
+# True to open the charts in the browser and  save the HTML files in output
+# False to only save the HTML files in output/
 SHOW_CHARTS_IN_BROWSER = False
 
 
@@ -309,13 +305,9 @@ CREDIT_SIGNAL = {
 
 # AI analysis (only in the sector zoom of the dashboard), using OpenRouter
 #   The key is NOT written here: it goes in the .env file of the project folder
-#   (never upload .env to git, it is in .gitignore):
+#   It is configure so it is never upload .env to git, it is in .gitignore:
 #       OPENROUTER_API_KEY=your-key
-#   If the app is published on Streamlit Community Cloud, the key goes in st.secrets instead.
-#   Model: cost-effective one recommended by the professor (group key with a USD 2 limit).
-#   Price checked on openrouter.ai (Oct 2026): USD 0.0173 input / 0.80 output per million tokens,
-#   about USD 0.0007 per analysis (prompt ~700 tokens + answer up to 800 tokens).
-#   Other option from the professor: "inclusionai/ling-3.0-flash"
+
 AI_BASE_URL = "https://openrouter.ai/api/v1"
 AI_MODEL = "deepseek/deepseek-v4.1-flash"
 AI_API_KEY_NAME = "OPENROUTER_API_KEY"
