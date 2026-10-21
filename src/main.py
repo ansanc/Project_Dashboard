@@ -27,7 +27,7 @@
 
 
 
-# import the libraries
+# import the libraries from loguru and functions from other files in the project to run the pipeline 
 from loguru import logger
 
 from config import (DATA_FILES, FILES_TO_MERGE, INDICATORS_TO_ANALYSE, LOG_FOLDER, LOG_FILE,
@@ -40,7 +40,7 @@ from exploration import (clean_indicator_file, merge_indicator_files, keep_targe
 from scoring import (build_indicator_results, build_pillar_results, build_overall_results,
                      make_sector_by_quarter_table)
 
-# this function sets up the logging system
+# this function sets up the logging system where the logs will be saved
 def setup_logging() -> None:
     """Write the logs in log/pipeline.log (and keep showing them on screen)."""
     LOG_FOLDER.mkdir(exist_ok=True)
@@ -169,7 +169,7 @@ def make_charts(results: dict) -> None:
     except Exception as error:
         logger.error("Failed to make the charts: {}", error)
 
-
+# this function saves the results as the baseline for the tests
 def save_baseline(results: dict) -> None:
     """Save the results as the baseline the tests compare against.
     Do it ONLY when you are sure the results are correct."""
