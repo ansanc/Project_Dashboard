@@ -35,7 +35,7 @@ from dotenv import load_dotenv
 from loguru import logger
 from openai import OpenAI
 
-from config import (PROJECT_FOLDER, DATA_FILES, LOGO_FILE, TARGET_SECTORS, SECTOR_COLORS,
+from config import (PROJECT_FOLDER, DATA_FILES, TARGET_SECTORS, SECTOR_COLORS,
                     INDICATORS_TO_ANALYSE, PILLARS, SCORE_INDICATORS, ESG_RISK_TO_LIGHT,
                     POINTS_PER_LIGHT, GREEN_IF_SCORE_AT_LEAST, AMBER_IF_SCORE_AT_LEAST,
                     NUMBER_OF_REDS_THAT_BLOCK_GREEN, CREDIT_SIGNAL,
@@ -400,10 +400,6 @@ def reset_filters() -> None:
     st.session_state["selected_lights"] = ALL_LIGHTS
 
 
-# Logo on top of the sidebar (only if the file is in the data folder)
-if LOGO_FILE.exists():
-    st.sidebar.image(str(LOGO_FILE))
-
 st.sidebar.header("Filters")
 selected_quarter = st.sidebar.selectbox("Assessment quarter", quarter_options, key="selected_quarter",
                                         format_func=quarter_text)
@@ -510,7 +506,7 @@ if selected_page == "Overview":
             summary_rows.append(summary_row)
 
         df_summary = pd.DataFrame(summary_rows).sort_values("Order").drop(columns="Order")
-        st.caption("👆 Click a row to zoom into that sector.")
+        st.caption("Check the box in the first column to zoom into a sector.")
         st.session_state["committee_table_order"] = list(df_summary["Industry"])   # order of the rows
         st.dataframe(df_summary, hide_index=True, width="stretch", key="committee_table",
                      on_select=open_clicked_sector, selection_mode="single-row")
