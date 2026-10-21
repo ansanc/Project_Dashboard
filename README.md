@@ -49,8 +49,7 @@ Project_Dashboard/
 │   ├── exploration.py            <- cleaning, merging, ESG, data checks and charts
 │   ├── scoring.py                <- risk score and traffic lights
 │   ├── main.py                   <- RUNS the whole project with one command (logs, results, charts)
-│   ├── dashboard.py              <- Streamlit dashboard (Part 3)
-│   └── AllCode.py                <- to EXPLORE: the whole project in one file, without functions, cell by cell
+│   └── dashboard.py              <- Streamlit dashboard (Part 3)
 ├── test/
 │   └── test_pipeline.py          <- 7 simple pytest tests
 ├── .streamlit/
@@ -72,7 +71,6 @@ Project_Dashboard/
 | `scoring.py` | Yearly growth, traffic lights, pillar scores (W1, W2, W3), overall score, override rules and the report per sector. |
 | `main.py` | **Runs** the whole project with one command: load, clean, merge, filter, ESG, data checks, score, save the results in `output/` (which the tests read), charts and, when asked, the baseline. Everything is written in `log/pipeline.log`. |
 | `dashboard.py` | **Shows** the results in a Streamlit dashboard for the credit committee: overview, sector zoom with AI commentary, indicator data, ESG and methodology (see Part 3). |
-| `AllCode.py` | **Explores** the data: the whole project in one file, without functions, cell by cell (`# %%`), reviewing each df (head, tail, info, describe) before changing it. |
 
 ---
 
@@ -108,8 +106,6 @@ The project uses [uv](https://docs.astral.sh/uv/) to manage Python and the depen
    For the AI analysis, create a `.env` file in the `Project_Dashboard/` folder with `OPENROUTER_API_KEY=your-key` (see Part 3).
 
 > The `.py` files import each other (`from config import ...`), so Python must look for them in `src/`. From the terminal the commands above already do it. In the VS Code interactive window, if you get `ModuleNotFoundError: No module named 'config'`, add `"jupyter.notebookFileRoot": "${fileDirname}"` to `.vscode/settings.json`.
-
-> To explore the data step by step, open `src/AllCode.py` in VS Code and run it cell by cell.
 
 > Tip: if you edit another `.py` file while working in the VS Code interactive window, run `%load_ext autoreload` and `%autoreload 2` once. Your changes will then be picked up without restarting.
 
@@ -181,8 +177,6 @@ It was collected from the top companies in Singapore in the sectors we are inter
 
 The data checks (missing values, repeated sectors, unusual jumps) are written as warnings in `log/pipeline.log`.
 
-**In `AllCode.py`** (to explore step by step) you also have: each df reviewed before and after cleaning, `df_GDP_Share_filtered` (% of total GDP), `data_check_summaries` and `data_check_jumps` (the data check tables) and `filtered_data_5_years`.
-
 **Charts** (saved as HTML in `output/`), made by `make_charts()` in `main.py` with the functions of section 7 of `exploration.py`:
 
 | Function | Chart | For which indicators |
@@ -244,17 +238,7 @@ The overall score is the weighted sum of three pillars. Each pillar is also a tr
 
 The log also shows the final light of each sector in the latest quarter.
 
-**In `AllCode.py`** you also have the tables with sectors as rows and quarters as columns:
-
-| Variable | Content |
-|---|---|
-| `df_overall_score_table` | **Final table:** score 0–100, quarters of the last 5 years as columns |
-| `df_overall_light_table` | Same shape, final traffic light after the override rules |
-| `indicator_value_tables`, `indicator_light_tables`, `indicator_points_tables` | One table per indicator, e.g. `indicator_value_tables["gdp_growth"]` |
-| `pillar_score_tables`, `pillar_light_tables` | One table per pillar, e.g. `pillar_score_tables["W1"]` |
-| Section 10.7 | Report for one sector and quarter: indicator breakdown, calculation, override check, final result |
-
-The same tables can be made from the CSVs with `make_sector_by_quarter_table()` in `scoring.py`.
+Tables with sectors as rows and quarters as columns can be made from the CSVs with `make_sector_by_quarter_table()` in `scoring.py`.
 
 ---
 
