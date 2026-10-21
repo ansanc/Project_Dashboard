@@ -40,13 +40,13 @@ from exploration import (clean_indicator_file, merge_indicator_files, keep_targe
 from scoring import (build_indicator_results, build_pillar_results, build_overall_results,
                      make_sector_by_quarter_table)
 
-
+# this function sets up the logging system
 def setup_logging() -> None:
     """Write the logs in log/pipeline.log (and keep showing them on screen)."""
     LOG_FOLDER.mkdir(exist_ok=True)
     logger.add(LOG_FILE, level="DEBUG", rotation="1 MB", encoding="utf-8")
 
-
+# this function runs the whole pipeline and returns the results in a dictionary
 def run_pipeline() -> dict:
     """Run all the steps and return the results in a dictionary."""
     logger.info("Pipeline started")
@@ -122,7 +122,7 @@ def run_pipeline() -> dict:
         "df_overall_results": df_overall_results,
     }
 
-
+# this function saves the results of the pipeline in CSV files in the output folder
 def save_results(results: dict) -> None:
     """8. SAVE the score results as CSV in the output folder."""
     try:
@@ -135,7 +135,7 @@ def save_results(results: dict) -> None:
         logger.error("Failed to save the results: {}", error)
         raise
 
-
+# this function logs the final traffic light of each sector in the latest quarter
 def log_final_lights(results: dict) -> None:
     """Write in the log the final traffic light of each sector in the latest quarter."""
     df_light_table = make_sector_by_quarter_table(results["df_overall_results"], "Final light")
@@ -143,7 +143,7 @@ def log_final_lights(results: dict) -> None:
     for sector in df_light_table.index:
         logger.info("{} | {}: {}", latest_quarter, sector, df_light_table.loc[sector, latest_quarter])
 
-
+# this function makes the charts and saves them as HTML in the output folder
 def make_charts(results: dict) -> None:
     """9. CHARTS: saved as HTML in the output folder.
     If a chart fails, the error is logged (the results are already saved)."""
